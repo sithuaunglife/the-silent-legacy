@@ -1,11 +1,17 @@
-import { HeroPage } from "./features/home/components/HeroPage";
+import React, {useCallback,useState} from 'react';
+import OuterSpace from './components/OuterSpace';
+import Moon from './components/Moon';
+import Mars from './components/Mars';
 
-function App() {
-  return (
-    <>
-      <HeroPage />
-    </>
-  );
+/** Flight navigation lives in OuterSpace; each surface manages its own DOM/game state. */
+export default function App(){
+  const [world,setWorld]=useState(null);
+  const land=useCallback((name)=>setWorld(name),[]);
+  const close=useCallback(()=>setWorld(null),[]);
+  return <main id="silent-legacy-outer-space">
+    <OuterSpace onLand={land}>
+      <Moon active={world==='moon'} onClosed={close}/>
+      <Mars active={world==='mars'} onClosed={close}/>
+    </OuterSpace>
+  </main>;
 }
-
-export default App;

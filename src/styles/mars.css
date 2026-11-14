@@ -1,0 +1,8 @@
+#silent-legacy-outer-space .outer-surface[data-world="mars"]{--surface-ink:#ffe0c9;--entry-core:#ffe9afed;--entry-color:#ed6838c0;--entry-trail:#fb9048c2;border-color:#a7715e;background:#341e20}#silent-legacy-outer-space .outer-surface[data-world="mars"] .outer-landing-dust{background:repeating-linear-gradient(90deg,#e8a16b9e 0 5px,transparent 5px 11px)}#silent-legacy-outer-space .outer-mars-field{position:absolute;inset:0;pointer-events:none}#silent-legacy-outer-space .outer-mars-marker{
+  position:absolute;width:clamp(46px,var(--marker-size),133px);height:clamp(42px,12%,95px);
+  transform:translate(-50%,-90%);border:0;padding:0;background:none;cursor:pointer;pointer-events:auto;
+}#silent-legacy-outer-space .outer-mars-marker::before{
+  content:"";position:absolute;inset:auto 18% 3% 18%;height:10%;background:#45232e8c;transform:skewX(-25deg);
+}#silent-legacy-outer-space .outer-mars-marker img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:pixelated;
+}#silent-legacy-outer-space .outer-mars-marker:hover img{filter:drop-shadow(0 0 3px #ffbf96)}

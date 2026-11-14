@@ -1,0 +1,10 @@
+The Silent Legacy — Planet textures
+
+Moon color map: NASA Scientific Visualization Studio / Ernie Wright, using Lunar Reconnaissance Orbiter data (CGI Moon Kit). The Silent Legacy reduces the resolution and uses a custom grayscale palette.
+https://svs.gsfc.nasa.gov/4720/
+
+Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune and Sun textures: Solar System Scope, Creative Commons Attribution 4.0 International. The Silent Legacy reduces the resolution and retints and quantizes the colors.
+https://commons.wikimedia.org/wiki/Category:Solar_System_Scope
+https://commons.wikimedia.org/wiki/File:Solarsystemscope_texture_2k_mars.jpg
+https://commons.wikimedia.org/wiki/File:Solarsystemscope_texture_2k_sun.jpg
+https://creativecommons.org/licenses/by/4.0/

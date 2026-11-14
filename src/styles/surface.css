@@ -1,0 +1,140 @@
+#silent-legacy-outer-space .outer-surface{
+  --surface-ink:#e7effb;--entry-core:#d9eeffa6;--entry-color:#576eaa70;--entry-trail:#4c9dff9e;width:min(94vw,1020px);height:min(84dvh,640px);max-width:none;max-height:none;
+  margin:auto;padding:0;overflow:hidden;border:1px solid #526987;background:#080b12;color:var(--surface-ink);
+  box-shadow:0 0 0 2px #070c17,0 0 32px #4b84c933;
+}
+
+
+#silent-legacy-outer-space .outer-surface::backdrop,#silent-legacy-outer-space .outer-artifact::backdrop{background:#060910d9}
+#silent-legacy-outer-space .outer-terrain{image-rendering:pixelated}
+#silent-legacy-outer-space .outer-surface-head{
+  position:absolute;inset:0 0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  padding:clamp(12px,3vw,22px);background:linear-gradient(#070a14e8,#070a1400);
+}
+#silent-legacy-outer-space .outer-surface h2{margin:0;font-size:clamp(20px,5vw,30px);font-weight:400;outline:none}
+#silent-legacy-outer-space .outer-surface-status{margin:2px 0;color:var(--surface-ink);font-size:11px}
+#silent-legacy-outer-space .outer-return,#silent-legacy-outer-space .outer-field-guide button{
+  border:1px solid #667d99;background:#0a121eea;color:var(--surface-ink);font:inherit;cursor:pointer;
+}
+#silent-legacy-outer-space .outer-return{min-height:44px;padding:5px 10px;white-space:nowrap}
+#silent-legacy-outer-space .outer-return:disabled{opacity:.52;cursor:default}
+#silent-legacy-outer-space .outer-descent-ship{
+  position:absolute;top:63%;left:50%;width:clamp(48px,9%,100px);aspect-ratio:1;
+  transform:translate(-50%,-67%);
+}
+#silent-legacy-outer-space .outer-descent-ship img{position:relative;width:100%;height:100%}
+#silent-legacy-outer-space .outer-landing-shadow{
+  position:absolute;top:64.5%;left:50%;width:clamp(35px,9%,84px);height:10px;opacity:0;transform:translate(-50%,-50%);
+  background:#12111ba0;clip-path:polygon(0 40%,13% 40%,13% 20%,30% 20%,30% 0,70% 0,70% 20%,87% 20%,87% 40%,100% 40%,100% 65%,84% 65%,84% 85%,66% 85%,66% 100%,34% 100%,34% 85%,16% 85%,16% 65%,0 65%);
+}
+#silent-legacy-outer-space .outer-surface:is([data-phase="landed"],[data-phase="boarding"]) .outer-landing-shadow{opacity:1}
+#silent-legacy-outer-space .outer-descent-thrust{
+  position:absolute;top:42%;left:6%;width:29%;height:60%;transform:rotate(34deg);transform-origin:50% 20%;
+  clip-path:polygon(23% 0,77% 0,77% 25%,100% 25%,100% 42%,74% 42%,74% 70%,59% 70%,59% 100%,41% 100%,41% 75%,23% 75%,23% 54%,0 54%,0 28%,23% 28%);
+  background:linear-gradient(#fafcff,#a1edff 24%,#3486ff 60%,#254b9d00);opacity:0;
+}
+#silent-legacy-outer-space .outer-landing-dust{
+  position:absolute;left:50%;top:64.5%;width:clamp(48px,17%,150px);height:12px;opacity:0;transform:translate(-50%,-50%);
+  background:repeating-linear-gradient(90deg,#c8c5bb82 0 5px,transparent 5px 11px);pointer-events:none;
+  clip-path:polygon(0 70%,12% 70%,12% 48%,26% 48%,26% 28%,46% 28%,46% 10%,59% 10%,59% 34%,76% 34%,76% 57%,88% 57%,88% 72%,100% 72%,100% 90%,0 90%);
+}
+
+#silent-legacy-outer-space .outer-entry-effects{
+  position:absolute;inset:0;opacity:0;pointer-events:none;
+  background:radial-gradient(ellipse at 29% 18%,var(--entry-color),transparent 63%),linear-gradient(150deg,#040510 8%,#0405104f 65%,#05071200);
+}
+#silent-legacy-outer-space .outer-entry-effects::before{
+  content:"";position:absolute;inset:-45%;opacity:.64;transform:rotate(-23deg);
+  background:repeating-linear-gradient(0deg,transparent 0 23px,var(--entry-trail) 23px 25px,transparent 25px 49px,var(--entry-color) 49px 53px,transparent 53px 70px);
+  clip-path:polygon(8% 6%,94% 6%,79% 29%,93% 34%,80% 54%,85% 72%,61% 87%,7% 87%,27% 62%,12% 48%,26% 25%);
+}
+#silent-legacy-outer-space .outer-surface[data-phase="entry"] .outer-entry-effects{animation:outer-entry-haze var(--entry-duration) ease-out both}
+#silent-legacy-outer-space .outer-surface[data-phase="entry"] .outer-entry-effects::before{animation:outer-entry-streaks .48s linear infinite}
+#silent-legacy-outer-space .outer-surface[data-phase="entry"] .outer-descent-ship{animation:outer-entry-ship var(--entry-duration) cubic-bezier(.3,.02,.62,1) both}
+#silent-legacy-outer-space .outer-surface[data-phase="entry"] .outer-descent-ship img{filter:drop-shadow(0 0 10px var(--entry-trail))}
+#silent-legacy-outer-space .outer-surface[data-phase="entry"] .outer-descent-thrust{
+  background:linear-gradient(var(--entry-core),var(--entry-trail) 65%,transparent);animation:outer-landing-thrust .14s steps(2,end) infinite;
+}
+#silent-legacy-outer-space .outer-surface[data-phase="descent"] .outer-descent-ship{animation:outer-touchdown var(--descent-duration) cubic-bezier(.21,.61,.36,.98) both}
+#silent-legacy-outer-space .outer-surface[data-phase="descent"] .outer-descent-thrust{animation:outer-landing-thrust .19s steps(2,end) infinite}
+#silent-legacy-outer-space .outer-surface[data-phase="descent"] .outer-landing-shadow{animation:outer-shadow-approach var(--descent-duration) ease-out both}
+#silent-legacy-outer-space .outer-surface[data-phase="slide"] .outer-descent-ship{animation:outer-ground-slide var(--slide-duration) cubic-bezier(.15,.69,.29,1) both}
+#silent-legacy-outer-space .outer-surface[data-phase="slide"] .outer-landing-shadow{animation:outer-shadow-slide var(--slide-duration) cubic-bezier(.15,.69,.29,1) both}
+#silent-legacy-outer-space .outer-surface[data-phase="slide"] .outer-landing-dust{animation:outer-slide-dust var(--slide-duration) ease-out both}
+#silent-legacy-outer-space .outer-surface[data-phase="launch"] .outer-descent-ship{animation:outer-launch-ship var(--launch-duration) cubic-bezier(.47,.01,.72,.55) both}
+#silent-legacy-outer-space .outer-surface[data-phase="launch"] .outer-descent-thrust{animation:outer-landing-thrust .12s steps(2,end) infinite}
+#silent-legacy-outer-space .outer-surface[data-phase="launch"] .outer-landing-dust{animation:outer-launch-dust .85s ease-out both}
+#silent-legacy-outer-space .outer-surface[data-phase="launch"] .outer-landing-shadow{animation:outer-launch-shadow .8s ease-out both}
+#silent-legacy-outer-space .outer-surface[data-phase="launch"] .outer-entry-effects{animation:outer-launch-haze var(--launch-duration) ease-in both}
+#silent-legacy-outer-space .outer-surface[data-phase="launch"] .outer-entry-effects::before{animation:outer-entry-streaks .43s linear infinite reverse}
+@keyframes outer-launch-ship{
+  0%{transform:translate(-50%,-67%) rotate(0deg) scale(1);opacity:1}
+  26%{transform:translate(-36%,-94%) rotate(-22deg) scale(1);opacity:1}
+  78%{opacity:1}
+  100%{transform:translate(160%,-545%) rotate(-52deg) scale(.52);opacity:0}
+}
+@keyframes outer-launch-dust{0%{opacity:0;transform:translate(-50%,-50%) scaleX(.34)}30%{opacity:.9}100%{opacity:0;transform:translate(-64%,-50%) scaleX(1.25)}}
+@keyframes outer-launch-shadow{from{opacity:1;transform:translate(-50%,-50%) scale(1)}to{opacity:0;transform:translate(36%,-50%) scale(.45)}}
+@keyframes outer-launch-haze{0%,36%{opacity:0}100%{opacity:1}}
+@keyframes outer-entry-haze{0%{opacity:1}43%{opacity:1}100%{opacity:0}}
+@keyframes outer-entry-streaks{from{transform:rotate(-23deg) translateY(0)}to{transform:rotate(-23deg) translateY(-70px)}}
+@keyframes outer-entry-ship{
+  from{transform:translate(-325%,-435%) rotate(8deg) scale(.50);opacity:.12}
+  36%{opacity:1}
+  to{transform:translate(-205%,-242%) rotate(17deg) scale(.72)}
+}
+@keyframes outer-touchdown{
+  from{transform:translate(-205%,-242%) rotate(17deg) scale(.72)}
+  65%{transform:translate(-176%,-111%) rotate(-9deg) scale(.95)}
+  to{transform:translate(-155%,-67%)}
+}
+@keyframes outer-shadow-approach{from{opacity:0;transform:translate(-220%,-50%) scale(.68)}to{opacity:1;transform:translate(-166%,-50%)}}
+@keyframes outer-shadow-slide{from{opacity:1;transform:translate(-166%,-50%)}to{opacity:1;transform:translate(-50%,-50%)}}
+@keyframes outer-ground-slide{from{transform:translate(-155%,-67%)}to{transform:translate(-50%,-67%)}}
+@keyframes outer-landing-thrust{from{opacity:.72;transform:rotate(34deg) scale(.88)}to{opacity:1;transform:rotate(34deg) scale(1.16)}}
+@keyframes outer-slide-dust{0%{opacity:0;transform:translate(-139%,-50%) scaleX(.35)}31%{opacity:.86}100%{opacity:0;transform:translate(-78%,-50%) scaleX(1.28)}}
+#silent-legacy-outer-space .outer-field-guide{
+  position:absolute;left:clamp(10px,3vw,22px);right:clamp(10px,3vw,22px);bottom:clamp(10px,3vw,22px);
+  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;
+}
+#silent-legacy-outer-space .outer-field-guide button{
+  min-height:44px;min-width:110px;max-width:185px;display:flex;align-items:center;gap:6px;text-align:left;
+  padding:5px 8px;font-size:11px;
+}
+#silent-legacy-outer-space .outer-field-guide button:hover{background:#1d2c44}
+#silent-legacy-outer-space .outer-field-guide img{width:35px;height:34px;object-fit:contain}
+#silent-legacy-outer-space .outer-field-guide{z-index:1}
+
+
+
+
+
+#silent-legacy-outer-space .outer-artifact{
+  width:min(92vw,520px);max-height:calc(100dvh - 26px);margin:auto;padding:18px;overflow:auto;
+  color:#d7edff;background:#080f1d;border:1px solid #526987;
+}
+#silent-legacy-outer-space .outer-artifact h2{font-size:21px;margin:0 48px 13px 0}
+#silent-legacy-outer-space .outer-artifact figure{margin:0}
+#silent-legacy-outer-space .outer-artifact figure img{width:100%;max-height:52dvh;object-fit:contain;background:#04070d;image-rendering:auto}
+#silent-legacy-outer-space .outer-artifact figcaption{padding:5px 0;color:#aabed2;font-size:10px}
+#silent-legacy-outer-space .outer-artifact a{color:var(--cyan)}
+
+
+#silent-legacy-outer-space .outer-surface-head{z-index:2;pointer-events:none}
+#silent-legacy-outer-space .outer-surface-head button{pointer-events:auto}
+
+
+
+
+
+
+
+
+
+#silent-legacy-outer-space .outer-artifact-scan{margin-top:13px;border-top:1px solid #314d68;padding-top:9px}
+#silent-legacy-outer-space .outer-artifact-scan progress{width:100%;height:6px;accent-color:#77c9ff}
+#silent-legacy-outer-space .outer-scan-status{color:#a6c8ee;font-size:11px}
+#silent-legacy-outer-space .outer-scan-button{min-height:44px;margin-top:8px;padding:0 12px}
+#silent-legacy-outer-space .outer-scan-button:disabled{opacity:.62;cursor:default}
+@media (prefers-reduced-motion:reduce) {#silent-legacy-outer-space .outer-surface :is(.outer-entry-effects,.outer-descent-ship,.outer-descent-thrust,.outer-landing-dust,.outer-landing-shadow){animation:none!important}#silent-legacy-outer-space .outer-entry-effects::before{animation:none!important}}
+

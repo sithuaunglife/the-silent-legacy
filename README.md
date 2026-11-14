@@ -1,77 +1,39 @@
-A lightweight, reusable Vite starter template for building modern frontend applications with a clean project structure and essential development tooling.
+# The Silent Legacy — NASA Space Exploration
 
-# React + TypeScript + Vite
+NASA storytelling exploration game featuring interactive outer-space flight, 2.5D Moon and Mars landing environments, and historical space artifacts.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Stack
 
-Currently, two official plugins are available:
+React 18 + Vite 6, JavaScript, CSS, canvas graphics. No backend required.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Local development
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run test:jsx
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Visit the Vite URL (normally `http://localhost:5173`). To verify a production bundle, run `npm run build`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Windows Smart App Control can block native Rollup binaries; this project uses the WASM Rollup override in `package.json`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Structure
 
-```
+- `src/components/OuterSpace.jsx` — main flight UI
+- `src/game/outerSpaceEngine.js` — outer-space animation and input lifecycle
+- `src/components/Moon.jsx` and `src/game/moonEngine.js` — lunar surface
+- `src/components/Mars.jsx` and `src/game/marsEngine.js` — Martian surface
+- `src/data/` — NASA artifact records for Moon and Mars
+- `src/styles/` — separated environment styles
+- `public/assets/` — image textures, NASA artifacts, and legacy globe rendering bundle
+
+The Earth globe asset (`public/assets/earth-globe.js`) is loaded by the outer-space component and **must be retained**. The source includes image and shader licenses in `public/assets`.
+
+## Verification
+
+The JSX import checker can be run with `npm run test:jsx`. Run `npm run build` before deploying. The game is client-side and does not require a Java Spring backend.
+
+## Data / attribution
+
+NASA mission descriptions are informative; links and image-credit records are in the `src/data` and `public/assets` folders. NASA does not endorse this project.
