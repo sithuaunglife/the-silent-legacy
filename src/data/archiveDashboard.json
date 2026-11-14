@@ -1,0 +1,437 @@
+[
+  {
+    "id": "spirit",
+    "name": "SPIRIT",
+    "subtitle": "Mars Exploration Rover (MER-A) • Gusev Crater",
+    "world": "MARS",
+    "status": "SILENT ON MARS",
+    "statusColor": "amber",
+    "date": "JAN 3, 2004",
+    "lifespan": "6 Yrs, 2 Mos",
+    "planned": "Plan: 90 Sols",
+    "distance": "7.73 km",
+    "opsSub": "25x Planned Life",
+    "location": "Home Plate, Mars",
+    "modelType": "mer_rover",
+    "accentColor": 14251812,
+    "photos": [
+      {
+        "url": "https://www.nasa.gov/wp-content/uploads/2015/03/spirit_launch.jpg",
+        "caption": "01 — Spirit Launch aboard Delta II Rocket, Cape Canaveral (June 10, 2003)",
+        "credit": "NASA / Kennedy Space Center"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/35/PIA05591_Spirit%27s_Destination_%28panorama%29.jpg",
+        "caption": "02 — Gusev Crater Panorama looking toward Columbia Hills (2004)",
+        "credit": "NASA / JPL-Caltech / Cornell"
+      },
+      {
+        "url": "https://assets.science.nasa.gov/content/dam/science/psd/mars/downloadable_items/4/40164_PIA07829_plusRover-A667R1.jpg",
+        "caption": "03 — Spirit & Wheel Tracks in Columbia Hills (2005–2007)",
+        "credit": "NASA / JPL-Caltech"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/PIA09089-RA3-hirise-closeup_annotated.png",
+        "caption": "04 — HiRISE Orbital View of Spirit Trapped at Home Plate (2009–2011)",
+        "credit": "NASA / JPL-Caltech / Univ. of Arizona"
+      }
+    ],
+    "brief": {
+      "goal": "Search Gusev Crater and Columbia Hills for geological proof that liquid water once flowed on Mars.",
+      "discovery": "A damaged wheel dragged through soil exposed nearly pure silica—proving ancient hydrothermal hot springs.",
+      "challenge": "Dust devils cleaned its solar panels, but in May 2009 its wheels became trapped in soft sand before winter froze contact.",
+      "legacy": "Outlasted its 90-day warranty by over 25x, transforming our understanding of Mars’ watery past."
+    },
+    "briefMy": {
+      "goal": "အင်္ဂါဂြိုဟ်ပေါ်တွင် ရှေးယခင်က ရေစီးဆင်းခဲ့ဖူးကြောင်း ဘူမိဗေဒအထောက်အထားများကို Gusev Crater တွင် ရှာဖွေရန်။",
+      "discovery": "ပျက်စီးနေသော ဘီးတစ်ဖက်ဖြင့် မြေကြီးကို တရွတ်တိုက်ဆွဲရာမှ ရှေးဟောင်းရေပူစမ်းများရှိခဲ့ကြောင်း သက်သေပြသည့် ဆီလီကာသန့်သန့်ကို တွေ့ရှိခဲ့သည်။",
+      "challenge": "ဖုန်မုန်တိုင်းငယ်များက ဆိုလာပြားကို သန့်စင်ပေးခဲ့သော်လည်း ၂၀၀၉ မေလတွင် သဲနုထဲ ဘီးနစ်သွားပြီး ဆောင်းရာသီအအေးဒဏ်ကြောင့် အဆက်အသွယ်ပြတ်ခဲ့သည်။",
+      "legacy": "မူလသတ်မှတ်ထားသော ရက် ၉၀ ထက် ၂၅ ဆကျော် ပိုမိုတာရှည်ခံခဲ့ပြီး အင်္ဂါဂြိုဟ်၏ ရေရှိခဲ့သောသမိုင်းကို ပြောင်းလဲပေးနိုင်ခဲ့သည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 LAUNCH",
+        "title": "Launch & Airbag Bounce into Gusev Crater (2003–2004)",
+        "text": "Launched June 10, 2003 and bounced inside airbags onto Columbia Memorial Station, grinding rock \"Adirondack\" and climbing Husband Hill.",
+        "photoIdx": 0
+      },
+      {
+        "code": "02 GUSEV PANORAMA",
+        "title": "Exploring Gusev Crater & Columbia Hills (2004–2007)",
+        "text": "Captured panoramic views of Gusev Crater; dust devils cleaned its solar panels and a dragged wheel uncovered pure hydrothermal silica.",
+        "photoIdx": 2
+      },
+      {
+        "code": "03 FINAL SIGNAL",
+        "title": "Trapped at Home Plate & Last Contact (2009–2011)",
+        "text": "Immobilized in soft soil in May 2009. Sent final signal on March 22, 2010 before extreme Martian winter cold ended operations.",
+        "photoIdx": 3
+      }
+    ]
+  },
+  {
+    "id": "opportunity",
+    "name": "OPPORTUNITY",
+    "subtitle": "Mars Exploration Rover (MER-B) • Meridiani Planum",
+    "world": "MARS",
+    "status": "MISSION COMPLETE",
+    "statusColor": "amber",
+    "date": "JAN 24, 2004",
+    "lifespan": "Nearly 15 Yrs",
+    "planned": "Plan: 90 Sols",
+    "distance": "45.16 km",
+    "opsSub": "First Mars Marathon",
+    "location": "Perseverance Valley",
+    "modelType": "mer_rover",
+    "accentColor": 3718648,
+    "photos": [
+      {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/resources/detail_files/5260_20_Meridiani_Planum-full2.jpg?w=1602&h=1196&fit=clip&crop=faces%2Cfocalpoint",
+        "caption": "01 — Orbital Hematite Mineral Map of Meridiani Planum",
+        "credit": "NASA / JPL-Caltech / ASU"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/62/PIA07269-Mars_Rover_Opportunity-Iron_Meteorite.jpg",
+        "caption": "02 — Heat Shield Rock: Iron-Nickel Meteorite Found on Mars (Jan 2005)",
+        "credit": "NASA / JPL-Caltech / Cornell"
+      },
+      {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia08/pia08812/figures/PIA08812_fig1.jpg",
+        "caption": "03 — HiRISE View of Opportunity on the Rim of Victoria Crater (2006)",
+        "credit": "NASA / JPL-Caltech / Univ. of Arizona"
+      },
+      {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia14/pia14505/PIA14505.jpg?w=943&h=759&fit=clip&crop=faces%2Cfocalpoint",
+        "caption": "04 — Opportunity’s Multi-Year Traverse Route to Endeavour Crater",
+        "credit": "NASA / JPL-Caltech / Univ. of Arizona"
+      }
+    ],
+    "brief": {
+      "goal": "Investigate water-associated minerals in Meridiani Planum to assess if ancient Mars supported microbial life.",
+      "discovery": "Found water-altered rock layers in Eagle Crater and discovered \"Heat Shield Rock\"—an iron-nickel meteorite on Mars.",
+      "challenge": "Escaped a 6-week sand trap in 2005, but a planet-wide dust storm in June 2018 blocked all sunlight to its panels.",
+      "legacy": "Drove 45.16 km—the first human vehicle to complete a full marathon distance on another world."
+    },
+    "briefMy": {
+      "goal": "ရှေးဟောင်းအင်္ဂါဂြိုဟ်တွင် အဏုဇီဝသက်ရှိများ ရှင်သန်နိုင်ခဲ့ခြင်း ရှိမရှိ သိရှိရန် Meridiani Planum ရှိ ရေနှင့်ဆက်စပ်သတ္တုများကို စစ်ဆေးရန်။",
+      "discovery": "Eagle Crater တွင် ရေတိုက်စားထားသော ကျောက်လွှာများနှင့် အင်္ဂါဂြိုဟ်ပေါ်ကျရောက်နေသော သံ-နီကယ် ဥက္ကာခဲ (Heat Shield Rock) ကို တွေ့ရှိခဲ့သည်။",
+      "challenge": "၂၀၀၅ တွင် သဲနုထဲ ၆ ပတ်ကြာ ပိတ်မိရာမှ လွတ်မြောက်ခဲ့သော်လည်း ၂၀၁၈ ဇွန်လ ကမ္ဘာလုံးဆိုင်ရာ ဖုန်မုန်တိုင်းကြောင့် နေရောင်ခြည်ပြတ်တောက်ခဲ့သည်။",
+      "legacy": "အခြားဂြိုဟ်ပေါ်တွင် မာရသွန်အကွာအဝေး (45.16 km) ကို ပထမဆုံး မောင်းနှင်နိုင်ခဲ့သော လူသားတို့၏ ယာဉ်ဖြစ်လာခဲ့သည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 METEORITE FIND",
+        "title": "Meridiani Planum & Heat Shield Rock (2004–2005)",
+        "text": "Rolled into Eagle Crater, confirming past liquid water, then discovered an iron-nickel meteorite beside its discarded heat shield.",
+        "photoIdx": 1
+      },
+      {
+        "code": "02 VICTORIA RIM",
+        "title": "Victoria Crater & Marathon Record (2006–2015)",
+        "text": "Explored the scalloped rim of 800m-wide Victoria Crater and became the first off-world vehicle to drive a 26.219-mile marathon.",
+        "photoIdx": 2
+      },
+      {
+        "code": "03 ENDEAVOUR",
+        "title": "Road to Endeavour & 2018 Global Dust Storm",
+        "text": "Reached 22km-wide Endeavour Crater and Perseverance Valley before a planet-wide dust storm ended its nearly 15-year mission.",
+        "photoIdx": 3
+      }
+    ]
+  },
+  {
+    "id": "sojourner",
+    "name": "SOJOURNER",
+    "subtitle": "Mars Pathfinder Microrover • Ares Vallis",
+    "world": "MARS",
+    "status": "HISTORIC PIONEER",
+    "statusColor": "cyan",
+    "date": "JULY 4, 1997",
+    "lifespan": "83 Sols",
+    "planned": "Plan: 7 Sols",
+    "distance": "~100 Meters",
+    "opsSub": "550 Rover Photos",
+    "location": "Ares Vallis, Mars",
+    "modelType": "sojourner",
+    "accentColor": 16096779,
+    "photos": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Sojourner_on_Mars_PIA01122.jpg",
+        "caption": "01 — Sojourner Analyzing Martian Rocks on Ares Vallis (July 1997)",
+        "credit": "NASA / JPL-Caltech"
+      },
+      {
+        "url": "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA01122.jpg",
+        "caption": "02 — First Wheeled Rover Operating on the Red Planet (Carl Sagan Station)",
+        "credit": "NASA / JPL"
+      }
+    ],
+    "brief": {
+      "goal": "Prove low-cost airbag landing tech and operate humanity’s first free-roaming wheeled robot on another planet.",
+      "discovery": "Analyzed flood-deposited pebbles and rocks with its X-ray spectrometer, proving Mars was once warmer and wetter.",
+      "challenge": "Weighing just 10.6 kg and standing 30 cm tall, it navigated rocky ancient floodplains using onboard laser hazard sensors.",
+      "legacy": "Paved the engineering road for Spirit, Opportunity, Curiosity, and Perseverance."
+    },
+    "briefMy": {
+      "goal": "ကုန်ကျစရိတ်သက်သာသော လေအိတ်ဆင်းသက်မှုနည်းပညာကို စမ်းသပ်ရန်နှင့် အခြားဂြိုဟ်ပေါ်တွင် ပထမဆုံး ဘီးတပ်စက်ရုပ်ကို မောင်းနှင်ရန်။",
+      "discovery": "X-ray spectrometer ဖြင့် ရေလွှမ်းမိုးမှုကြောင့် ဖြစ်ပေါ်လာသော ကျောက်စရစ်ခဲများကို စစ်ဆေးပြီး အင်္ဂါဂြိုဟ်သည် ယခင်က ပူနွေးစိုစွတ်ခဲ့ကြောင်း သက်သေပြခဲ့သည်။",
+      "challenge": "အလေးချိန် 10.6 kg နှင့် အမြင့် 30 cm သာရှိသော်လည်း လေဆာအာရုံခံကိရိယာများဖြင့် ကျောက်ဆောင်ထူထပ်သော မြေပြင်ကို ဖြတ်ကျော်ခဲ့သည်။",
+      "legacy": "နောက်ပိုင်းစေလွှတ်ခဲ့သော Spirit, Opportunity, Curiosity နှင့် Perseverance စက်ရုပ်များအတွက် လမ်းဖွင့်ပေးခဲ့သည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 AIRBAG DROP",
+        "title": "15 Bounces onto Ares Vallis (July 4, 1997)",
+        "text": "Pathfinder bounced 50 feet high inside airbags before settling at Carl Sagan Memorial Station.",
+        "photoIdx": 1
+      },
+      {
+        "code": "02 FIRST WHEELS",
+        "title": "Rolling Down the Lander Ramp (July 5, 1997)",
+        "text": "Named after Sojourner Truth, the 6-wheeled microrover touched Martian soil and began chemical rock analyses.",
+        "photoIdx": 0
+      },
+      {
+        "code": "03 LEGACY",
+        "title": "2.3 Billion Bits Returned (Sept 27, 1997)",
+        "text": "Transmitted 550 rover photos and 16,500 lander images, validating mobile planetary robotics forever.",
+        "photoIdx": 0
+      }
+    ]
+  },
+  {
+    "id": "eagle",
+    "name": "EAGLE DESCENT STAGE",
+    "subtitle": "Apollo 11 Lunar Module • Sea of Tranquility",
+    "world": "MOON",
+    "status": "LUNAR MONUMENT",
+    "statusColor": "emerald",
+    "date": "JULY 20, 1969",
+    "lifespan": "21h 36m Crewed",
+    "planned": "First Crew Landing",
+    "distance": "250m EVA Radius",
+    "opsSub": "21.55 kg Samples",
+    "location": "Mare Tranquillitatis",
+    "modelType": "eagle_lander",
+    "accentColor": 16498468,
+    "photos": [
+      {
+        "url": "https://www.nasa.gov/wp-content/uploads/2015/03/aldrin-eagle.jpg",
+        "caption": "01 — Buzz Aldrin beside Lunar Module Eagle at Tranquility Base (July 20, 1969)",
+        "credit": "NASA / Neil Armstrong"
+      },
+      {
+        "url": "https://ig.utexas.edu/wp-content/uploads/2019/07/apollo11-pse-module-AS11-40-5927.jpg",
+        "caption": "02 — EASEP Passive Seismometer & Laser Retroreflector Deployed on Moon",
+        "credit": "NASA / Apollo 11"
+      }
+    ],
+    "brief": {
+      "goal": "Safely land Neil Armstrong and Buzz Aldrin on the Moon, serve as a surface base, and launch the ascent stage home.",
+      "discovery": "Deployed the EASEP seismometer and laser retroreflector—still used today to measure Earth-Moon distance.",
+      "challenge": "Precision powered descent to Mare Tranquillitatis with minimal fuel before separating its upper ascent cabin.",
+      "legacy": "Remains permanently on the Moon at Tranquility Base where humans first stepped onto another world."
+    },
+    "briefMy": {
+      "goal": "Neil Armstrong နှင့် Buzz Aldrin တို့ကို လပေါ်သို့ ဘေးကင်းစွာ ဆင်းသက်စေပြီး အာကာသယာဉ်မှူးများ ပြန်တက်ရန် အခြေစိုက်စခန်းအဖြစ် ဆောင်ရွက်ရန်။",
+      "discovery": "ကမ္ဘာနှင့်လ အကွာအဝေးကို ယနေ့တိုင် တိုင်းတာနိုင်သည့် လေဆာရောင်ပြန်နှင့် ငလျင်တိုင်းကိရိယာ (EASEP) တို့ကို လပေါ်တွင် တပ်ဆင်ခဲ့သည်။",
+      "challenge": "လောင်စာဆီ အနည်းငယ်သာ ကျန်ရှိချိန်တွင် Mare Tranquillitatis သို့ တိကျစွာ ဆင်းသက်ခဲ့ရသည်။",
+      "legacy": "လူသားများ ပထမဆုံး ခြေချခဲ့ရာ Tranquility Base တွင် ထာဝရ အထိမ်းအမှတ်အဖြစ် ကျန်ရှိနေသည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 TOUCHDOWN",
+        "title": "\"The Eagle Has Landed\" (July 20, 1969)",
+        "text": "Guided Armstrong and Aldrin safely to the Sea of Tranquility at 20:17:40 UTC.",
+        "photoIdx": 0
+      },
+      {
+        "code": "02 EASEP SCIENCE",
+        "title": "Giant Leap & Science Station (July 21, 1969)",
+        "text": "Crew walked 250m from Eagle, gathered 21.55 kg of lunar rocks, and deployed seismic and laser instruments.",
+        "photoIdx": 1
+      },
+      {
+        "code": "03 SEPARATION",
+        "title": "Ascent Liftoff & Permanent Base",
+        "text": "After 21h 36m on the surface, the ascent stage fired back to orbit while the gold-foil descent stage stayed behind.",
+        "photoIdx": 0
+      }
+    ]
+  },
+  {
+    "id": "apollo15_lrv",
+    "name": "APOLLO 15 LRV",
+    "subtitle": "Lunar Roving Vehicle • Hadley–Apennine",
+    "world": "MOON",
+    "status": "PARKED ON MOON",
+    "statusColor": "emerald",
+    "date": "JULY 31, 1971",
+    "lifespan": "3 EVA Excursions",
+    "planned": "Battery Electric",
+    "distance": "27.9 km",
+    "opsSub": "First Crewed Rover",
+    "location": "Hadley Rille, Moon",
+    "modelType": "apollo_lrv",
+    "accentColor": 15381256,
+    "photos": [
+      {
+        "url": "https://lroc.im-ldi.com/ckeditor_assets/pictures/1064/content_AS15-88-11901.crop.FI.png",
+        "caption": "01 — Apollo 15 Lunar Roving Vehicle Parked at Hadley–Apennine (Aug 1971)",
+        "credit": "NASA / Apollo 15"
+      }
+    ],
+    "brief": {
+      "goal": "Expand astronaut range beyond walking distance to explore mountains, craters, and Hadley Rille.",
+      "discovery": "Enabled David Scott and James Irwin to traverse diverse geological zones and collect high-value lunar samples.",
+      "challenge": "Folded compactly inside Lunar Module Falcon, then unfolded and driven on electric wire-mesh wheels in 1/6th gravity.",
+      "legacy": "First crewed vehicle driven on another world, proving wheeled mobility for Apollo 16 and 17."
+    },
+    "briefMy": {
+      "goal": "အာကာသယာဉ်မှူးများ လမ်းလျှောက်နိုင်သည်ထက် ပိုမိုဝေးကွာသော တောင်တန်းများနှင့် Hadley Rille ချိုင့်ဝှမ်းများကို စူးစမ်းနိုင်ရန်။",
+      "discovery": "David Scott နှင့် James Irwin တို့အား ဘူမိဗေဒနယ်မြေအမျိုးမျိုးသို့ သွားရောက်၍ အဖိုးတန် လကျောက်နမူနာများ စုဆောင်းနိုင်စေခဲ့သည်။",
+      "challenge": "Falcon ယာဉ်အတွင်း ခေါက်သိမ်းသယ်ဆောင်လာပြီး လ၏ဆွဲအား ၆ ပုံ ၁ ပုံအောက်တွင် လျှပ်စစ်ဘီးများဖြင့် မောင်းနှင်ခဲ့ရသည်။",
+      "legacy": "အခြားကမ္ဘာပေါ်တွင် လူကိုယ်တိုင် မောင်းနှင်ခဲ့သော ပထမဆုံး ယာဉ်ဖြစ်ပြီး Apollo 16 နှင့် 17 အတွက် စံနမူနာဖြစ်ခဲ့သည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 DEPLOYMENT",
+        "title": "Unfolded from Falcon Lander (July 31, 1971)",
+        "text": "Built by Boeing, the lightweight battery-powered electric buggy unfolded onto the Hadley–Apennine plain.",
+        "photoIdx": 0
+      },
+      {
+        "code": "02 EXPLORATION",
+        "title": "27.9 km Across Hadley Rille",
+        "text": "Carried two astronauts, cameras, and tools along the base of the Apennine Mountains across three excursions.",
+        "photoIdx": 0
+      },
+      {
+        "code": "03 FINAL PARK",
+        "title": "Left Behind at Hadley Base (Aug 2, 1971)",
+        "text": "Parked after its third drive to film Falcon’s liftoff; remains a permanent artifact on the lunar surface.",
+        "photoIdx": 0
+      }
+    ]
+  },
+  {
+    "id": "surveyor3",
+    "name": "SURVEYOR 3",
+    "subtitle": "Robotic Lunar Lander • Oceanus Procellarum",
+    "world": "MOON",
+    "status": "VISITED BY APOLLO 12",
+    "statusColor": "cyan",
+    "date": "APRIL 20, 1967",
+    "lifespan": "14 Earth Days",
+    "planned": "Soil Strength Test",
+    "distance": "4 Trenches Dug",
+    "opsSub": "6,326 TV Photos",
+    "location": "Oceanus Procellarum",
+    "modelType": "surveyor3",
+    "accentColor": 3718648,
+    "photos": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/7/77/Surveyor_3_on_Moon.jpg",
+        "caption": "01 — Surveyor 3 Lander & Extended Soil Sampler Arm in Oceanus Procellarum (1967)",
+        "credit": "NASA / JPL"
+      },
+      {
+        "url": "https://i.redd.it/1ifoengq71ic1.jpg",
+        "caption": "02 — Apollo 12 Astronaut Pete Conrad Inspecting Surveyor 3 with Intrepid Behind (Nov 19, 1969)",
+        "credit": "NASA / Alan Bean"
+      }
+    ],
+    "brief": {
+      "goal": "Test whether lunar soil was firm enough to support the weight of future crewed Apollo Lunar Modules.",
+      "discovery": "Dug 4 trenches and ran 17 soil tests, proving lunar regolith behaves like wet sand and can support Apollo landers.",
+      "challenge": "Radar confusion caused it to bounce twice (10m and 3m high) during landing, yet all instruments survived intact.",
+      "legacy": "Visited 2.5 years later by Apollo 12 astronauts, who brought its camera back to Earth for space-exposure study."
+    },
+    "briefMy": {
+      "goal": "အနာဂတ် Apollo လဆင်းယာဉ်များ၏ အလေးချိန်ကို လမြေသားက ခံနိုင်ရည်ရှိမရှိ စမ်းသပ်စစ်ဆေးရန်။",
+      "discovery": "မြေကျင်း ၄ ကျင်းတူး၍ စမ်းသပ်မှု ၁၇ ကြိမ်ပြုလုပ်ခဲ့ပြီး လမြေသားသည် စိုစွတ်သောသဲကဲ့သို့ ခိုင်မာမှုရှိကြောင်း သက်သေပြခဲ့သည်။",
+      "challenge": "ဆင်းသက်စဉ် ရေဒါအမှားကြောင့် လမျက်နှာပြင်ပေါ် ၂ ကြိမ် ပြန်ခုန်တက်ခဲ့သော်လည်း ကိရိယာအားလုံး မပျက်စီးဘဲ ကျန်ရှိခဲ့သည်။",
+      "legacy": "၂ နှစ်ခွဲအကြာတွင် Apollo 12 အာကာသယာဉ်မှူးများက လာရောက်တွေ့ဆုံပြီး ကင်မရာကို ကမ္ဘာသို့ ပြန်လည်သယ်ဆောင် စစ်ဆေးခဲ့သည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 BOUNCE LANDING",
+        "title": "Double Lunar Bounce & Digging Soil (April 1967)",
+        "text": "Bounced twice upon touchdown in Oceanus Procellarum, then dug four trenches and transmitted 6,326 TV images.",
+        "photoIdx": 0
+      },
+      {
+        "code": "02 SOIL VERDICT",
+        "title": "Clearing the Path for Apollo Landings",
+        "text": "Bearing and impact tests proved lunar soil had the consistency of wet sand and could safely support crewed landers.",
+        "photoIdx": 0
+      },
+      {
+        "code": "03 APOLLO 12 VISIT",
+        "title": "Reunion on the Moon (Nov 19, 1969)",
+        "text": "Apollo 12 astronauts Pete Conrad and Alan Bean walked 180m from Intrepid to retrieve Surveyor 3’s camera for Earth analysis.",
+        "photoIdx": 1
+      }
+    ]
+  },
+  {
+    "id": "voyager1",
+    "name": "VOYAGER 1",
+    "subtitle": "Interstellar Space Probe • Deep Space Reference",
+    "world": "INTERSTELLAR",
+    "status": "ACTIVE // INTERSTELLAR",
+    "statusColor": "emerald",
+    "date": "SEPT 5, 1977",
+    "lifespan": "49+ Years Active",
+    "planned": "Plan: 5 Years",
+    "distance": "24+ Billion km",
+    "opsSub": "165+ AU from Earth",
+    "location": "Interstellar Medium",
+    "modelType": "voyager",
+    "accentColor": 51455,
+    "photos": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/7/73/Pale_Blue_Dot.png",
+        "caption": "01 — Pale Blue Dot: Earth Photographed by Voyager 1 from 6 Billion km (Feb 14, 1990)",
+        "credit": "NASA / JPL-Caltech"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/Voyager_spacecraft.jpg",
+        "caption": "02 — Voyager Spacecraft High-Gain Dish & Science Boom Configuration",
+        "credit": "NASA / JPL"
+      }
+    ],
+    "brief": {
+      "goal": "Explore Jupiter and Saturn’s rings and moons before continuing outward toward the edge of the Solar System.",
+      "discovery": "Discovered active volcanoes on Io, complex dynamics in Saturn’s rings, and crossed the heliopause in 2012.",
+      "challenge": "Operating decades past design life on decaying plutonium RTGs across billions of kilometers of deep space.",
+      "legacy": "Farthest human-made object from Earth, carrying the Golden Record message from humanity."
+    },
+    "briefMy": {
+      "goal": "ကြာသပတေးဂြိုဟ်နှင့် စနေဂြိုဟ်တို့၏ ကွင်းများနှင့် လများကို လေ့လာပြီး နေအဖွဲ့အစည်းအပြင်ဘက်သို့ ဆက်လက်ခရီးနှင်ရန်။",
+      "discovery": "Io လပေါ်ရှိ မီးတောင်ရှင်များကို တွေ့ရှိခဲ့ပြီး ၂၀၁၂ ခုနှစ်တွင် နေအဖွဲ့အစည်းနယ်နိမိတ် (Heliopause) ကို ကျော်ဖြတ်နိုင်ခဲ့သည်။",
+      "challenge": "မူလသက်တမ်းထက် ဆယ်စုနှစ်များစွာကျော်လွန်ပြီး ကီလိုမီတာ ဘီလီယံပေါင်းများစွာ အကွာအဝေးမှ ဆက်လက်အလုပ်လုပ်နေရခြင်း။",
+      "legacy": "ကမ္ဘာမှ အဝေးဆုံးသို့ ရောက်ရှိနေသော လူသားတို့၏ အာကာသယာဉ်ဖြစ်ပြီး ရွှေဓာတ်ပြား (Golden Record) ကို သယ်ဆောင်ထားသည်။"
+    },
+    "chapters": [
+      {
+        "code": "01 GRAND TOUR",
+        "title": "Jupiter & Saturn Flybys (1979–1980)",
+        "text": "Captured unprecedented close-up telemetry of Jupiter’s Great Red Spot, Io’s volcanoes, and Titan’s atmosphere.",
+        "photoIdx": 1
+      },
+      {
+        "code": "02 PALE BLUE DOT",
+        "title": "Solar System Family Portrait (Feb 14, 1990)",
+        "text": "Turned its camera back from 6 billion km away to capture Earth as a tiny pixel suspended in a sunbeam.",
+        "photoIdx": 0
+      },
+      {
+        "code": "03 INTERSTELLAR",
+        "title": "Beyond the Heliopause (2012–Present)",
+        "text": "Became the first human spacecraft to enter interstellar space, still transmitting cosmic ray data back to Earth.",
+        "photoIdx": 1
+      }
+    ]
+  }
+]

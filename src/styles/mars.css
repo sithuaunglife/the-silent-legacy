@@ -5,4 +5,11 @@
   content:"";position:absolute;inset:auto 18% 3% 18%;height:10%;background:#45232e8c;transform:skewX(-25deg);
 }#silent-legacy-outer-space .outer-mars-marker img{
   position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:pixelated;
-}#silent-legacy-outer-space .outer-mars-marker:hover img{filter:drop-shadow(0 0 3px #ffbf96)}
+}#silent-legacy-outer-space .outer-mars-marker:hover img{filter:drop-shadow(0 0 3px #ffbf96)}/* 2.5D isometric pixel sprites: ambient shadow, hover lift and keyboard selection. */
+#silent-legacy-outer-space .outer-mars-marker {transform-style:preserve-3d;outline-offset:4px;transition:filter .18s ease,transform .18s ease}
+#silent-legacy-outer-space .outer-mars-marker::before {filter:blur(3px);opacity:.66;transition:transform .18s ease,opacity .18s ease}
+#silent-legacy-outer-space .outer-mars-marker img {filter:drop-shadow(4px 9px 3px #27101db0);transition:filter .18s ease,transform .18s ease}
+#silent-legacy-outer-space .outer-mars-marker:is(:hover,:focus-visible) {transform:translate(-50%,-98%) scale(1.10)}
+#silent-legacy-outer-space .outer-mars-marker:is(:hover,:focus-visible) img {filter:drop-shadow(0 0 9px #fba46b9c) drop-shadow(4px 11px 3px #28121bb0)}
+#silent-legacy-outer-space .outer-mars-marker:focus-visible {outline:2px solid #ffd492}
+@media (prefers-reduced-motion:reduce){#silent-legacy-outer-space .outer-mars-marker,#silent-legacy-outer-space .outer-mars-marker img{transition:none}}

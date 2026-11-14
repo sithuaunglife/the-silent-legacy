@@ -82,7 +82,7 @@ const sites = [
 const shipHatch = { x: 495, y: 350 };
 const jumpDuration = .92;
 
-export function createLunarSurface(surface, terrain, artifact, records, openArtifact) {
+export function createLunarSurface(surface, terrain, records, openArtifact) {
   const listeners = new AbortController();
   const on = (node, name, fn) => node.addEventListener(name, fn, {signal: listeners.signal});
   const ctx = terrain.getContext('2d');
@@ -108,6 +108,7 @@ export function createLunarSurface(surface, terrain, artifact, records, openArti
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const player = { x: 542, y: 368, facing: 1, step: 0, jumpTime: 0 };
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const archiveOpen = () => document.documentElement.dataset.silentArchiveOpen === 'true';
   const playable = () => surface.open && surface.dataset.world === 'moon' && surface.dataset.phase === 'landed';
   let target;
   let activeSite;
@@ -248,12 +249,13 @@ export function createLunarSurface(surface, terrain, artifact, records, openArti
   }
 
   function jump() {
-    if (!playable() || artifact.open || player.jumpTime) return;
+    if (!playable() || archiveOpen() || player.jumpTime) return;
     player.jumpTime = .001;
   }
 
   function tick(now) {
     frame = 0;
+    if (archiveOpen()) { frame = requestAnimationFrame(tick); return; }
     if (!playable() && !boarding) return;
     const dt = lastTime ? Math.min((now - lastTime) / 1000, .05) : 0;
     lastTime = now;
@@ -273,7 +275,7 @@ export function createLunarSurface(surface, terrain, artifact, records, openArti
       }
       return;
     }
-    if (!artifact.open) {
+    if (!archiveOpen()) {
       if (player.jumpTime) player.jumpTime = player.jumpTime + dt >= jumpDuration ? 0 : player.jumpTime + dt;
       let dx = 0;
       let dy = 0;
@@ -320,7 +322,7 @@ export function createLunarSurface(surface, terrain, artifact, records, openArti
   }
 
   on(window, 'keydown', event => {
-    if (!playable() || artifact.open || event.altKey || event.metaKey || event.ctrlKey) return;
+    if (!playable() || archiveOpen() || event.altKey || event.metaKey || event.ctrlKey) return;
     if (event.code === 'Space') {
       event.preventDefault();
       if (!event.repeat) jump();
@@ -337,7 +339,7 @@ export function createLunarSurface(surface, terrain, artifact, records, openArti
   on(jumpButton, 'click', jump);
   on(card, 'click', () => investigate(activeSite));
   on(terrain, 'click', event => {
-    if (!playable() || artifact.open) return;
+    if (!playable() || archiveOpen()) return;
     const box = terrain.getBoundingClientRect();
     const x = (event.clientX - box.left) * terrain.width / box.width;
     const y = (event.clientY - box.top) * terrain.height / box.height;

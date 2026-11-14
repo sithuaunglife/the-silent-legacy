@@ -1,39 +1,47 @@
-# The Silent Legacy — NASA Space Exploration
+# The Silent Legacy — NASA Interactive Archive
 
-NASA storytelling exploration game featuring interactive outer-space flight, 2.5D Moon and Mars landing environments, and historical space artifacts.
+React + Vite frontend for the NASA Moon and Mars equipment storytelling experience.
 
-## Stack
+## Interactive flow
 
-React 18 + Vite 6, JavaScript, CSS, canvas graphics. No backend required.
+1. Enter the Outer Space scene, fly or use **Go to Moon / Go to Mars**.
+2. The ship approaches and lands on the destination surface.
+3. Select an isometric **2.5D pixel** equipment sprite (or the lunar equipment preview card).
+4. A React-powered mission telemetry dashboard opens showing mission-specific stats, summaries, real-source links, photos, rotating procedural 360° model, mission chapters, and EN/MY language toggle.
+5. Close the dashboard to continue exploring, or use **Return to orbit**.
 
-## Local development
+Equipment names and summaries from the user-supplied `dash board.html` have been retained for its seven original units. Apollo 12 ALSEP, Phoenix and Ingenuity have been added to cover the four in-world Moon items and four Mars markers. The Mars `Spirit & Opportunity` marker opens Spirit first, with Opportunity selectable in the Mars roster.
+
+The 360° models are **stylized low-poly reconstructions**, not NASA engineering scans. Local transparent WebP images are isometric pixel-art representations, separate from documentary NASA photographs. Some archive photographs are externally hosted and may fall back to locally bundled reference art if offline. The records link to NASA's mission pages where possible; photo identification/credits and historical values should be independently reviewed before presenting this as authoritative NASA data.
+
+## Development
 
 ```bash
 npm install
 npm run test:jsx
+npm run test:archive
 npm run dev
 ```
 
-Visit the Vite URL (normally `http://localhost:5173`). To verify a production bundle, run `npm run build`.
+`npm run build` creates the production build. Windows Smart App Control may block native Rollup binaries; this project retains the `@rollup/wasm-node` override from the prior Windows-compatible version. Never disable Windows security to run the app.
 
-Windows Smart App Control can block native Rollup binaries; this project uses the WASM Rollup override in `package.json`.
+## Code architecture
 
-## Structure
+- `src/components/OuterSpace.jsx` — outer-space scene
+- `src/components/Moon.jsx` — lunar exploration scene
+- `src/components/Mars.jsx` — Mars exploration scene
+- `src/components/archive/ArchiveDashboard.jsx` — user-provided telemetry dashboard converted to interactive React
+- `src/components/archive/ArtifactModel.jsx` — 360° Three.js viewer with lifecycle cleanup
+- `src/components/archive/archiveModels.js` — individual procedural spacecraft representations
+- `src/data/archiveCatalog.js` — original seven dashboard records, plus equipment-specific additions
+- `src/data/archiveDashboard.json` — source data preserved from `dash board.html` (no runtime network dependency)
+- `src/game/artifactViewer.js` — event bridge from canvas worlds into React archive
+- `src/game/outerSpaceEngine.js` — spaceship controls and stable sprite rendering
+- `public/assets/` — original image textures, isometric spacecraft sprites, NASA-style references; retain license and credits files.
 
-- `src/components/OuterSpace.jsx` — main flight UI
-- `src/game/outerSpaceEngine.js` — outer-space animation and input lifecycle
-- `src/components/Moon.jsx` and `src/game/moonEngine.js` — lunar surface
-- `src/components/Mars.jsx` and `src/game/marsEngine.js` — Martian surface
-- `src/data/` — NASA artifact records for Moon and Mars
-- `src/styles/` — separated environment styles
-- `public/assets/` — image textures, NASA artifacts, and legacy globe rendering bundle
+## Testing status
 
-The Earth globe asset (`public/assets/earth-globe.js`) is loaded by the outer-space component and **must be retained**. The source includes image and shader licenses in `public/assets`.
-
-## Verification
-
-The JSX import checker can be run with `npm run test:jsx`. Run `npm run build` before deploying. The game is client-side and does not require a Java Spring backend.
-
-## Data / attribution
-
-NASA mission descriptions are informative; links and image-credit records are in the `src/data` and `public/assets` folders. NASA does not endorse this project.
+- JavaScript syntax checks and React import/static source tests: passed.
+- Standalone AppDeploy preview: deployed successfully; automated first-load QA reported no frontend errors.
+- Complete Windows native Vite build and long-duration manual gameplay walkthrough: not independently validated here.
+- NASA does not endorse this project.

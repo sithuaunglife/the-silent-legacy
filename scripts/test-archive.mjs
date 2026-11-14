@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import { strict as assert } from 'node:assert';
+const dir = new URL('../src/', import.meta.url);
+const catalog = JSON.parse(fs.readFileSync(new URL('./data/archiveDashboard.json',dir),'utf-8'));
+const dashboard = fs.readFileSync(new URL('./components/archive/ArchiveDashboard.jsx',dir),'utf-8');
+const outer = fs.readFileSync(new URL('./game/outerSpaceEngine.js',dir),'utf-8');
+const shipCSS = fs.readFileSync(new URL('./styles/outerspace.css',dir),'utf-8');
+assert.equal(catalog.length,7);
+assert(catalog.filter(x=>x.world==='MARS').length===3);
+assert(catalog.filter(x=>x.world==='MOON').length===3);
+assert(catalog.some(x=>x.id==='voyager1'));
+assert(dashboard.includes('360° 3D MODEL')&&dashboard.includes('NASA PHOTOS'));
+assert(outer.includes('--ship-position')&&shipCSS.includes('--ship-position'));
+console.log('PASS: source archive, React dashboard and stable sprite position checks');

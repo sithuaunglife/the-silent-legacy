@@ -1,5 +1,4 @@
 import React, { forwardRef } from 'react';
-import ArtifactDialog from './ArtifactDialog';
 import '../styles/surface.css';
 
 /** Shared visual landing frame; each world supplies its own exploration UI and engine. */
@@ -17,7 +16,7 @@ const SurfaceShell = forwardRef(function SurfaceShell({ world, children }, ref) 
       </div><button className="outer-return cursor-interaction" type="button" disabled>Return to orbit</button></header>
       {children}
     </dialog>
-    <ArtifactDialog world={world} />
+
   </>;
 });
 export default SurfaceShell;

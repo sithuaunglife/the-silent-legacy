@@ -12,3 +12,5 @@
   color:#d9eeff;background:linear-gradient(#172b46,#0a1222);border:1px solid #557296;box-shadow:inset 0 -2px #080d19;
   font-family:inherit;cursor:pointer;
 }#silent-legacy-outer-space :is(.outer-lunar-card,.outer-lunar-jump,.outer-scan-button):hover:not(:disabled){border-color:#9dd8ff;background:#224069}@media (max-width:520px) {#silent-legacy-outer-space .outer-lunar-card{left:8px;transform:none;max-width:calc(100% - 73px);white-space:normal}}
+/* Preserve crisp isometric surface objects while allowing pixel-perfect inspection. */
+#silent-legacy-outer-space .outer-lunar-card:focus-visible{outline:2px solid #bceeff;outline-offset:2px}

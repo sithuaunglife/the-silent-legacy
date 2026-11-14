@@ -8,11 +8,13 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "check": "npm run build",
-    "test:jsx": "node scripts/check-jsx-imports.mjs"
+    "test:jsx": "node scripts/check-jsx-imports.mjs",
+    "test:archive": "node scripts/test-archive.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "vite": "6.4.6"

@@ -60,7 +60,7 @@ export function mountOuterSpaceEngine(root, { onLand }) {
   let frame = 0;
   let previousTime = 0;
   let elapsed = 0;
-  const modalOpen = () => record.open || surfaces.some(dialog => dialog.open);
+  const modalOpen = () => document.documentElement.dataset.silentArchiveOpen === 'true' || record.open || surfaces.some(dialog => dialog.open);
   let autopilot = null;
   let parking = null;
   let waitingForFlight = true;
@@ -450,12 +450,17 @@ export function mountOuterSpaceEngine(root, { onLand }) {
     const leaving = autopilot?.phase === 'exit';
     const transition = entering ? autopilot.time / entryDuration : leaving ? 1 - autopilot.time / exitDuration : 0;
     entryWash.style.opacity = ease(clamp((transition - .26) / .66, 0, 1)).toFixed(3);
-    ship.style.opacity = String(1 - ease(clamp((transition - .58) / .40, 0, 1)));
+    // Avoid intermittent ship disappearance: hide only during final atmospheric entry.
+    ship.style.opacity = String(1 - ease(clamp((transition - .90) / .10, 0, 1)));
+    // The ship always renders above planet geometry while navigating; it only fades at touchdown.
+    ship.style.zIndex = '80';
 
     const flicker = reducedMotion.matches ? 0 : Math.sin(Math.floor(elapsed * 21) * 2.39);
     const thrust = .32 + Math.min(1, Math.hypot(velocity.x, velocity.z) / 320) * .75 + (autopilot ? .2 : 0);
     const spriteFrame = (Math.round(heading / (Math.PI / 4)) + 8) % 8;
     ship.style.setProperty('--ship-frame', String(spriteFrame));
+    // A precomputed CSS percentage avoids unsupported calc() background positions.
+    ship.style.setProperty('--ship-position', (spriteFrame * 100 / 7).toFixed(5) + '%');
     ship.style.setProperty('--ship-heading', heading.toFixed(4) + 'rad');
     ship.style.setProperty('--flame-length', (.6 + thrust * .35 + flicker * .08).toFixed(2));
     ship.style.setProperty('--engine-sparks', (.38 + thrust * .30 + flicker * .17).toFixed(2));
@@ -692,6 +697,7 @@ export function mountOuterSpaceEngine(root, { onLand }) {
     if (keysDown.delete(keyCodes[event.key.toLowerCase()])) refreshKeys();
   });
   on(window, 'blur', stopMovement);
+  on(window, 'silent:archive-close', () => { previousTime = 0; startLoop(); });
   on(document, 'visibilitychange', () => {
     previousTime = 0;
     if (document.hidden) stopMovement();

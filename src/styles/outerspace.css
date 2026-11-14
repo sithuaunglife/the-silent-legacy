@@ -229,3 +229,7 @@ html{background:#000}body{margin:0}
   #silent-legacy-outer-space .outer-pad{display:grid}
   #silent-legacy-outer-space .outer-nav button{min-height:44px}
 }
+
+/* Stable sprite-sheet frame position, computed in the flight engine. */
+#silent-legacy-outer-space .outer-ship-angle {background-position-x:var(--ship-position,57.14286%);}
+#silent-legacy-outer-space .outer-ship {will-change:transform;backface-visibility:hidden;}

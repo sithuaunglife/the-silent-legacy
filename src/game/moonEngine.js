@@ -8,10 +8,9 @@ export function mountMoonEngine(surface, onClosed) {
   const terrain = surface.querySelector('.outer-terrain');
   const guide = surface.querySelector('.outer-field-guide');
   const controls = surface.querySelector('.outer-lunar-controls');
-  const artifact = surface.nextElementSibling;
   let lunar;
-  const viewer = createArtifactViewer(artifact, () => lunar);
-  lunar = createLunarSurface(surface, terrain, artifact, moon.records, viewer.show);
+  const viewer = createArtifactViewer('moon', () => lunar);
+  lunar = createLunarSurface(surface, terrain, moon.records, viewer.show);
   const transitions = createLandingSequence({
     surface, world:moon, onClosed,
     beforeLand(){

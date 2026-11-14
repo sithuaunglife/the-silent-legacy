@@ -8,8 +8,7 @@ export function mountMarsEngine(surface,onClosed) {
   const terrain=surface.querySelector('.outer-terrain');
   const field=surface.querySelector('.outer-mars-field');
   const guide=surface.querySelector('.outer-field-guide');
-  const artifact=surface.nextElementSibling;
-  const viewer=createArtifactViewer(artifact);
+  const viewer=createArtifactViewer('mars');
   const sites=[[18,76,9],[35,61,7],[68,68,8],[83,80,11]];
   const events=new AbortController();
   const markers=mars.records.map((record,index)=>{
