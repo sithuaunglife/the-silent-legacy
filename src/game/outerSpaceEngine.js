@@ -730,7 +730,23 @@ export function mountOuterSpaceEngine(root, { onLand }) {
     graph.querySelector('span').textContent = chartCanvas.hidden ? 'OFF' : 'ON';
     render();
   });
-  on(probe, 'click', () => { stopMovement(); record.showModal(); });
+  // Orbital archive is opt-in: never display on initial load or auto-flight.
+  const inspectVoyager = () => {
+    if (modalOpen() || autopilot) return;
+    stopMovement();
+    window.dispatchEvent(new CustomEvent('silent:inspect', {
+      detail: { world: 'interstellar', id: 'voyager1' }
+    }));
+  };
+  on(ship, 'click', inspectVoyager);
+  on(ship, 'keydown', event => {
+    if (event.code === 'Enter' || event.code === 'Space') {
+      event.preventDefault();
+      inspectVoyager();
+    }
+  });
+  // The existing Voyager probe marker may also be used; no page is opened automatically.
+  on(probe, 'click', inspectVoyager);
   on(record, 'close', startLoop);
   on(root, 'orbit:launch', startDeparture);
   on(root, 'space:closed', startLoop);

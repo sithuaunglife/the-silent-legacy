@@ -1,15 +1,138 @@
-#silent-legacy-outer-space .outer-surface[data-world="mars"]{--surface-ink:#ffe0c9;--entry-core:#ffe9afed;--entry-color:#ed6838c0;--entry-trail:#fb9048c2;border-color:#a7715e;background:#341e20}#silent-legacy-outer-space .outer-surface[data-world="mars"] .outer-landing-dust{background:repeating-linear-gradient(90deg,#e8a16b9e 0 5px,transparent 5px 11px)}#silent-legacy-outer-space .outer-mars-field{position:absolute;inset:0;pointer-events:none}#silent-legacy-outer-space .outer-mars-marker{
-  position:absolute;width:clamp(46px,var(--marker-size),133px);height:clamp(42px,12%,95px);
-  transform:translate(-50%,-90%);border:0;padding:0;background:none;cursor:pointer;pointer-events:auto;
-}#silent-legacy-outer-space .outer-mars-marker::before{
-  content:"";position:absolute;inset:auto 18% 3% 18%;height:10%;background:#45232e8c;transform:skewX(-25deg);
-}#silent-legacy-outer-space .outer-mars-marker img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:pixelated;
-}#silent-legacy-outer-space .outer-mars-marker:hover img{filter:drop-shadow(0 0 3px #ffbf96)}/* 2.5D isometric pixel sprites: ambient shadow, hover lift and keyboard selection. */
-#silent-legacy-outer-space .outer-mars-marker {transform-style:preserve-3d;outline-offset:4px;transition:filter .18s ease,transform .18s ease}
-#silent-legacy-outer-space .outer-mars-marker::before {filter:blur(3px);opacity:.66;transition:transform .18s ease,opacity .18s ease}
-#silent-legacy-outer-space .outer-mars-marker img {filter:drop-shadow(4px 9px 3px #27101db0);transition:filter .18s ease,transform .18s ease}
-#silent-legacy-outer-space .outer-mars-marker:is(:hover,:focus-visible) {transform:translate(-50%,-98%) scale(1.10)}
-#silent-legacy-outer-space .outer-mars-marker:is(:hover,:focus-visible) img {filter:drop-shadow(0 0 9px #fba46b9c) drop-shadow(4px 11px 3px #28121bb0)}
-#silent-legacy-outer-space .outer-mars-marker:focus-visible {outline:2px solid #ffd492}
-@media (prefers-reduced-motion:reduce){#silent-legacy-outer-space .outer-mars-marker,#silent-legacy-outer-space .outer-mars-marker img{transition:none}}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] {
+  --surface-ink: #ffe0c9;
+  --entry-core: #ffe9afed;
+  --entry-color: #ed6838c0;
+  --entry-trail: #fb9048c2;
+  border-color: #a7715e;
+  background: #341e20;
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-landing-dust {
+  background: repeating-linear-gradient(90deg, #e8a16b9e 0 5px, transparent 5px 11px);
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars'][data-phase='landed'] .outer-terrain {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+#silent-legacy-outer-space .outer-mars-field {
+  position: absolute;
+  inset: 0;
+  container-type: size;
+  pointer-events: none;
+}
+#silent-legacy-outer-space .outer-mars-marker {
+  position: absolute;
+  width: max(44px, var(--sprite-width));
+  height: max(44px, var(--sprite-height));
+  transform: translate(-50%, -100%);
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  outline-offset: 5px;
+}
+#silent-legacy-outer-space .outer-mars-marker::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: max(22px, calc(var(--sprite-width) * .75));
+  height: 10px;
+  transform: translateX(-45%) skewX(-18deg);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #31151cb8 0 27%, #542a298a 57%, transparent 83%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+#silent-legacy-outer-space .outer-mars-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 24%;
+  width: 52%;
+  height: 3px;
+  transform: skewX(-24deg);
+  background: repeating-linear-gradient(90deg, #a5644b 0 3px, #6a3a35 3px 6px);
+  opacity: .67;
+  pointer-events: none;
+}
+#silent-legacy-outer-space .outer-mars-marker img {
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  transform: translateX(-50%);
+  width: var(--sprite-width);
+  height: var(--sprite-height);
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+  image-rendering: pixelated;
+  filter: sepia(.13) saturate(.91) brightness(.93) drop-shadow(2px 5px 2px #38202585);
+  transition: transform .16s ease, filter .16s ease;
+}
+#silent-legacy-outer-space .outer-mars-marker:is(:focus-visible,:hover) img {
+  transform: translateX(-50%) translateY(-4px) scale(1.065);
+  filter: sepia(.09) saturate(1.05) drop-shadow(0 0 4px #ffd09975) drop-shadow(2px 7px 2px #3820259a);
+}
+#silent-legacy-outer-space .outer-mars-marker:focus-visible { outline: 2px solid #ffc08f; }
+#silent-legacy-outer-space .outer-mars-marker-label {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, -4px);
+  padding: 4px 7px;
+  color: #fff1dc;
+  font: 10px/1.3 monospace;
+  text-shadow: 1px 1px #301a20;
+  background: #160f17db;
+  border: 1px solid #bc7d5d;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s;
+}
+#silent-legacy-outer-space .outer-mars-marker:is(:focus-visible,:hover) .outer-mars-marker-label { opacity: 1; }
+#silent-legacy-outer-space .outer-mars-person {
+  position: absolute;
+  height: calc(1.75 * 5.3cqh);
+  aspect-ratio: 144/210;
+  transform: translate(-50%, -100%) scale(var(--person-scale,1));
+  transform-origin: center bottom;
+  pointer-events: none;
+  filter: drop-shadow(2px 5px 1px #33181d70);
+}
+#silent-legacy-outer-space .outer-mars-person::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 8%;
+  width: 92%;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse,#2719239e 0 26%,#3b262b61 56%,transparent 78%);
+}
+#silent-legacy-outer-space .outer-mars-avatar {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 400% 100%;
+  background-position: 0 0;
+  image-rendering: pixelated;
+  filter: sepia(.11) saturate(.90);
+}
+@media (prefers-reduced-motion:reduce) {
+  #silent-legacy-outer-space .outer-mars-marker img { transition: none; }
+}
+
+/* Context-aware equipment interaction — no distant dashboard opening. */
+#silent-legacy-outer-space .outer-mars-inspect { position:absolute; padding:7px 10px;
+  transform:translate(12px,-125%); pointer-events:auto;z-index:8000;
+  cursor:pointer; white-space:nowrap; font:700 11px/1.2 'JetBrains Mono',monospace;
+  color:#fff1cf;background:#271c23ed; border:1px solid #e6ac78;
+  box-shadow:0 0 0 2px #130e19,0 0 15px #a9533460; }
+#silent-legacy-outer-space .outer-mars-inspect[data-side='left'] {transform:translate(calc(-100% - 12px),-125%);}
+#silent-legacy-outer-space .outer-mars-inspect[hidden] {display:none!important;}
+#silent-legacy-outer-space .outer-mars-inspect:hover,
+#silent-legacy-outer-space .outer-mars-inspect:focus-visible {background:#51342d; outline:2px solid #ffce9d;outline-offset:2px;}
+#silent-legacy-outer-space .outer-mars-avatar {transform-origin:center bottom;}

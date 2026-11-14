@@ -1,16 +1,40 @@
-#silent-legacy-outer-space .outer-surface[data-world="moon"]{height:min(84dvh,clamp(320px,52.875vw,574px))}#silent-legacy-outer-space .outer-surface[data-world="moon"][data-phase="landed"] .outer-terrain{cursor:crosshair;pointer-events:auto}#silent-legacy-outer-space .outer-lunar-controls{position:absolute;inset:0;pointer-events:none}#silent-legacy-outer-space .outer-lunar-scan-count{
+#silent-legacy-outer-space .outer-surface[data-world='moon'] {height:min(84dvh,clamp(320px,52.875vw,574px))}
+#silent-legacy-outer-space .outer-surface[data-world='moon'][data-phase='landed'] .outer-terrain{cursor:crosshair;pointer-events:auto}
+#silent-legacy-outer-space .outer-lunar-controls{position:absolute;inset:0;pointer-events:none}
+#silent-legacy-outer-space .outer-lunar-scan-count{
   position:absolute;top:clamp(57px,11vw,76px);right:clamp(12px,3vw,22px);margin:0;color:#a6c8ee;font-size:10px;
   padding:4px 6px;border:1px solid #385779;background:#0c1626;
-}#silent-legacy-outer-space .outer-lunar-card{
+}
+#silent-legacy-outer-space .outer-lunar-card{
   position:absolute;bottom:clamp(8px,3vw,16px);left:50%;transform:translateX(-50%);pointer-events:auto;
   display:flex;align-items:center;gap:10px;text-align:left;padding:4px 11px 4px 5px;white-space:nowrap;
-}#silent-legacy-outer-space .outer-surface .outer-lunar-card canvas{
+}
+#silent-legacy-outer-space .outer-surface .outer-lunar-card canvas{
   position:static;width:44px;height:44px;background:#08111c;border:1px solid #395676;image-rendering:pixelated;
-}#silent-legacy-outer-space .outer-lunar-card strong{display:block;font-weight:400;font-size:12px}#silent-legacy-outer-space .outer-lunar-card small{display:block;color:#abbbcf;font-size:10px;margin-top:2px}#silent-legacy-outer-space .outer-lunar-jump{
+}
+#silent-legacy-outer-space .outer-lunar-card strong{display:block;font-weight:400;font-size:12px}
+#silent-legacy-outer-space .outer-lunar-card small{display:block;color:#abbbcf;font-size:10px;margin-top:2px}
+#silent-legacy-outer-space .outer-lunar-jump{
   position:absolute;bottom:clamp(8px,3vw,16px);right:clamp(8px,3vw,22px);min-height:44px;padding:4px 11px;pointer-events:auto;
-}#silent-legacy-outer-space :is(.outer-lunar-card,.outer-lunar-jump,.outer-scan-button){
-  color:#d9eeff;background:linear-gradient(#172b46,#0a1222);border:1px solid #557296;box-shadow:inset 0 -2px #080d19;
-  font-family:inherit;cursor:pointer;
-}#silent-legacy-outer-space :is(.outer-lunar-card,.outer-lunar-jump,.outer-scan-button):hover:not(:disabled){border-color:#9dd8ff;background:#224069}@media (max-width:520px) {#silent-legacy-outer-space .outer-lunar-card{left:8px;transform:none;max-width:calc(100% - 73px);white-space:normal}}
-/* Preserve crisp isometric surface objects while allowing pixel-perfect inspection. */
+}
+#silent-legacy-outer-space :is(.outer-lunar-card,.outer-lunar-jump,.outer-scan-button){
+  color:#d9eeff;background:linear-gradient(#172b46,#0a1222);border:1px solid #557296;
+  box-shadow:inset 0 -2px #080d19;font-family:inherit;cursor:pointer;
+}
+#silent-legacy-outer-space :is(.outer-lunar-card,.outer-lunar-jump,.outer-scan-button):hover:not(:disabled){border-color:#9dd8ff;background:#224069}
 #silent-legacy-outer-space .outer-lunar-card:focus-visible{outline:2px solid #bceeff;outline-offset:2px}
+@media (max-width:520px){#silent-legacy-outer-space .outer-lunar-card{left:8px;transform:none;max-width:calc(100% - 73px);white-space:normal}}
+
+/* Crisper near-side lunar landscape and readable tooltips. */
+#silent-legacy-outer-space .outer-surface[data-world='moon'] { background:#050b16; }
+#silent-legacy-outer-space .outer-lunar-controls { z-index:4; }
+#silent-legacy-outer-space .outer-lunar-card { bottom:auto; right:auto; max-width:180px;
+  min-height:44px; padding:4px 8px 4px 5px; border:1px solid #8fd5ff;
+  background:linear-gradient(145deg,#172b47fa,#061528fa);box-shadow:0 4px 0 #060b1d,0 0 12px #51b8ff55;
+  white-space:normal; font-size:11px; align-items:center; }
+#silent-legacy-outer-space .outer-lunar-card[hidden] {display:none!important;}
+#silent-legacy-outer-space .outer-lunar-card::after {content:'';position:absolute;top:50%;left:-9px;width:8px;border-top:1px dashed #b5e0f8;}
+#silent-legacy-outer-space .outer-lunar-card[data-side='left']::after{left:auto;right:-9px;}
+#silent-legacy-outer-space .outer-lunar-card small{color:#e3cb82;font-size:10px}
+#silent-legacy-outer-space .outer-lunar-card:hover{background:linear-gradient(145deg,#234875,#0e203a)!important;}
+@media(max-width:520px){#silent-legacy-outer-space .outer-lunar-card{max-width:145px;white-space:normal;}}

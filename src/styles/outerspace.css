@@ -233,3 +233,9 @@ html{background:#000}body{margin:0}
 /* Stable sprite-sheet frame position, computed in the flight engine. */
 #silent-legacy-outer-space .outer-ship-angle {background-position-x:var(--ship-position,57.14286%);}
 #silent-legacy-outer-space .outer-ship {will-change:transform;backface-visibility:hidden;}
+
+/* The orbiting ship doubles as the explicit Voyager 1 archive trigger. */
+#silent-legacy-outer-space .outer-ship { pointer-events:auto; cursor:pointer; outline-offset:6px; border-radius:50%; }
+#silent-legacy-outer-space .outer-ship:focus-visible { outline:2px solid #9de5ff; }
+#silent-legacy-outer-space .outer-ship:hover .outer-ship-angle,
+#silent-legacy-outer-space .outer-ship:focus-visible .outer-ship-angle { filter:drop-shadow(0 0 9px #75cdffe0); }

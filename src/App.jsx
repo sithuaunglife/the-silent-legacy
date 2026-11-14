@@ -6,7 +6,12 @@ import ArchiveDashboard from './components/archive/ArchiveDashboard';
 
 /** One React modal is shared by the Moon and Mars exploration engines. */
 export default function App(){
-  const [world,setWorld]=useState(null);
+  // Direct preview links may open a planet; normal visits still start in orbit.
+  const [world,setWorld]=useState(()=>{
+    const previewWorld=new URLSearchParams(window.location.search).get('surface');
+    return previewWorld==='mars'||previewWorld==='moon'?previewWorld:null;
+  });
+  // Do not open an archive on first load. Every archive is selected by a click.
   const [selection,setSelection]=useState(null);
   const archiveRef=useRef(null);
   const land=useCallback((name)=>setWorld(name),[]);
@@ -20,18 +25,21 @@ export default function App(){
   useEffect(()=>{
     const onInspect=event=>{
       const target=event.detail;
-      if(!document.querySelector(`.outer-surface[data-world="${target.world}"]`)?.open)return;
+      // Voyager 1 is a spaceborne record: only a deliberate ship click opens it.
+      if(target.world === 'interstellar') {
+        if(world || document.querySelector('.outer-surface[open]')) return;
+      } else if(!document.querySelector(`.outer-surface[data-world="${target.world}"]`)?.open) return;
       document.documentElement.dataset.silentArchiveOpen='true';
       setSelection(target);
     };
     window.addEventListener('silent:inspect',onInspect);
     return()=>window.removeEventListener('silent:inspect',onInspect);
-  },[]);
+  },[world]);
   useEffect(()=>{
     if(selection && archiveRef.current && !archiveRef.current.open)archiveRef.current.showModal();
     else if(!selection && archiveRef.current?.open)archiveRef.current.close();
   },[selection]);
-  useEffect(()=>{if(!world&&selection)closeArchive();},[world,selection,closeArchive]);
+  useEffect(()=>{if(!world&&selection&&selection.world!=='interstellar')closeArchive();},[world,selection,closeArchive]);
   return <main id="silent-legacy-outer-space">
     <OuterSpace onLand={land}>
       <Moon active={world==='moon'} onClosed={close}/>

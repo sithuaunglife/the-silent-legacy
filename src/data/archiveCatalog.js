@@ -48,6 +48,12 @@ const extras = [
 export const archiveCatalog = [...curated, ...extras];
 export const forSurface = (world) => archiveCatalog.filter(x => x.world === world.toUpperCase());
 export const matchArtifact = (world, id) => {
-  if (id === 'twins') return archiveCatalog.find(x=>x.id==='spirit');
-  return archiveCatalog.find(x=>x.world === world.toUpperCase() && x.surfaceId===id);
+  const matchingWorld = String(world || '').toUpperCase();
+  const requestedId = String(id || '');
+  // A direct record ID always identifies exactly that machine.
+  const precise = archiveCatalog.find(x => x.world === matchingWorld && x.id === requestedId);
+  if (precise) return precise;
+  // The in-world MER twins marker represents one inspection target; default to Spirit.
+  if (requestedId === 'twins' && matchingWorld === 'MARS') return archiveCatalog.find(x => x.id === 'spirit');
+  return archiveCatalog.find(x => x.world === matchingWorld && x.surfaceId === requestedId) || null;
 };

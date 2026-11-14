@@ -138,3 +138,5 @@
 #silent-legacy-outer-space .outer-scan-button:disabled{opacity:.62;cursor:default}
 @media (prefers-reduced-motion:reduce) {#silent-legacy-outer-space .outer-surface :is(.outer-entry-effects,.outer-descent-ship,.outer-descent-thrust,.outer-landing-dust,.outer-landing-shadow){animation:none!important}#silent-legacy-outer-space .outer-entry-effects::before{animation:none!important}}
 
+
+#silent-legacy-outer-space .outer-surface>.outer-terrain {position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;}
