@@ -9,6 +9,8 @@ import {
   SURFACE_HEIGHTS_METERS,
   surfaceSpriteUrl,
 } from '../data/surfaceScale';
+import { EARTH_DAY_TEXTURE } from '../data/pixelEquipment';
+import { siteFor } from '../data/missionSites';
 
 const HORIZON_Y = 290;
 const GROUND_MIN_Y = 308;
@@ -49,12 +51,15 @@ const craters = [
 // Anchors are equipment ground-contact points, not the center of a pasted image.
 // Presentation dimensions use a common astronaut-sized meter scale.
 const sites = [
-  { id: 'eagle', x: 155, y: 420, heightMeters: SURFACE_HEIGHTS_METERS.eagle, widthFactor: 1 },
-  { id: 'rover', x: 345, y: 485, heightMeters: SURFACE_HEIGHTS_METERS.rover, widthFactor: 1.45 },
-  { id: 'surveyor', x: 645, y: 350, heightMeters: SURFACE_HEIGHTS_METERS.surveyor, widthFactor: 1 },
-  { id: 'alsep', x: 825, y: 410, heightMeters: SURFACE_HEIGHTS_METERS.alsep, widthFactor: 1.65 },
+  { id: 'eagle', x: 155, y: 418, heightMeters: SURFACE_HEIGHTS_METERS.eagle, widthFactor: 1 },
+  { id: 'rover', x: 403, y: 437, heightMeters: SURFACE_HEIGHTS_METERS.rover, widthFactor: 1.45 },
+  { id: 'surveyor', x: 676, y: 412, heightMeters: SURFACE_HEIGHTS_METERS.surveyor, widthFactor: 1 },
+  { id: 'alsep', x: 835, y: 471, heightMeters: SURFACE_HEIGHTS_METERS.alsep, widthFactor: 1.65 },
 ];
 const shipHatch = { x: 495, y: 350 };
+// Interactive archive gallery: historical artifacts are displayed together for discovery.
+// Their actual geographically separate resting sites remain documented in each archive.
+
 const jumpDuration = .92;
 const INSPECT_RANGE = 79;
 const VISIBLE_STAR_HEIGHT = 213;
@@ -77,6 +82,15 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   const jumpButton = surface.querySelector('.outer-lunar-jump');
   const count = surface.querySelector('.outer-lunar-scan-count');
   const scanned = new Set();
+  let locationIndex = 0;
+  const nav = surface.querySelector('.outer-site-nav');
+  nav.hidden = true;
+  const siteLabel = document.createElement('div');
+  siteLabel.className = 'outer-site-detail';
+  siteLabel.setAttribute('aria-live', 'polite');
+  surface.append(siteLabel);
+  // Every lunar artifact is available in the same explorable scene.
+  const navButtons = [];
   const keys = new Set();
   const directions = {
     KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1],
@@ -130,34 +144,68 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   }
   paintLunarGround();
 
-  // Distant Earth, shaded as an actual sphere, not a flat pasted circle.
+  // A borderless globe, lit volumetrically and mapped from the bundled Earth
+  // day texture. Neither a rectangular backing nor a circle stroke is drawn.
   const earthSprite = document.createElement('canvas');
-  earthSprite.width = earthSprite.height = 100;
-  const earthPixels = earthSprite.getContext('2d');
-  earthPixels.imageSmoothingEnabled = false;
-  const r = 47;
-  for (let yy = -r; yy <= r; yy += 3) {
-    for (let xx = -r; xx <= r; xx += 3) {
-      const normalizedX = xx / r;
-      const normalizedY = yy / r;
-      const rr = normalizedX * normalizedX + normalizedY * normalizedY;
-      if (rr >= 1) continue;
-      const z = Math.sqrt(1 - rr);
-      const diffuse = Math.max(.12, Math.min(1, .18 + (z * .74 - normalizedX * .4 - normalizedY * .25)));
-      const continent = Math.sin((xx + 12) * .145) * Math.cos((yy - 10) * .115)
-        + Math.cos((yy + xx * .7) * .21) * .42 > .42;
-      const cloud = Math.sin((xx - yy * .5) * .27) + Math.cos((yy + 7) * .19) > 1.17;
-      let base = continent ? [71, 151, 107] : [47, 129, 198];
-      if (cloud) base = [199, 225, 240];
-      earthPixels.fillStyle = `rgb(${base.map(v => Math.round(v * diffuse)).join(',')})`;
-      earthPixels.fillRect(50 + xx, 50 + yy, 3, 3);
+  earthSprite.width = earthSprite.height = 116;
+  const earthPixels = earthSprite.getContext('2d', { willReadFrequently: true });
+  function renderGlobe(texturePixels) {
+    const size = earthSprite.width;
+    const radius = size * .488;
+    const result = earthPixels.createImageData(size, size);
+    const data = result.data;
+    for (let py=0; py<size; py++) {
+      for (let px=0; px<size; px++) {
+        const nx=(px + .5 - size/2)/radius;
+        const ny=(py + .5 - size/2)/radius;
+        const rr=nx*nx+ny*ny;
+        if(rr>=1) continue;
+        const nz=Math.sqrt(1-rr);
+        const longitude=Math.atan2(nx,nz) / (2*Math.PI);
+        const latitude=Math.asin(ny) / Math.PI;
+        // Shift Earth texture until Africa / Atlantic face the lunar observer.
+        const u=((longitude+.60)%1+1)%1;
+        const v=Math.min(.999,Math.max(0,.5+latitude));
+        const base=texturePixels ?
+          (()=>{const tx=Math.floor(u*texturePixels.width),ty=Math.floor(v*texturePixels.height);
+            const i=(ty*texturePixels.width+tx)*4;
+            return [texturePixels.data[i],texturePixels.data[i+1],texturePixels.data[i+2]];})() :
+          ((Math.sin(u*35)+Math.cos(v*31+u*14)>0.48)?[69,149,95]:[35,107,183]);
+        const light=Math.min(1,Math.max(.16,.15+.88*Math.max(0,nz*.84-nx*.44-ny*.12)));
+        const atmosphere=Math.pow(1-Math.min(1,nz),3)*20;
+        const i=(py*size+px)*4;
+        data[i]=Math.min(255,base[0]*light+atmosphere*.25);
+        data[i+1]=Math.min(255,base[1]*light+atmosphere*.6);
+        data[i+2]=Math.min(255,base[2]*light+atmosphere*1.6);
+        data[i+3]=255;
+      }
     }
+    earthPixels.clearRect(0,0,size,size);
+    earthPixels.putImageData(result,0,0);
   }
-  earthPixels.strokeStyle = '#7cb4e07d';
-  earthPixels.lineWidth = 2;
-  earthPixels.beginPath();
-  earthPixels.arc(50, 50, 47, 0, Math.PI * 2);
-  earthPixels.stroke();
+  renderGlobe();
+  const earthTexture = new Image();
+  earthTexture.decoding='async';
+  on(earthTexture, 'load', () => {
+    const source = document.createElement('canvas');
+    source.width = earthTexture.naturalWidth;
+    source.height = earthTexture.naturalHeight;
+    const tx=source.getContext('2d',{willReadFrequently:true});
+    tx.drawImage(earthTexture,0,0);
+    const image=tx.getImageData(0,0,source.width,source.height);
+    renderGlobe(image);
+    if(playable()) draw(true);
+  });
+  earthTexture.src=EARTH_DAY_TEXTURE;
+  const earthGlow = document.createElement('canvas');
+  earthGlow.width=earthGlow.height=160;
+  const gctx=earthGlow.getContext('2d');
+  const bloom=gctx.createRadialGradient(80,80,31,80,80,79);
+  bloom.addColorStop(0,'#407cb511');
+  bloom.addColorStop(.55,'#3567a418');
+  bloom.addColorStop(1,'#3267a400');
+  gctx.fillStyle=bloom;
+  gctx.fillRect(0,0,160,160);
 
   function paintAnimatedSky() {
     ctx.save();
@@ -177,15 +225,11 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
         ctx.fillRect(sx, sy - 2, 1, 5);
       }
     }
-    // A distant pixel Earth remains visible from the near-side lunar terrain.
-    const earthBob = reducedMotion.matches ? 0 : Math.round(Math.sin(t * .1) * 2);
-    ctx.fillStyle = '#386e994a';
-    ctx.fillRect(773, 67 + earthBob, 109, 109);
+    // Earthrise: a naturally circular sphere, with no hard square or outline.
+    const earthBob = reducedMotion.matches ? 0 : Math.round(Math.sin(t*.075));
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(earthSprite, 777, 70 + earthBob, 101, 101);
-    ctx.fillStyle = '#a6d3f2d9';
-    ctx.font = '11px monospace';
-    ctx.fillText('EARTH', 806, 189 + earthBob);
+    ctx.drawImage(earthGlow, 755, 39 + earthBob, 158, 158);
+    ctx.drawImage(earthSprite, 780, 64 + earthBob, 108, 108);
     ctx.restore();
   }
 
@@ -202,7 +246,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     if (!model?.complete || !model.naturalWidth) return;
     const drawHeight = height ?? Math.round(width * model.naturalHeight / model.naturalWidth);
     context.imageSmoothingEnabled = false;
-    context.drawImage(model, Math.round(x - width / 2), Math.round(y - drawHeight), width, drawHeight);
+    context.drawImage(model, Math.round(x - width / 2), Math.round(y - drawHeight), Math.round(width), Math.round(drawHeight));
   }
 
   /** Pixelated occlusion, rubble and a contact shadow physically join a model to the ground. */
@@ -259,7 +303,12 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   }
 
   function paintLunarGround() {
-    const shades = ['#343c51','#424d64','#505c73','#5c677c','#656f84','#717b8e'];
+    rock.clearRect(0, 0, 960, 540);
+    const site = siteFor(sites[locationIndex].id);
+    const shades = site.style === 'rille' ? ['#2a3244','#374459','#4a576c','#5c687f','#737d91','#8991a2'] :
+      site.style === 'crater' ? ['#2e354a','#3a455a','#48546c','#59657c','#647389','#78879a'] :
+      site.style === 'experiment' ? ['#34394b','#42495b','#4c5a70','#646d81','#7a8394','#8d94a4'] :
+      ['#272f43','#364154','#454e62','#545e72','#626e82','#747f90'];
     for (let y = HORIZON_Y; y < 540; y += 2) {
       for (let x = 0; x < 960; x += 8) {
         const depth = (y - HORIZON_Y) / 250;
@@ -276,7 +325,11 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     // Elliptical isometric basins: layered rim highlights, shadowed inner walls,
     // and an offset depressed floor create depth instead of flat dark ovals.
     const basins = [
-      ...craters,
+      ...(site.style === 'rille' ? [
+        {x:90,y:496,rx:38,ry:9},{x:755,y:472,rx:26,ry:8}]:
+        site.style === 'crater' ? [{x:510,y:431,rx:200,ry:42},{x:120,y:499,rx:60,ry:14}]:
+        site.style === 'experiment' ? [{x:170,y:405,rx:70,ry:16},{x:760,y:340,rx:32,ry:7}]:
+        [{x:215,y:438,rx:54,ry:10},{x:730,y:484,rx:74,ry:17}]),
       {x: 430, y: 324, rx: 23, ry: 7}, {x: 596, y: 486, rx: 31, ry: 8},
       {x: 890, y: 510, rx: 38, ry: 12}, {x: 345, y: 397, rx: 19, ry: 5},
       {x: 540, y: 427, rx: 29, ry: 8}, {x: 90, y: 420, rx: 19, ry: 5},
@@ -309,6 +362,66 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
         rock.fillRect(Math.round(x + Math.cos(angle) * rx * 1.25), Math.round(y + Math.sin(angle) * ry * 2), 3, 2);
       }
     }
+    // Layered escarpments, dark rock faces, scattered regolith and distinct
+    // illumination planes. Pixel geometry gives 2.5D depth with no blur.
+    const reliefRocks = [
+      [52,398,12],[251,424,7],[470,472,14],[552,323,8],
+      [720,388,12],[921,445,19],[331,520,11],[578,510,6],
+      [93,345,7],[863,373,6],[607,405,10],[234,475,8],
+      [428,368,8],[794,505,10],[70,515,12],[688,525,8],
+    ];
+    const drawRock = (x,y,size,index) => {
+      const width=Math.round(size), height=Math.round(size*.48);
+      const left=Math.round(x-width), right=Math.round(x+width);
+      const tipY=Math.round(y-height*1.7);
+      rock.fillStyle='#212c3da8';
+      rock.fillRect(left+7,Math.round(y+3),width*2,Math.max(2,Math.round(height*.4)));
+      rock.beginPath();
+      rock.moveTo(left,Math.round(y));rock.lineTo(Math.round(x-width*.32),tipY);
+      rock.lineTo(right-2,Math.round(y-height*.28));rock.lineTo(right,Math.round(y));rock.closePath();
+      rock.fillStyle=index%3===0?'#747e97':'#5c697e';rock.fill();
+      rock.beginPath();
+      rock.moveTo(left,Math.round(y));rock.lineTo(Math.round(x-width*.32),tipY);
+      rock.lineTo(Math.round(x-width*.12),Math.round(y-height*.18));rock.closePath();
+      rock.fillStyle='#aeb7c7';rock.fill();
+      rock.fillStyle='#303b51';
+      rock.fillRect(Math.round(x+width*.25),Math.round(y-height*.12),Math.max(3,Math.round(width*.72)),3);
+    };
+    reliefRocks.forEach(([x,y,size],index)=>drawRock(x,y,size,index));
+    // Site-specific geology; drawings are 2.5D illustrations, not claimed to be
+    // surveyed elevation maps of the resting sites.
+    if(site.style === 'rille') {
+      // The Hadley Rille escarpment cuts a dark channel across the foreground.
+      rock.fillStyle='#19283c';
+      rock.beginPath();rock.moveTo(0,490);rock.lineTo(135,478);
+      rock.lineTo(210,496);rock.lineTo(350,540);rock.lineTo(0,540);rock.fill();
+      rock.strokeStyle='#b4bac3';rock.lineWidth=3;
+      rock.beginPath();rock.moveTo(0,486);rock.lineTo(135,474);rock.lineTo(210,492);rock.stroke();
+    } else if(site.style === 'crater') {
+      rock.strokeStyle='#a7abb4';rock.lineWidth=4;
+      rock.beginPath();rock.ellipse(500,429,196,39,0,Math.PI*.1,Math.PI*.94);rock.stroke();
+    } else if(site.style === 'experiment') {
+      // Apollo ALSEP central distribution station cable routes.
+      rock.strokeStyle='#202b3d';rock.lineWidth=2;
+      for (let n=0;n<3;n++) {
+        rock.beginPath();rock.moveTo(487,425);
+        rock.bezierCurveTo(375+n*75,475,260+n*150,422,210+n*260,482);rock.stroke();
+      }
+    }
+    // Equipment-specific surface history: landing scars and wheel tracks. These
+    // remain behind the physical machinery, helping the sprites feel planted.
+    if (site.style === 'rille') for(let n=0;n<2;n++){
+      rock.strokeStyle=n?'#354052a8':'#9fa8b581';rock.lineWidth=2;
+      rock.beginPath();
+      rock.moveTo(345-70,485-11+n*11);
+      rock.bezierCurveTo(300,472+n*8,365,491+n*10,421,512+n*10);
+      rock.stroke();
+    }
+    // Apollo descent-blast footprint and instruments connected by fine cables.
+    rock.strokeStyle='#242d44b7';rock.lineWidth=1;
+    rock.beginPath();rock.ellipse(155,422,63,14,-.11,0,Math.PI*2);rock.stroke();
+    rock.strokeStyle='#939caf';
+    rock.beginPath();rock.moveTo(785,406);rock.lineTo(807,420);rock.lineTo(839,418);rock.stroke();
   }
 
   function paintPreview(index) {
@@ -319,6 +432,18 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   function draw(showPlayer) {
     ctx.drawImage(background, 0, 0);
     paintAnimatedSky();
+    const profile = siteFor(sites[locationIndex].id);
+    if (profile.style === 'rille') {
+      ctx.fillStyle='#2d364b';
+      ctx.beginPath();ctx.moveTo(0,285);ctx.lineTo(30,257);ctx.lineTo(98,235);
+      ctx.lineTo(160,205);ctx.lineTo(230,239);ctx.lineTo(290,224);
+      ctx.lineTo(356,258);ctx.lineTo(500,287);ctx.lineTo(960,290);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#707b91';ctx.fillRect(96,233,67,3);
+    }
+    if (profile.style === 'crater') {
+      ctx.fillStyle='#485267';ctx.fillRect(48,269,250,4);
+      ctx.fillStyle='#29364c';ctx.fillRect(42,273,260,10);
+    }
     ctx.drawImage(ground, 0, 0);
     const entities = sites.map((site, index) => ({ y: site.y, paint: () => {
       const point = groundPoint(site);
@@ -326,6 +451,11 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       drawGroundContact(point.x, site.y, width, point.scale);
       drawModel(ctx, index, point.x, site.y, width, height);
       drawSurfaceDust(point.x, site.y, width);
+      // Foreground regolith specks occlude the foot of each object slightly.
+      ctx.fillStyle='#a3b0c0';
+      ctx.fillRect(Math.round(point.x-width*.24),site.y-1,3,2);
+      ctx.fillStyle='#2d3850';
+      ctx.fillRect(Math.round(point.x+width*.18),site.y+1,5,2);
       if (showPlayer && !boarding && activeSite === index) {
         ctx.fillStyle = scanned.has(index) ? '#8dcdaa9e' : '#94d0f99e';
         ctx.fillRect(Math.round(point.x - 10), site.y + 5, 20, 2);
@@ -508,6 +638,9 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     }
   });
 
+  function updateSiteLabel() {
+    siteLabel.textContent = 'Illustrative artifact gallery — original equipment remains at separate NASA mission sites.';
+  }
   function updateCount() {
     count.textContent = `Artifacts scanned ${scanned.size}/${sites.length}`;
   }
@@ -517,10 +650,17 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       stop();
       terrain.width = 960;
       terrain.height = 540;
+      locationIndex = 0;
+      nav.hidden = true;siteLabel.hidden=true;
+      navButtons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===0)));
+      updateSiteLabel();
+      paintLunarGround();
       draw(false);
     },
     start() {
-      Object.assign(player, { x: 542, y: 368, facing: 1, step: 0, jumpTime: 0 });
+      Object.assign(player, { x: 680, y: 458, facing: -1, step: 0, jumpTime: 0 });
+      nav.hidden = true;siteLabel.hidden=true;
+      updateSiteLabel();
       activeSite = undefined;
       card.hidden=true;
       selectNearest();
@@ -542,7 +682,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       frame = requestAnimationFrame(tick);
     },
     stop,
-    destroy() { stop(); listeners.abort(); },
+    destroy() { stop(); listeners.abort();siteLabel.remove();nav.replaceChildren(); },
     isScanned: index => scanned.has(index),
     markScanned(index) {
       scanned.add(index);

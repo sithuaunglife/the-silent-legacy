@@ -1,27 +1,22 @@
-# The Silent Legacy — Moon / Mars Exploration Preview
+# The Silent Legacy — Classic OuterSpace (No Start/Launch)
 
-React + Vite NASA pixel-art exploration preview.
+React + Vite pixel-art NASA equipment exploration. This is the version **before** the Start Page and Earth Launch intro were added. It opens directly in OuterSpace. The classic pixel spacecraft and existing Moon/Mars surfaces and NASA inspection dashboard are preserved.
 
-## Latest changes (local preview only)
-
-- Initial orbit view never auto-opens Voyager 1. Click the **moving spacecraft** (or orbit probe) to inspect Voyager 1.
-- Astronaut sprite retains the original user-provided design; movement mirrors left/right.
-- Moon: animated twinkling parallax stars, pixel-shaded Earth visible in sky, stepped 2.5D lunar craters with rims, recessed floors and regolith.
-- Both surfaces: inspect actions are **proximity-only**; click machines to walk toward them, then click the small **INSPECT [E]** button beside the machine or press E.
-- No GitHub updates were made.
-
-## Run
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Windows Smart App Control: this project retains its Rollup WASM override. For direct planet previews, append `?surface=moon` or `?surface=mars`.
+Open `http://localhost:5173/`. Use `/?surface=moon` or `/?surface=mars` for direct previews.
 
-## November 14 surface update
+Windows Smart App Control: the project retains the Rollup WASM override.
 
-- **Use the uploaded astronaut drawing exactly:** `public/assets/reference/astronat-original.jpg` is the user-provided source. `public/assets/astronaut-myanmar-4frames.png` is only its four pose crops with exterior white removed. The Myanmar flag, visor, black outlines, clothing, pose and face are unchanged.
-- All four Moon artifacts and all four Mars artifacts appear as *2.5D isometric pixel sprites*, resting on the same terrain plane with contact shadows, foreground gravel/dust, tint and occlusion.
-- Approximate human-relative equipment heights are maintained centrally in `src/data/surfaceScale.js` (astronaut reference 1.75m). Some equipment figures are deliberately small, with larger clickable target zones for accessibility.
-- Moon controls: WASD/arrows to
+## Navigation
+
+- Space: pixel-art orbital map with classic ship and Moon / Mars buttons. Click the ship to inspect Voyager (no automatic archive).
+- Moon/Mars: common 2.5D artifact galleries, surface walk and jump, close-range INSPECT [E], NASA equipment details.
+- Return to orbit: existing return control and departure animation.
+
+This package excludes the experimental StartPage, LaunchSequence and related intro engine/styles. It is a local revert; **no GitHub push** is included.

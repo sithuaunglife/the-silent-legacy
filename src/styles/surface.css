@@ -140,3 +140,24 @@
 
 
 #silent-legacy-outer-space .outer-surface>.outer-terrain {position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;}
+
+/* Geographic scene picker: one historical final location per screen. */
+#silent-legacy-outer-space .outer-site-nav{position:absolute;top:clamp(76px,12vw,95px);left:clamp(8px,2vw,20px);right:clamp(8px,2vw,20px);display:flex;align-items:center;gap:6px;flex-wrap:wrap;z-index:5;pointer-events:auto}
+#silent-legacy-outer-space .outer-site-nav[hidden]{display:none!important}
+#silent-legacy-outer-space .outer-site-nav button{padding:7px 10px;min-height:34px;cursor:pointer;color:#cee8f6;background:#081c33e3;border:1px solid #527e9a;box-shadow:inset 0 -2px #050b17;font:700 clamp(9px,1.2vw,11px)/1.2 'JetBrains Mono',monospace;letter-spacing:.035em}
+#silent-legacy-outer-space .outer-site-nav button[aria-pressed='true']{background:#194366;border-color:#a0e6ff;color:#fff0af;box-shadow:0 0 8px #44b2ff6b}
+#silent-legacy-outer-space .outer-site-nav button:focus-visible{outline:2px solid #ffe29a;outline-offset:2px}
+#silent-legacy-outer-space .outer-site-detail{position:absolute;bottom:8px;left:12px;z-index:3;color:#dbeafb;background:#061122dc;border-left:2px solid #86b9d9;padding:5px 8px;font:10px/1.4 'JetBrains Mono',monospace;pointer-events:none;max-width:60%;}
+#silent-legacy-outer-space .outer-site-detail strong{display:block;font-size:10px;color:#ffc979}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-site-nav button[aria-pressed='true']{border-color:#edac7b;background:#51312c}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-lunar-controls{z-index:5}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-lunar-jump{bottom:clamp(8px,3vw,16px);right:clamp(8px,3vw,22px);min-height:44px;pointer-events:auto;position:absolute}
+@media(max-width:600px){#silent-legacy-outer-space .outer-site-nav{top:77px;max-height:82px;overflow-y:auto;gap:3px}#silent-legacy-outer-space .outer-site-nav button{font-size:9px;padding:5px 7px;min-height:29px}#silent-legacy-outer-space .outer-site-detail{font-size:9px;max-width:66%}}
+
+/* Historic machines shown together comprise an educational gallery, not one real landing site. */
+#silent-legacy-outer-space .outer-site-nav { display:none !important; }
+#silent-legacy-outer-space .outer-site-detail { display:none !important; }
+#silent-legacy-outer-space .outer-gallery-note { position:absolute; z-index:2; left:11px;bottom:11px; padding:3px 7px;
+ font:9px/1.35 monospace; color:#b5c9df; background:#081322b8; border-left:2px solid #6a9dba;
+ pointer-events:none; max-width:min(70%,390px); }
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-gallery-note { color:#ffdabf;border-left-color:#dc986a; }

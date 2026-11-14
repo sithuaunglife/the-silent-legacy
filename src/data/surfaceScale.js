@@ -1,3 +1,6 @@
+import { eagleReconstructionArt } from './eagleArt.js';
+import { PIXEL_EQUIPMENT } from './pixelEquipment.js';
+
 /**
  * Human-relative dimensions for the artistic surface scenes.
  * NASA reference data: Apollo descent stage 3.23 m, Apollo LRV ~1.5 m,
@@ -8,12 +11,14 @@
 export const ASTRONAUT_HEIGHT_METERS = 1.75;
 export const LUNAR_PIXELS_PER_METER = 34;
 export const SURFACE_HEIGHTS_METERS = Object.freeze({
-  eagle: 3.23,
+  eagle: 6.95, // Visualized complete module only; surviving descent hardware ~3.23 m.
   rover: 1.5,
   surveyor: 3.0,
   alsep: 0.95,
   sojourner: 0.3,
   twins: 1.5,
+  spirit: 1.5,
+  opportunity: 1.5,
   ingenuity: 0.49,
   phoenix: 2.05,
 });
@@ -21,8 +26,10 @@ export const SURFACE_HEIGHTS_METERS = Object.freeze({
 // Preview deployments do not copy binary project assets. Use the versioned
 // public repository artwork there, while local builds load their own files.
 export const surfaceSpriteUrl = id => {
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('appdeploy.ai')) {
-    return `https://raw.githubusercontent.com/sithuaunglife/the-silent-legacy/main/public/assets/surface/${id}.webp`;
-  }
-  return `/assets/surface/${id}.webp`;
+  if(id === 'eagle') return eagleReconstructionArt;
+  if(id === 'spirit' || id === 'opportunity') return PIXEL_EQUIPMENT.twins;
+  // Prefer the sharp pixel remasters instead of browser-filtered WebP images.
+  // Artifact perspective and meter ratios are preserved from the original scenes.
+  if (PIXEL_EQUIPMENT[id]) return PIXEL_EQUIPMENT[id];
+  return `/assets/surface/${id}-pixel.png`;
 };

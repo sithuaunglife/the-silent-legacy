@@ -1,0 +1,73 @@
+[
+  {
+    "name": "Open directly in OuterSpace, no Start or Launch",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "homepage starts in orbit",
+      "no intro or launch",
+      "no Voyager auto-open"
+    ],
+    "description": "Default route immediately displays the previous OuterSpace scene.",
+    "steps": [
+      "Open / with no query parameters",
+      "Verify the original space map and moving classic ship display",
+      "Verify that no START or LAUNCH button appears",
+      "Check the Voyager archive is initially closed"
+    ],
+    "expected": "The original OuterSpace view appears instantly, without a launch or start scene."
+  },
+  {
+    "name": "Classic spacecraft and deliberate archive interaction",
+    "viewport": "desktop",
+    "covers": [
+      "old pixel spaceship",
+      "Voyager click only",
+      "rotating 360 model absent"
+    ],
+    "description": "The original sprite ship is kept.",
+    "steps": [
+      "Open /",
+      "Observe the classic pixel ship",
+      "Click it and verify the Voyager archive opens",
+      "Close the archive"
+    ],
+    "expected": "Classic 8-direction pixel ship; archive opens only on click."
+  },
+  {
+    "name": "Moon artifact gallery and scan",
+    "viewport": "desktop",
+    "covers": [
+      "Moon landing",
+      "all lunar machines in one environment",
+      "proximity inspection"
+    ],
+    "description": "Explore Moon without separate location tabs.",
+    "steps": [
+      "Open /?surface=moon",
+      "Wait for landing",
+      "Walk near an artifact",
+      "Select INSPECT [E]",
+      "Close the NASA record and return to exploration"
+    ],
+    "expected": "Moon gallery, landing and scanner remain unchanged."
+  },
+  {
+    "name": "Mars artifact gallery and scan",
+    "viewport": "mobile",
+    "covers": [
+      "Mars landing",
+      "all martian machines together",
+      "jump",
+      "proximity inspection"
+    ],
+    "description": "Mars interactions remain functional.",
+    "steps": [
+      "Open /?surface=mars",
+      "Wait for landing",
+      "Walk or jump to a piece of equipment",
+      "Use INSPECT [E] when nearby"
+    ],
+    "expected": "Mars gallery, landing and scanners remain unchanged."
+  }
+]

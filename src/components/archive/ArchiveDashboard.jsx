@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PixelArtifactViewer, { archiveAssetFallback, assetUrl } from './PixelArtifactViewer';
 import { matchArtifact } from '../../data/archiveCatalog';
+import { siteFor } from '../../data/missionSites';
 import '../../styles/archiveDashboard.css';
 
 const copy = {
@@ -76,10 +77,11 @@ export default function ArchiveDashboard({ selection, onClose }) {
   const t = copy[lang];
   const brief = lang === 'my' && craft.briefMy ? craft.briefMy : craft.brief;
   const moon = craft.world === 'MOON';
+  const site = siteFor(craft.id === 'apollo15_lrv' ? 'rover' : craft.id === 'surveyor3' ? 'surveyor' : craft.id);
   const chapter = craft.chapters?.[phase];
   const stats = [
     ['ARRIVAL', craft.date], ['ACTIVE', craft.lifespan],
-    ['DISTANCE / OPS', craft.distance], ['FINAL LOCATION', craft.location],
+    ['DISTANCE / OPS', craft.distance], ['FINAL LOCATION', site?.label || craft.location],
   ];
   return <div className={`archive-screen archive-single archive-single-${moon ? 'moon' : 'mars'}`} role="region" aria-label={`NASA mission record for ${craft.name}`}>
     <article className="archive-console archive-single-console" data-selected-artifact={craft.id}>
@@ -92,16 +94,17 @@ export default function ArchiveDashboard({ selection, onClose }) {
         <section className="archive-single-visual" aria-label={`${craft.name} 2.5D pixel-art diorama and NASA photographs`}>
           <nav className="archive-single-tabs" aria-label="Archive view"><button type="button" className={tab === 'pixel' ? 'selected' : ''} onClick={() => setTab('pixel')}>▧ {t.model}</button><button type="button" className={tab === 'photo' ? 'selected' : ''} onClick={() => setTab('photo')}>▤ {t.photo} <small>{craft.photos?.length || 0}</small></button></nav>
           <div className="archive-single-view">{tab === 'pixel' ? <PixelArtifactViewer craft={craft} /> : <MissionPhotos craft={craft} />}</div>
-          <div className="archive-planet-note"><span className="archive-dot" /><span>{moon ? 'LUNAR REGOLITH · ARTIFACT SITE' : 'MARTIAN TERRAIN · ARTIFACT SITE'}</span><span>2.5D VISUALIZATION</span></div>
+          <div className="archive-planet-note"><span className="archive-dot" /><span>{site.region} · FINAL SITE ILLUSTRATION</span><span>2.5D VISUALIZATION</span></div>
         </section>
         <section className="archive-single-info" aria-label={t.overview}>
           <div className="archive-info-subtitle"><strong>◈ {t.overview}</strong><span>NASA ARCHIVE / {craft.imageId || 'MISSION'}</span></div>
+          <div className="archive-site-credit"><strong>◉ RESTING SITE</strong><span>{site.label} · {site.region}</span><a href={site.source} target="_blank" rel="noreferrer noopener">NASA SITE SOURCE ↗</a></div>
           <div className="archive-single-stats">{stats.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
           <div className="archive-single-brief"><section><span>01 / {t.goal}</span><p>{brief?.goal}</p></section><section><span>02 / {t.discovery}</span><p>{brief?.discovery}</p></section></div>
           <button type="button" className="archive-more-toggle" onClick={() => setExpanded(v => !v)} aria-expanded={expanded}>{expanded ? '− ' : '+ '}{expanded ? t.collapse : t.expand}<span>{expanded ? '⌃' : '⌄'}</span></button>
           {expanded && <div className="archive-single-extra"><section><span>03 / {t.challenge}</span><p>{brief?.challenge}</p></section><section><span>04 / {t.legacy}</span><p>{brief?.legacy}</p></section></div>}
           <div className="archive-single-timeline"><div className="archive-timeline-header"><strong>{t.timeline}</strong><div>{(craft.chapters || []).map((part, i) => <button type="button" key={part.code} className={phase === i ? 'selected' : ''} aria-label={`Show mission phase ${i + 1}`} onClick={() => setPhase(i)}>{String(i + 1).padStart(2, '0')}</button>)}</div></div><div className="archive-timeline-content"><small>{chapter?.code}</small><strong>{chapter?.title}</strong><p>{chapter?.text}</p></div></div>
-          <div className="archive-single-footer"><a href={craft.nasa} target="_blank" rel="noreferrer noopener">{t.visit}</a>{moon && <button type="button" disabled={scanStatus !== 'idle'} onClick={() => setScanStatus('scanning')}>{scanStatus === 'scanning' ? 'SCANNING…' : scanStatus === 'done' ? 'SCAN COMPLETE ✓' : t.scan}</button>}</div>
+          <div className="archive-single-footer"><a href={craft.nasa} target="_blank" rel="noreferrer noopener">{t.visit}</a>{(moon || craft.world === 'MARS') && <button type="button" disabled={scanStatus !== 'idle'} onClick={() => setScanStatus('scanning')}>{scanStatus === 'scanning' ? 'SCANNING…' : scanStatus === 'done' ? 'SCAN COMPLETE ✓' : t.scan}</button>}</div>
         </section>
       </div>
       <footer className="archive-single-bottom"><span>◆ ARTWORK: PIXEL-ART INTERPRETATION · NOT NASA'S PHYSICAL 3D MODEL</span><button type="button" onClick={onClose}>← {t.return}</button></footer>

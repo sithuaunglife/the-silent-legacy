@@ -11,8 +11,10 @@ assert(dashboard.includes('matchArtifact(selection.world, selection.id)'), 'Only
 assert(!dashboard.includes('setCraftId(') && !dashboard.includes('filtered.map('), 'Other machines are not shown or navigable');
 assert(dashboard.includes('PixelArtifactViewer'), 'Pixel 2.5D viewer is used');
 assert(!dashboard.includes('ArtifactModel'), 'Legacy rotating model is not used');
-assert(diorama.includes('drawWorld(context, world)'), 'World-specific terrain is drawn');
+assert(diorama.includes('drawWorld(context, world, siteId)'), 'World-specific terrain is drawn');
 assert(diorama.includes('assetUrl(surface)'), 'In-world pixel sprite assets are used');
 assert(match.includes('const precise'), 'Exact mission ID resolution is supported');
 assert(outer.includes('--ship-position'), 'Ship stability code is preserved');
+assert(fs.readFileSync(new URL('components/OuterSpace.jsx',root),'utf8').includes('outer-ship-angle'), 'Classic pixel-art spaceship restored');
+assert(diorama.includes('siteFor(siteId)'), 'Site-specific historical geology descriptions present');
 console.log('PASS: selected-unit-only compact archive, 2.5D themed diorama and original spaceflight retained');

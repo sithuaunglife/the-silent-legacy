@@ -738,7 +738,7 @@ export function mountOuterSpaceEngine(root, { onLand }) {
       detail: { world: 'interstellar', id: 'voyager1' }
     }));
   };
-  on(ship, 'click', inspectVoyager);
+  on(ship, 'click', () => { if (ship.hasAttribute('data-ship-dragged')) return; inspectVoyager(); });
   on(ship, 'keydown', event => {
     if (event.code === 'Enter' || event.code === 'Space') {
       event.preventDefault();

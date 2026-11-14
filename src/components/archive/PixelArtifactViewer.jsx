@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ASTRONAUT_ATLAS_URL } from '../../data/astronautSprite';
+import { siteFor } from '../../data/missionSites';
 import { ASTRONAUT_HEIGHT_METERS, SURFACE_HEIGHTS_METERS, surfaceSpriteUrl } from '../../data/surfaceScale';
 
 // The mission's existing hand-drawn 2.5D sprite is the subject; a low-resolution
@@ -34,7 +35,8 @@ function ellipse(ctx, x, y, rx, ry, color) {
   ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
   ctx.fill();
 }
-function drawWorld(ctx, world) {
+function drawWorld(ctx, world, siteId) {
+  const site = siteFor(siteId);
   const martian = world === 'MARS';
   const palette = martian ? {
     sky: '#150f1b', glow: '#5b2630', distant: '#633247',
@@ -100,6 +102,51 @@ function drawWorld(ctx, world) {
   ctx.lineTo(458, 211);
   ctx.stroke();
   ctx.globalAlpha = 1;
+  // Geographic site variants: stylistic reconstructions informed by NASA's
+  // documented region, never exact scans of a landing or final parking site.
+  if (site.style === 'rille') {
+    polygon(ctx,[[0,166],[82,132],[151,167],[220,145],[294,171],[328,189],[0,204]],'#3d4b66');
+    polygon(ctx,[[10,223],[143,210],[200,226],[268,269],[80,254],[0,245]],'#243148');
+    ctx.strokeStyle='#bcc6d5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(13,223);ctx.lineTo(140,211);ctx.lineTo(204,226);ctx.stroke();
+    ctx.strokeStyle='#31384b';ctx.lineWidth=2;
+    for(let n=0;n<2;n++){ctx.beginPath();ctx.moveTo(145,241+n*6);ctx.bezierCurveTo(209,230+n*4,289,250+n*4,347,265+n*3);ctx.stroke();}
+  } else if(site.style === 'crater') {
+    ellipse(ctx,238,218,164,32,'#29354c');
+    ellipse(ctx,239,223,146,23,'#46556b');
+    ctx.strokeStyle='#aeb9c5';ctx.lineWidth=3;
+    ctx.beginPath();ctx.ellipse(238,219,165,32,0,Math.PI,Math.PI*2);ctx.stroke();
+  } else if(site.style === 'experiment') {
+    ctx.strokeStyle='#222d3d';ctx.lineWidth=2;
+    for(let n=0;n<4;n++){
+      ctx.beginPath();ctx.moveTo(232,230);ctx.bezierCurveTo(177+n*29,258,100+n*59,247,60+n*104,287);ctx.stroke();
+    }
+  } else if(site.style === 'floodplain') {
+    for(let n=0;n<17;n++){
+      let x=Math.round(rand()*440+12),y=Math.round(rand()*48+194);
+      ellipse(ctx,x,y,Math.round(3+rand()*5),Math.round(2+rand()*3),'#a78a78');
+    }
+  } else if(site.style === 'volcanic') {
+    polygon(ctx,[[3,186],[98,166],[156,169],[186,190],[118,207],[0,208]],'#5a3946');
+    polygon(ctx,[[341,185],[431,164],[478,171],[480,212],[366,204]],'#76434a');
+    for(let n=0;n<6;n++)ctx.fillRect(350,179+n*4,76-n*4,2);
+  } else if(site.style === 'valley') {
+    polygon(ctx,[[1,190],[133,180],[203,204],[242,239],[0,244]],'#793d43');
+    polygon(ctx,[[0,188],[140,181],[190,199],[215,222],[0,213]],'#c17d63');
+    for(let n=0;n<8;n++)ctx.fillRect(10,185+n*4,130-n*9,1);
+  } else if(site.style === 'dunes') {
+    polygon(ctx,[[0,213],[87,190],[162,211],[237,196],[314,208],[460,194],[480,263],[0,263]],'#b07955');
+    ctx.strokeStyle='#f5ba82';ctx.lineWidth=2;
+    for(let n=0;n<8;n++){const y=220+n*5;ctx.beginPath();ctx.moveTo(25,y);ctx.lineTo(170,y-7);ctx.stroke();}
+  } else if(site.style === 'polar') {
+    polygon(ctx,[[2,203],[150,201],[231,196],[461,201],[472,244],[266,273],[30,252]],'#b8a19a');
+    ctx.strokeStyle='#e3d0be';ctx.lineWidth=2;
+    for(let x=20;x<460;x+=42){ctx.beginPath();ctx.moveTo(x,205);ctx.lineTo(x+12,216);ctx.lineTo(x+36,211);ctx.stroke();}
+  } else if(site.style === 'mare') {
+    ellipse(ctx,310,225,51,13,'#46516a');
+    ellipse(ctx,310,223,48,10,'#30374f');
+    ctx.strokeStyle='#9aa8bd';ctx.lineWidth=2;
+    ctx.beginPath();ctx.ellipse(308,223,51,13,0,Math.PI,Math.PI*2);ctx.stroke();
+  }
 }
 
 /** Single-equipment 2.5D pixel diorama, not a falsely labelled 360°/NASA 3D scan. */
@@ -109,6 +156,7 @@ export default function PixelArtifactViewer({ craft }) {
   const [imageSrc, setImageSrc] = useState('');
   const world = craft.world === 'MARS' ? 'MARS' : 'MOON';
   const surface = craft.surfaceId || FALLBACK_SURFACE[craft.id] || '';
+  const siteId=craft.id === 'apollo15_lrv' ? 'rover' : craft.id === 'surveyor3' ? 'surveyor' : craft.id;
   const equipmentMeters = SURFACE_HEIGHTS_METERS[surface] || ASTRONAUT_HEIGHT_METERS;
   const artHeightPercent = Math.min(74, equipmentMeters / ASTRONAUT_HEIGHT_METERS * 33);
   useEffect(() => {
@@ -117,14 +165,14 @@ export default function PixelArtifactViewer({ craft }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext('2d', { alpha: false });
-    if (context) drawWorld(context, world);
-  }, [craft.id, surface, world]);
+    if (context) drawWorld(context, world, siteId);
+  }, [craft.id, surface, siteId, world]);
   const onImageError = () => {
     if (imageSrc !== archiveAssetFallback(surface)) setImageSrc(archiveAssetFallback(surface));
   };
   return <div className={`pixel-diorama ${world === 'MARS' ? 'pixel-diorama-mars' : 'pixel-diorama-moon'}`}>
     <canvas ref={canvasRef} width="480" height="300" aria-hidden="true" className="pixel-diorama-land" />
-    <div className="pixel-diorama-topline"><span>◈ 2.5D PIXEL ARTIFACT</span><span>{world} / SURFACE</span></div>
+    <div className="pixel-diorama-topline"><span>◈ 2.5D PIXEL ARTIFACT</span><span>{siteFor(siteId).region.toUpperCase()}</span></div>
     <div className="pixel-diorama-shadow" aria-hidden="true" />
     <div className="pixel-diorama-human" aria-label={`Astronaut ${ASTRONAUT_HEIGHT_METERS} meters tall for comparison`}>
       <span className="pixel-diorama-human-art" style={{ backgroundImage: `url("${ASTRONAUT_ATLAS_URL}")` }} />
@@ -139,6 +187,7 @@ export default function PixelArtifactViewer({ craft }) {
       onError={onImageError}
       draggable={false}
     /> : <div className="pixel-diorama-unsupported">PIXEL MODEL NOT AVAILABLE</div>}
+    {siteId==='eagle' && <div className="pixel-diorama-reconstruction">Ascent cabin shown for context — it departed in 1969; descent stage remains.</div>}
     <div className="pixel-diorama-controls">
       <span>2.5D PIXEL SCENE • ~{equipmentMeters.toFixed(2)} m / 1.75 m HUMAN</span>
       <button type="button" aria-pressed={zoomed} onClick={() => setZoomed(value => !value)}>{zoomed ? '− ZOOM OUT' : '+ ZOOM'}</button>

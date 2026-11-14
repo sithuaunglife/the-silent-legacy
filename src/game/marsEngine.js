@@ -11,10 +11,11 @@ import { paintMarsTerrain } from './marsTerrain';
  * Small real machines intentionally stay small, but have >=44px hit targets.
  */
 const locations = [
-  { x: 22, y: 77, aspect: 1.19, widthBonus: 1.35 }, // Sojourner, 30cm tall
-  { x: 41, y: 68, aspect: 1.16, widthBonus: 1.45 }, // Spirit / Opportunity, 1.5m
-  { x: 67, y: 69, aspect: 1.84, widthBonus: 1.2 }, // Ingenuity, 49cm
-  { x: 83, y: 84, aspect: 1.73, widthBonus: 1.14 }, // Phoenix lander
+  { x: 16, y: 77, aspect: 1.19, widthBonus: 1.35 }, // Sojourner, Ares Vallis
+  { x: 34, y: 76, aspect: 1.16, widthBonus: 1.45 }, // Spirit, Home Plate
+  { x: 52, y: 84, aspect: 1.16, widthBonus: 1.45 }, // Opportunity, Perseverance Valley
+  { x: 73, y: 72, aspect: 1.84, widthBonus: 1.20 }, // Ingenuity, Valinor Hills
+  { x: 87, y: 83, aspect: 1.73, widthBonus: 1.14 }, // Phoenix, Green Valley
 ];
 const directions = {
   KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1],
@@ -23,15 +24,32 @@ const directions = {
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
 
 export function mountMarsEngine(surface, onClosed) {
+  const events = new AbortController();
+  const on = (el, ev, handler) => el.addEventListener(ev, handler, { signal: events.signal });
   const terrain = surface.querySelector('.outer-terrain');
   const field = surface.querySelector('.outer-mars-field');
   const guide = surface.querySelector('.outer-field-guide');
-  const viewer = createArtifactViewer('mars');
-  const events = new AbortController();
-  const on = (el, ev, handler) => el.addEventListener(ev, handler, { signal: events.signal });
+  const scanned = new Set();
+  const counters = surface.querySelector('.outer-lunar-scan-count');
+  const controls = surface.querySelector('.outer-mars-controls');
+  const jumpButton = controls.querySelector('.outer-lunar-jump');
+  const siteNav = surface.querySelector('.outer-site-nav');
+  siteNav.hidden=true;
+  const siteLabel = document.createElement('div');
+  siteLabel.className = 'outer-site-detail';
+  siteLabel.setAttribute('aria-live','polite');
+  surface.append(siteLabel);
+  const viewer = createArtifactViewer('mars', () => ({markScanned(index) {
+    scanned.add(index);
+    updateCounter();
+    refreshInspectors();
+  }}));
+  let locationIndex = 0;
+  // All Martian artifacts stay visible in one continuous discovery scene.
+  const navButtons = [];
   const keys = new Set();
-  const player = { x: 54, y: 82, target: null, frame: 0, jump: 0, facing: 1 };
-  const INSPECT_RANGE = 9.8;
+  const player = { x: 25, y: 86, target: null, frame: 0, jump: 0, facing: 1 };
+  const INSPECT_RANGE = 12.2;
   let nearestIndex = -1;
   const archiveOpen = () => document.documentElement.dataset.silentArchiveOpen === 'true';
   const playable = () => surface.open && surface.dataset.phase === 'landed' && !archiveOpen();
@@ -52,6 +70,7 @@ export function mountMarsEngine(surface, onClosed) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'outer-mars-marker';
+    button.dataset.model = id;
     button.setAttribute('aria-haspopup', 'dialog');
     button.setAttribute('aria-label', `Explore ${record[1]} (${heightM} m, size compared to astronaut)`);
     button.title = `${record[1]} • about ${heightM} m tall • inspect NASA archive`;
@@ -63,16 +82,21 @@ export function mountMarsEngine(surface, onClosed) {
     const icon = new Image();
     icon.loading = 'eager';
     icon.decoding = 'async';
-    icon.src = surfaceSpriteUrl(id);
+    icon.src = surfaceSpriteUrl(id === 'spirit' || id === 'opportunity' ? 'twins' : id);
     icon.onerror = () => {
       icon.onerror = null;
-      icon.src = `https://raw.githubusercontent.com/sithuaunglife/the-silent-legacy/main/public/assets/surface/${id}.webp`;
+      icon.src = `https://raw.githubusercontent.com/sithuaunglife/the-silent-legacy/main/public/assets/surface/${id === 'spirit' || id === 'opportunity' ? 'twins' : id}.webp`;
     };
     icon.alt = '';
+    // A compact soil imprint / machinery shadow is rendered beneath the sprite,
+    // rather than appearing as a floating asset pasted on a canvas.
+    const footprint = document.createElement('i');
+    footprint.className='outer-mars-artifact-footprint';
+    footprint.setAttribute('aria-hidden','true');
     const label = document.createElement('span');
     label.className = 'outer-mars-marker-label';
     label.textContent = `${record[1]} · ${heightM}m`;
-    button.append(icon, label);
+    button.append(footprint, icon, label);
     // Machine click guides the astronaut over; information opens only nearby.
     on(button, 'click', () => {
       if (!playable()) return;
@@ -80,8 +104,8 @@ export function mountMarsEngine(surface, onClosed) {
     });
     const inspect = document.createElement('button');
     inspect.type = 'button';
-    inspect.className = 'outer-mars-inspect';
-    inspect.textContent = '⌕ INSPECT [E]';
+    inspect.className = 'outer-mars-inspect outer-mars-scan-card';
+    inspect.innerHTML = `<span class="outer-inspect-icon">⌕</span><span><strong>${record[1]}</strong><small>INSPECT [E] · ${heightM}m</small></span>`;
     inspect.setAttribute('aria-label', `Inspect ${record[1]} NASA mission data`);
     inspect.hidden = true;
     inspect.style.left = `${x}%`;
@@ -89,7 +113,7 @@ export function mountMarsEngine(surface, onClosed) {
     inspect.style.zIndex = String(Math.round(y * 10) + 4);
     inspect.dataset.side = x > 72 ? 'left' : 'right';
     on(inspect, 'click', () => {
-      if (playable() && nearestIndex === index) viewer.show(record);
+      if (playable() && nearestIndex === index) viewer.show(record,index);
     });
     inspectors.push(inspect);
     field.append(button,inspect);
@@ -116,7 +140,7 @@ export function mountMarsEngine(surface, onClosed) {
       if (distance < bestDistance) { bestDistance=distance; best=i; }
     }
     nearestIndex = best;
-    inspectors.forEach((button,i) => {button.hidden = i !== best;});
+    inspectors.forEach((button,i) => {button.hidden = i !== best || !playable();});
   }
 
   function updatePerson() {
@@ -174,7 +198,7 @@ export function mountMarsEngine(surface, onClosed) {
   function start() {
     cancelAnimationFrame(rAF);
     rAF = 0;lastTime = 0;
-    player.x = 54;player.y = 82;player.target = null;
+    player.x = 25;player.y = 86;player.target = null;
     player.frame = 0;player.jump = 0;player.facing=1;
     updatePerson();
     rAF = requestAnimationFrame(tick);
@@ -192,7 +216,7 @@ export function mountMarsEngine(surface, onClosed) {
       return;
     }
     if (event.code === 'KeyE' && !event.repeat && nearestIndex >= 0) {
-      event.preventDefault(); viewer.show(mars.records[nearestIndex]); return;
+      event.preventDefault(); viewer.show(mars.records[nearestIndex],nearestIndex); return;
     }
     if (directions[event.code]) { event.preventDefault();keys.add(event.code); }
   });
@@ -206,17 +230,31 @@ export function mountMarsEngine(surface, onClosed) {
     if (y > 55) player.target = { x: clamp(x, 6, 94), y: clamp(y, 58, 91) };
   });
 
+  const updateCounter = () => { counters.textContent = `Artifacts scanned ${scanned.size}/${mars.records.length}`; };
+  function updateSiteLabel() {
+    siteLabel.textContent='Illustrative artifact gallery — actual resting sites are documented individually.';
+  }
+  on(jumpButton,'click',()=>{if(playable()&&!player.jump)player.jump=.001;});
   const transitions = createLandingSequence({
     surface, world: mars, onClosed,
     beforeLand() {
-      stop();paintMarsTerrain(terrain, mars);
+      stop();locationIndex=0;
+      navButtons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===0)));
+      paintMarsTerrain(terrain, mars, 'gallery');
+      updateSiteLabel();updateCounter();
+      siteNav.hidden=true;siteLabel.hidden=true;controls.hidden=true;
       guide.hidden = true;field.hidden = true;
     },
-    onLanded() { guide.hidden = true;field.hidden = false;start(); },
-    beforeLeave() { stop();guide.hidden = true;field.hidden = true; },
+    onLanded() {
+      guide.hidden=true;field.hidden=false;
+      controls.hidden=false;siteNav.hidden=true;siteLabel.hidden=true;
+      markers.forEach(marker=>{marker.hidden=false;});
+      start();
+    },
+    beforeLeave() { stop();guide.hidden=true;field.hidden=true;siteNav.hidden=true;siteLabel.hidden=true;controls.hidden=true; },
   });
   return {
     land: transitions.land,
-    destroy() { stop();transitions.destroy();events.abort();viewer.destroy(); },
+    destroy() { stop();transitions.destroy();events.abort();viewer.destroy();siteLabel.remove();siteNav.replaceChildren(); },
   };
 }
