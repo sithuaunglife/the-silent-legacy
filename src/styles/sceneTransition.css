@@ -1,0 +1,78 @@
+.scene-space {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  visibility: hidden;
+  opacity: 0;
+  transform: scale(0.97);
+  transition:
+    opacity 1700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 1700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    visibility 0s linear 1700ms;
+}
+
+.scene-space--entering,
+.scene-space--visible {
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 0s;
+}
+
+.launch-gateway {
+  transition: opacity 1700ms ease, transform 1700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.launch-gateway--exiting {
+  opacity: 0;
+  transform: scale(1.035);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-space,
+  .launch-gateway {
+    transition-duration: 1ms;
+  }
+}
+
+.earth-orbit-transition {
+  position:fixed;inset:0;z-index:1002;overflow:hidden;pointer-events:none;
+  background:radial-gradient(ellipse at 56% 85%,rgba(13,91,157,.3),transparent 61%),linear-gradient(145deg,rgba(3,8,26,.16),rgba(0,8,34,.77));
+  animation:orbit-veil 1.7s ease-out both;
+}
+.earth-orbit-transition__planet {
+  position:absolute;left:-32vw;bottom:-86vh;width:160vw;height:135vh;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 26%,#2a96e4,#104b87 28%,#081a3f 55%,#050912 74%);
+  border-top:7px solid rgba(104,223,255,.82);box-shadow:0 -30px 95px rgba(45,167,240,.32),inset 0 8px 35px rgba(132,228,255,.5);
+  animation:earth-fall-away 1.7s cubic-bezier(.12,.65,.3,1) both;
+}
+.earth-orbit-transition__beam {
+  position:absolute;left:48%;top:10%;width:3px;height:120vh;transform:rotate(22deg);
+  background:linear-gradient(transparent,rgba(115,228,255,.72),transparent);filter:blur(2px);
+  animation:orbit-streak 1.7s ease-in both;
+}
+.earth-orbit-transition__caption,.earth-orbit-transition__sub {
+  position:absolute;left:50%;transform:translateX(-50%);color:#d9f4ff;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.18em;text-align:center;width:min(96%,750px);
+  text-shadow:0 0 20px #0bb9ff;animation:orbit-label 1.7s ease-in-out both;
+}
+.earth-orbit-transition__caption {top:42%;font-weight:800;font-size:clamp(14px,2.6vw,27px)}
+.earth-orbit-transition__caption span {color:#7be7ff}
+.earth-orbit-transition__sub {top:51%;font-size:clamp(9px,1vw,12px)}
+.orbit-entry {
+  pointer-events:none;position:fixed;top:14%;right:11%;z-index:50;display:flex;
+  align-items:center;flex-direction:column;gap:6px;filter:drop-shadow(0 0 24px rgba(0,175,255,.52));
+  animation:orbit-depart 2.6s ease-in forwards;
+}
+.orbit-entry img {width:clamp(100px,16vw,220px);height:auto;image-rendering:pixelated}
+.orbit-entry span {padding:4px 9px;border:1px solid rgba(125,221,255,.48);background:rgba(3,9,29,.86);
+  color:#bfe9ff;font:10px ui-monospace,monospace;letter-spacing:.08em;white-space:nowrap}
+@keyframes earth-fall-away {to {transform:translateY(110vh) scale(.68);opacity:.18}}
+@keyframes orbit-streak {0%{opacity:0;transform:translateY(85vh) rotate(22deg)}40%{opacity:.9}100%{opacity:0;transform:translateY(-85vh) rotate(22deg)}}
+@keyframes orbit-label {0%,100%{opacity:0}34%,67%{opacity:1}}
+@keyframes orbit-veil {0%{opacity:0}36%{opacity:1}100%{opacity:0}}
+@keyframes orbit-depart {0%{opacity:0;transform:translate(-50vw,35vh) scale(1.7)}30%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(42vw,-26vh) scale(.3)}}
+@media(max-width:600px){.orbit-entry{right:4%;top:10%}.orbit-entry span{font-size:8px;white-space:normal;text-align:center;max-width:210px}}
+@media(prefers-reduced-motion:reduce){.earth-orbit-transition,.earth-orbit-transition__planet,.earth-orbit-transition__beam,.earth-orbit-transition__caption,.earth-orbit-transition__sub,.orbit-entry{animation-duration:1ms}}

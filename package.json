@@ -13,7 +13,8 @@
     "test:surface": "node scripts/test-surface-scale.mjs",
     "test:mars": "node scripts/test-mars-scan.mjs",
     "test:controls": "node scripts/test-controls-landing.mjs",
-    "test:eagle": "node scripts/test-eagle-reference.mjs"
+    "test:eagle": "node scripts/test-eagle-reference.mjs",
+    "test:launch": "node scripts/test-launch-spaceplane.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
