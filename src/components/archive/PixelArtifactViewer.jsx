@@ -152,7 +152,7 @@ function drawWorld(ctx, world, siteId) {
 /** Single-equipment 2.5D pixel diorama, not a falsely labelled 360°/NASA 3D scan. */
 export default function PixelArtifactViewer({ craft }) {
   const canvasRef = useRef(null);
-  const [zoomed, setZoomed] = useState(false);
+  const [zoom, setZoom] = useState(1);
   const [imageSrc, setImageSrc] = useState('');
   const world = craft.world === 'MARS' ? 'MARS' : 'MOON';
   const surface = craft.surfaceId || FALLBACK_SURFACE[craft.id] || '';
@@ -160,7 +160,7 @@ export default function PixelArtifactViewer({ craft }) {
   const equipmentMeters = SURFACE_HEIGHTS_METERS[surface] || ASTRONAUT_HEIGHT_METERS;
   const artHeightPercent = Math.min(74, equipmentMeters / ASTRONAUT_HEIGHT_METERS * 33);
   useEffect(() => {
-    setZoomed(false);
+    setZoom(1);
     setImageSrc(surface ? assetUrl(surface) : '');
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -179,9 +179,9 @@ export default function PixelArtifactViewer({ craft }) {
       <span className="pixel-diorama-human-label">1.75 m</span>
     </div>
     {imageSrc ? <img
-      className={`pixel-diorama-art ${zoomed ? 'is-zoomed' : ''}`}
+      className="pixel-diorama-art"
       data-artifact={surface}
-      style={{ height: `${artHeightPercent}%` }}
+      style={{ height: `${artHeightPercent}%`, '--artifact-zoom': zoom }}
       src={imageSrc}
       alt={`Isometric pixel-art interpretation of ${craft.name} on ${world === 'MARS' ? 'Martian' : 'lunar'} terrain`}
       onError={onImageError}
@@ -189,7 +189,12 @@ export default function PixelArtifactViewer({ craft }) {
     /> : <div className="pixel-diorama-unsupported">PIXEL MODEL NOT AVAILABLE</div>}
     <div className="pixel-diorama-controls">
       <span>2.5D PIXEL SCENE • ~{equipmentMeters.toFixed(2)} m / 1.75 m HUMAN</span>
-      <button type="button" aria-pressed={zoomed} onClick={() => setZoomed(value => !value)}>{zoomed ? '− ZOOM OUT' : '+ ZOOM'}</button>
+      <label className="pixel-diorama-zoom">
+        <span>ZOOM</span>
+        <input type="range" aria-label="Artifact zoom" min="1" max="6" step="0.1" value={zoom} onChange={event => setZoom(Number(event.target.value))} />
+        <output>{zoom.toFixed(1)}×</output>
+      </label>
+      <button type="button" onClick={() => setZoom(1)} disabled={zoom === 1}>RESET</button>
     </div>
   </div>;
 }
