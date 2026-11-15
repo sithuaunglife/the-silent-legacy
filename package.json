@@ -15,7 +15,8 @@
     "test:controls": "node scripts/test-controls-landing.mjs",
     "test:eagle": "node scripts/test-eagle-reference.mjs",
     "test:launch": "node scripts/test-launch-spaceplane.mjs",
-    "test:navigation": "node scripts/test-navigation.mjs"
+    "test:navigation": "node scripts/test-navigation.mjs",
+    "test:start": "node scripts/test-start-screen.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

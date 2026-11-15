@@ -4,6 +4,7 @@ import Moon from './components/Moon';
 import Mars from './components/Mars';
 import ArchiveDashboard from './components/archive/ArchiveDashboard';
 import LaunchSimulator from './components/LaunchSimulator';
+import StartScreen from './components/StartScreen';
 import './styles/sceneTransition.css';
 import { localizeInterface, translate } from './i18n';
 
@@ -23,6 +24,7 @@ export default function App(){
   const [launchComplete,setLaunchComplete]=useState(()=>{
     try{return Boolean(initialWorld)||window.sessionStorage.getItem('silent:stage')==='orbit'}catch{return Boolean(initialWorld)}
   });
+  const [startDismissed,setStartDismissed]=useState(()=>launchComplete);
   const [launchKey,setLaunchKey]=useState(0);
   const [launchTransition,setLaunchTransition]=useState(false);
   const [orbitTransitionVisible,setOrbitTransitionVisible]=useState(false);
@@ -94,6 +96,7 @@ export default function App(){
     setLaunchTransition(false);
     setOrbitTransitionVisible(false);
     setLaunchComplete(false);
+    setStartDismissed(false);
     setLaunchKey(key=>key+1);
     try{
       window.sessionStorage.removeItem('silent:world');
@@ -120,7 +123,8 @@ export default function App(){
         language={language} onLanguageChange={setLanguage}/>}
     </dialog>
     </main>}
-    {!launchComplete && <>
+    {!launchComplete && !startDismissed && <StartScreen onBegin={()=>setStartDismissed(true)} />}
+    {!launchComplete && startDismissed && <>
       <LaunchSimulator key={launchKey}
         onComplete={completeLaunch} exiting={launchTransition} language={language} />
       <button className="launch-global-language" type="button"

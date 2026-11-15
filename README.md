@@ -1,6 +1,6 @@
-# The Silent Legacy — Classic OuterSpace (No Start/Launch)
+# The Silent Legacy — NASA Archive Exploration
 
-React + Vite pixel-art NASA equipment exploration. This is the version **before** the Start Page and Earth Launch intro were added. It opens directly in OuterSpace. The classic pixel spacecraft and existing Moon/Mars surfaces and NASA inspection dashboard are preserved.
+React + Vite 2.5D pixel-art NASA equipment experience. The approved rotating-planet Start UI appears before the existing Earth launch simulator. **BEGIN THE JOURNEY** opens the current LaunchSimulator; completing launch continues to the existing OuterSpace, Moon, Mars and artifact-inspection scenes. The same original expedition gameplay is preserved.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ Windows Smart App Control: the project retains the Rollup WASM override.
 - Moon/Mars: common 2.5D artifact galleries, surface walk and jump, close-range INSPECT [E], NASA equipment details.
 - Return to orbit: existing return control and departure animation.
 
-This package excludes the experimental StartPage, LaunchSequence and related intro engine/styles. It is a local revert; **no GitHub push** is included.
+The approved Start Screen uses a separate TSX component, scoped CSS, a lightweight JS starfield engine and four local pixel-art assets. The Back to Start control returns to this new screen.
 
 ## Eagle sprite reference
 

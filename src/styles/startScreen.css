@@ -1,0 +1,212 @@
+/* Original approved NASA Archive 2.5D Start UI, scoped to avoid affecting Orbit / Moon / Mars. */
+
+    .nasa-start{
+      --ink: #02050c;
+      --text: #ebf7ff;
+      --sky: #9ee4ff;
+      --muted: #6f92ac;
+      --orange: #ff9c68;
+      --border: rgba(117, 175, 213, .22);
+    }
+    .nasa-start *{box-sizing:border-box}
+    .nasa-start, .nasa-start{width:100%;min-height:100%;margin:0;background:#02050c;overflow:hidden;color:var(--text)}
+    .nasa-start{font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace}
+    .nasa-start button{font:inherit; cursor:pointer}
+    .nasa-start button:focus-visible{outline:2px solid #bdf1ff;outline-offset:5px}
+    .nasa-start [hidden]{display:none!important}
+    .nasa-start{width:100vw;height:100dvh;min-height:460px;position:relative;overflow:hidden;isolation:isolate;
+      background:
+        radial-gradient(ellipse 39% 39% at 46% 68%, rgba(12,51,88,.28) 0%, transparent 82%),
+        radial-gradient(ellipse 20% 25% at 85% 30%, rgba(95,34,25,.11), transparent 85%),
+        linear-gradient(155deg,#03050a 8%,#030913 63%,#02050d 100%);
+    }
+    .nasa-start #stars{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;image-rendering:pixelated}
+    .nasa-start .scanlines{position:absolute;inset:0;z-index:15;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(130,205,245,.14) 4px);opacity:.17}
+    .nasa-start .grain{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 50% 55%,transparent 48%,#0008 100%)}
+    .nasa-start .frame-outline{position:absolute;inset:14px;z-index:3;border:1px solid rgba(67,121,160,.15);pointer-events:none}
+    .nasa-start .frame-outline::before, .nasa-start .frame-outline::after{content:'';position:absolute;width:26px;height:26px;border-color:#4d91bb;border-style:solid;opacity:.65}
+    .nasa-start .frame-outline::before{left:-1px;top:-1px;border-width:2px 0 0 2px}
+    .nasa-start .frame-outline::after{right:-1px;bottom:-1px;border-width:0 2px 2px 0}
+    .nasa-start .topbar{position:absolute;top:31px;left:5%;right:5%;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .nasa-start .topbar .brand{text-transform:uppercase;display:flex;align-items:center;gap:11px;font-size:10px;font-weight:800;letter-spacing:2px;color:#c8edff}
+    .nasa-start .topbar .brand svg{width:24px;height:24px;image-rendering:pixelated;color:#ff9c68}
+    .nasa-start .topbar .brand strong{color:#ffb488}
+    .nasa-start .topbar .badge{font-size:10px;letter-spacing:2.1px;color:#86a9bb;display:flex;align-items:center;gap:12px;text-transform:uppercase}
+    .nasa-start .status-point{display:inline-block;flex:none;width:6px;height:6px;border-radius:50%;background:#a5efb4;box-shadow:0 0 14px #a5efb4;animation:nasa-blink 1.8s steps(2,end) infinite}
+    .nasa-start .scene{position:absolute;z-index:4;width:1440px;height:820px;left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--fit,1));transform-origin:center;}
+    .nasa-start .title-block{position:absolute;left:530px;top:83px;width:390px;z-index:9;text-align:center;pointer-events:none;}
+    .nasa-start .eyebrow{font-size:11px;letter-spacing:5px;color:#88bdd2;font-weight:700;white-space:nowrap;margin-bottom:9px;}
+    .nasa-start .title-line{line-height:1.01;letter-spacing:-2.5px;font-weight:1000;text-transform:uppercase;text-shadow:4px 4px 0 #123b5d,0 0 28px #163c5880;}
+    .nasa-start .title-line small{display:block;color:#f9a779;font:900 30px/1.15 ui-monospace,'Courier New',monospace;letter-spacing:1px;text-shadow:3px 3px #642b23;}
+    .nasa-start .title-line strong{display:block;color:#b3e6ff;font:1000 48px/.94 ui-monospace,'Courier New',monospace;letter-spacing:-1px;text-shadow:4px 4px 0 #1e5074;}
+    .nasa-start .title-sub{margin-top:14px;color:#5c8dab;font-size:10px;letter-spacing:3px;font-weight:700}
+    .nasa-start .light-ring{position:absolute;border-radius:50%;pointer-events:none;z-index:1;border:1px solid rgba(73,144,196,.20);filter:drop-shadow(0 0 7px #4e9fcb34)}
+    .nasa-start .ring-one{width:620px;height:210px;top:376px;left:210px;transform:rotate(-20deg)}
+    .nasa-start .ring-two{width:820px;height:285px;top:345px;left:110px;transform:rotate(-17deg);border-style:dashed;border-color:rgba(92,154,187,.16)}
+    .nasa-start .ring-three{width:550px;height:169px;top:395px;left:245px;transform:rotate(-18deg);border-color:rgba(115,190,230,.09)}
+    .nasa-start .orbit-waypoint{position:absolute;top:319px;left:765px;color:#6d99b6;font-size:11px;letter-spacing:2px;transform:rotate(-16deg)}
+    .nasa-start .planet{position:absolute;z-index:3;border:0;padding:0;background:none;filter:drop-shadow(12px 20px 18px #000b);}
+    .nasa-start .planet img{width:100%;height:100%;display:block;object-fit:contain;image-rendering:pixelated;transition:filter .2s,transform .2s}
+    .nasa-start .planet::before{content:'';position:absolute;inset:-15%;border-radius:50%;z-index:-1;pointer-events:none;background:radial-gradient(circle,#479fd71a 0%,transparent 67%)}
+    .nasa-start .planet::after{content:'';position:absolute;inset:5%;border-radius:50%;z-index:2;pointer-events:none;box-shadow:inset -23px -18px 28px #0006,inset 4px 5px 10px #cfeeff11}
+    .nasa-start .planet:hover .label, .nasa-start .planet:focus-visible .label{opacity:.96}
+    .nasa-start .planet:hover img, .nasa-start .planet:focus-visible img{transform:scale(1.025);filter:brightness(1.16) drop-shadow(0 0 15px #79ceff77)}
+    .nasa-start .planet .label{position:absolute;left:50%;bottom:-37px;transform:translateX(-50%);white-space:nowrap;font-size:10px;color:#c4eafa;letter-spacing:2px;opacity:0;transition:opacity .18s;border:1px solid #477ca348;padding:8px 13px;background:#05111dcf;z-index:4}
+    .nasa-start .planet .label em{color:#78a8bc;font-size:8px;font-style:normal;letter-spacing:1px;padding-left:12px}
+    .nasa-start #earth{top:266px;left:358px;width:393px;height:393px;z-index:6;filter:drop-shadow(13px 20px 17px #000b) drop-shadow(0 0 26px #479dd230)}
+    .nasa-start #earth::before{inset:-12%;background:radial-gradient(circle,transparent 45%,#499ee51b 58%,transparent 72%)}
+    .nasa-start #earth::after{box-shadow:inset -34px -26px 32px #0008,inset 7px 6px 17px #bcf3ff22,0 0 3px 3px #69caff2a}
+    .nasa-start #moon{top:298px;left:134px;width:168px;height:168px;z-index:5}
+    .nasa-start #mars{top:160px;left:1112px;width:260px;height:260px;z-index:4;filter:drop-shadow(18px 22px 17px #000c) drop-shadow(0 0 24px #fd764a31)}
+    .nasa-start #mars::before{background:radial-gradient(circle,transparent 43%,#b3563820 58%,transparent 76%)}
+    .nasa-start #moon::after{box-shadow:inset -16px -14px 22px #0007,inset 4px 5px 10px #fff9}
+    .nasa-start #mars::after{box-shadow:inset -23px -17px 28px #0008,inset 6px 5px 12px #ffe0a333}
+    .nasa-start .planet .decor-star{position:absolute;pointer-events:none;font-size:21px;color:#b2eaff;text-shadow:0 0 12px currentColor}
+    .nasa-start .voyager{position:absolute;top:269px;left:905px;width:159px;height:117px;z-index:5;filter:drop-shadow(8px 12px 7px #000b);animation:nasa-float 6s ease-in-out infinite alternate;pointer-events:none}
+    .nasa-start .voyager img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+    .nasa-start .voyager .track{position:absolute;top:-20px;right:-42px;width:72px;height:1px;background:linear-gradient(90deg,#8eafc977,transparent);transform:rotate(-28deg)}
+    .nasa-start .ship-area{position:absolute;z-index:8;left:747px;top:403px;width:145px;height:150px;display:grid;place-items:center;pointer-events:none;}
+    .nasa-start .ship{position:relative;z-index:4;width:131px;height:136px;display:grid;place-items:center;border:0;background:none;padding:0;pointer-events:auto;transform:rotate(-13deg);animation:nasa-ship-hover 3.8s ease-in-out infinite alternate;filter:drop-shadow(12px 15px 9px #000c)}
+    .nasa-start .ship img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 9px #5aaff07a);transition:transform .2s}
+    .nasa-start .ship:hover img, .nasa-start .ship:focus-visible img{transform:scale(1.07)}
+    .nasa-start .ship-area .thruster{position:absolute;pointer-events:none;z-index:1;width:43px;height:75px;left:4px;top:97px;transform:rotate(39deg);opacity:.7;background:linear-gradient(#fff7c6 3%,#4cddff 25%,#3174ff 48%,transparent 95%);clip-path:polygon(37% 0,65% 0,100% 100%,0 100%);filter:blur(1px) drop-shadow(0 0 10px #43caff);animation:nasa-thrust 0.27s steps(2) infinite alternate}
+    .nasa-start .ship-label{position:absolute;z-index:5;top:17px;right:-58px;font-size:10px;letter-spacing:2px;color:#9bc8df;transform:translateX(16px);white-space:nowrap}
+    .nasa-start .ship-label::before{content:'';position:absolute;left:-34px;top:7px;width:25px;height:1px;background:#80b2cc}
+    .nasa-start .callout{position:absolute;z-index:6;pointer-events:none;color:#789cb7;text-transform:uppercase;letter-spacing:1.3px;font-size:10px;line-height:1.9}
+    .nasa-start .callout strong{color:#cce7f8;font-weight:700}
+    .nasa-start .earth-note{top:637px;left:671px;}
+    .nasa-start .moon-note{top:480px;left:120px;}
+    .nasa-start .mars-note{top:432px;left:1190px;}
+    .nasa-start .spark{position:absolute;width:14px;height:14px;pointer-events:none;z-index:2;color:#ff9bc4;opacity:.75;filter:drop-shadow(0 0 8px currentColor)}
+    .nasa-start .spark::before, .nasa-start .spark::after{content:'';position:absolute;background:currentColor;}
+    .nasa-start .spark::before{left:6px;top:0;width:2px;height:14px}.nasa-start .spark::after{left:0;top:6px;width:14px;height:2px}
+    .nasa-start .spark i{position:absolute;z-index:1;background:#fff;left:5px;top:5px;width:4px;height:4px}
+    .nasa-start .s1{top:268px;left:328px}.nasa-start .s2{top:215px;left:1020px}.nasa-start .s3{top:527px;left:1045px;color:#9cddff}.nasa-start .s4{top:170px;left:790px;color:#a0ddf5}.nasa-start .s5{top:471px;left:990px;color:#a9dfff}
+    .nasa-start .lower{position:absolute;z-index:10;left:5%;right:5%;bottom:5.8%;display:flex;align-items:flex-end;justify-content:space-between;gap:25px}
+    .nasa-start .description{max-width:375px;padding-left:18px;border-left:2px solid #69cce1;}
+    .nasa-start .description .chapter{font-size:10px;letter-spacing:2.8px;color:#91b4cc;margin-bottom:12px}
+    .nasa-start .description h2{font:900 21px/1.15 ui-monospace,Consolas,monospace;letter-spacing:-.9px;margin:0 0 11px;color:#f1faff;text-shadow:2px 2px #14344f;}
+    .nasa-start .description h2 span{color:#ffad85}
+    .nasa-start .description p{font-size:11px;line-height:1.9;margin:0;color:#7c9eb2;max-width:340px}
+    .nasa-start .launch-cta{min-width:280px;min-height:57px;padding:0 19px;display:flex;align-items:center;justify-content:space-between;gap:20px;color:#011b2c;background:#ace9f5;border:2px solid #d1fcff;font-size:12px;letter-spacing:.7px;font-weight:900;box-shadow:5px 5px 0 #193f57;transition:transform .2s,box-shadow .2s,background .2s;}
+    .nasa-start .launch-cta:hover{transform:translateY(-3px);background:#d3fbff;box-shadow:5px 9px 0 #193f57}
+    .nasa-start .launch-cta::before{content:'▶';font-size:14px}
+    .nasa-start .launch-cta::after{content:'↗';font-size:23px;line-height:1}
+    .nasa-start .destination-strip{display:flex;align-items:flex-end;gap:29px;text-align:left;}
+    .nasa-start .destination{display:flex;align-items:center;gap:12px;padding:0 0 5px;}
+    .nasa-start .destination .orb{width:26px;height:26px;border-radius:50%;flex:none;box-shadow:inset -5px -5px 5px #0006;}
+    .nasa-start .destination .orb.lunar{background:radial-gradient(circle at 30% 30%,#ddd,#959dac 55%,#404c5b)}
+    .nasa-start .destination .orb.martian{background:radial-gradient(circle at 30% 30%,#ffc16b,#d76640 54%,#662d36)}
+    .nasa-start .destination div{display:grid;gap:4px}.nasa-start .destination small{color:#7398b1;font-size:9px;letter-spacing:2px;}
+    .nasa-start .destination strong{color:#d0ebf9;font-size:11px;letter-spacing:1px;}
+    .nasa-start .footer-rule{position:absolute;z-index:9;left:5%;right:5%;bottom:3.2%;height:1px;background:linear-gradient(90deg,#41739866,#4173981a,#41739866)}
+    .nasa-start .footer-id{position:absolute;z-index:9;left:5%;bottom:1.2%;color:#50738e;font-size:8px;letter-spacing:2.2px}
+    .nasa-start .footer-right{position:absolute;z-index:9;right:5%;bottom:1.2%;color:#50738e;font-size:8px;letter-spacing:2.2px}
+    .nasa-start .notice{z-index:25;position:fixed;left:50%;bottom:80px;transform:translateX(-50%);border:1px solid #467da0;background:#061523ed;color:#d9f5ff;padding:16px 20px;max-width:min(470px,calc(100vw - 30px));box-shadow:0 15px 60px #000b;display:flex;gap:15px;align-items:center;line-height:1.6;font-size:12px;}
+    .nasa-start .notice strong{color:#f9b58a}.nasa-start .notice button{flex:none;border:0;background:none;color:#c4e9f9;font-weight:900;font-size:16px}
+    @keyframes nasa-blink{50%{opacity:.3}}@keyframes nasa-float{to{transform:translate(8px,-9px) rotate(2deg)}}
+    @keyframes nasa-ship-hover{to{transform:translate(8px,-8px) rotate(-9deg)}}
+    @keyframes nasa-thrust{to{opacity:1;height:87px}}
+    @media (max-width:1000px) {
+      .nasa-start .lower{left:4%;right:4%;bottom:6%;gap:16px}
+      .nasa-start .description{max-width:265px}
+      .nasa-start .description h2{font-size:17px}
+      .nasa-start .description p{font-size:10px}
+      .nasa-start .destination-strip{display:none}
+      .nasa-start .launch-cta{min-width:210px;font-size:11px;min-height:54px}
+      .nasa-start .topbar{left:4%;right:4%}
+    }
+    @media (max-width:650px) {
+      /* Mobile camera: frame the entire planet trio and spacecraft, no clipped planets. */
+      .nasa-start #moon{left:367px;top:309px;width:160px;height:160px}
+      .nasa-start #earth{left:541px;top:344px;width:314px;height:314px}
+      .nasa-start #mars{left:939px;top:294px;width:170px;height:170px}
+      .nasa-start .voyager{left:851px;top:274px;width:123px;height:92px}
+      .nasa-start .ship-area{left:855px;top:414px;transform:scale(.87);transform-origin:left top}
+      .nasa-start .title-block{left:547px;top:106px;width:390px}
+      .nasa-start .callout, .nasa-start .orbit-waypoint{display:none}
+      .nasa-start .ring-one{left:460px;top:434px;width:520px}
+      .nasa-start .ring-two{left:394px;top:397px;width:605px}
+      .nasa-start .ring-three{left:464px;top:454px;width:510px}
+      .nasa-start{min-height:420px}
+      .nasa-start .topbar{top:22px}
+      .nasa-start .topbar .badge{font-size:9px;letter-spacing:1px}
+      .nasa-start .topbar .brand{font-size:9px;letter-spacing:1px}
+      .nasa-start .lower{bottom:6%;display:flex;flex-direction:column;align-items:stretch;gap:20px}
+      .nasa-start .description{max-width:none;padding-left:13px}
+      .nasa-start .description .chapter{margin-bottom:7px}
+      .nasa-start .description h2{font-size:18px;margin-bottom:8px}
+      .nasa-start .description p{font-size:10px;line-height:1.65;max-width:310px}
+      .nasa-start .launch-cta{width:100%;min-height:53px}
+      .nasa-start .footer-rule{bottom:3%}
+      .nasa-start .footer-id, .nasa-start .footer-right{font-size:7px;letter-spacing:1px}
+    }
+    @media (prefers-reduced-motion:reduce){.nasa-start *{animation:none!important;transition:none!important}}
+  
+    /* Minimal preview: title, pixel-art planets, space ambience and entry action only. */
+    .nasa-start .lower{left:0;right:0;bottom:7.3%;justify-content:center;align-items:center;}
+    .nasa-start .launch-cta{min-width:255px;justify-content:center;gap:16px;}
+    .nasa-start .title-block{top:70px;}
+    .nasa-start .planet::after{opacity:.72;}
+    @media (max-width:650px) {
+      .nasa-start .lower{left:15px;right:15px;bottom:6%;align-items:center;display:flex;}
+      .nasa-start .launch-cta{width:min(100%,330px);min-width:0;min-height:53px;}
+      .nasa-start .title-block{top:117px;}
+    }
+
+    /* Refined primary action: compact, translucent, and low-profile. */
+    .nasa-start .launch-cta, .nasa-start .lower .launch-cta{
+      width: auto;
+      min-width: 196px;
+      min-height: 40px;
+      padding: 0 13px;
+      gap: 10px;
+      justify-content: center;
+      background: rgba(21, 66, 91, .20);
+      color: #d0f2ff;
+      border: 1px solid rgba(153, 224, 255, .65);
+      box-shadow: 0 0 15px rgba(47, 151, 210, .08), inset 0 0 14px rgba(59, 145, 186, .04);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .nasa-start .launch-cta::before{font-size: 10px; color: #a2e8fa;}
+    .nasa-start .launch-cta::after{font-size: 15px; color: #a2e8fa;}
+    .nasa-start .launch-cta:hover, .nasa-start .launch-cta:focus-visible{
+      transform: translateY(-2px);
+      background: rgba(50, 123, 160, .34);
+      border-color: #c4efff;
+      box-shadow: 0 0 22px rgba(72, 186, 228, .18), inset 0 0 16px rgba(97, 198, 229, .1);
+    }
+    /* Slow axial rotations. The shaded spherical overlay stays stationary
+       so the 2.5D planets keep their lighting as the pixel art moves. */
+    .nasa-start .planet{ --planet-scale: 1; }
+    .nasa-start .planet:hover, .nasa-start .planet:focus-visible{ --planet-scale: 1.025; }
+    .nasa-start .planet img{
+      transform-origin: center center;
+      animation:nasa-planet-axial-spin 125s linear infinite;
+      will-change: transform;
+    }
+    .nasa-start #earth img{ animation-duration: 100s; }
+    .nasa-start #moon img{ animation-duration: 185s; animation-direction: reverse; }
+    .nasa-start #mars img{ animation-duration: 115s; }
+    @keyframes nasa-planet-axial-spin {
+      from { transform: rotate(0deg) scale(var(--planet-scale)); }
+      to { transform: rotate(360deg) scale(var(--planet-scale)); }
+    }
+    @media(max-width:650px) {
+      .nasa-start .launch-cta, .nasa-start .lower .launch-cta{
+        width: auto;
+        min-width: 188px;
+        min-height: 40px;
+        padding: 0 12px;
+        font-size: 9px;
+      }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      .nasa-start .planet img{ animation: none !important; }
+    }
