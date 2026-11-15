@@ -161,3 +161,76 @@
  font:9px/1.35 monospace; color:#b5c9df; background:#081322b8; border-left:2px solid #6a9dba;
  pointer-events:none; max-width:min(70%,390px); }
 #silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-gallery-note { color:#ffdabf;border-left-color:#dc986a; }
+
+/* Immersive expeditions: the <dialog> fills the viewport, without a frame. */
+#silent-legacy-outer-space dialog.outer-surface {
+  position:fixed;inset:0;box-sizing:border-box;
+  width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;
+  min-width:0;min-height:0;margin:0;padding:0;border:0;border-radius:0;
+  box-shadow:none;overflow:hidden;overscroll-behavior:contain;
+}
+#silent-legacy-outer-space dialog.outer-surface .outer-surface-head {
+  z-index:12;padding:clamp(12px,2vw,24px);
+}
+#silent-legacy-outer-space dialog.outer-surface .outer-return {
+  border:0;border-radius:4px;background:#091423d9;
+  box-shadow:inset 0 0 0 1px #7697b067;
+}
+#silent-legacy-outer-space .outer-mission-comms {
+  position:absolute;z-index:9;bottom:clamp(14px,2.5vw,27px);left:clamp(13px,2.4vw,28px);
+  width:min(340px,calc(100% - 200px));pointer-events:none;
+  padding:12px 15px;background:linear-gradient(125deg,#081320ed,#0c1e31e3);
+  color:#e1f0ff;border-left:3px solid #75bde4;
+  font:12px/1.55 'JetBrains Mono',monospace;
+  box-shadow:0 7px 20px #02060b66;
+}
+#silent-legacy-outer-space .outer-mission-comms[data-mode='complete'] {border-left-color:#8beac6;}
+#silent-legacy-outer-space .outer-mission-label {
+  display:flex;align-items:center;gap:8px;letter-spacing:.13em;
+  font:700 10px/1.4 'JetBrains Mono',monospace;color:#94d7ff;
+}
+#silent-legacy-outer-space .outer-mission-live {
+  color:#a7ffce;font-size:9px;margin-left:auto;letter-spacing:.08em;
+}
+#silent-legacy-outer-space .outer-mission-message {margin:6px 0 0;max-width:40ch;}
+#silent-legacy-outer-space .outer-mission-comms[data-mode='transit'] .outer-mission-live {color:#ffcf9a;}
+#silent-legacy-outer-space .outer-movement-pad {
+  position:absolute;z-index:11;right:clamp(13px,2.6vw,28px);bottom:clamp(12px,2.5vw,25px);
+  display:none;pointer-events:auto;user-select:none;
+}
+#silent-legacy-outer-space .outer-surface[data-phase='landed'] .outer-movement-pad {display:block;}
+#silent-legacy-outer-space .outer-movement-caption {
+  display:block;margin-bottom:6px;text-align:center;color:#d9e8f4;
+  font:700 10px/1.3 'JetBrains Mono',monospace;letter-spacing:.09em;text-shadow:0 2px 4px #000;
+}
+#silent-legacy-outer-space .outer-movement-grid {
+  display:grid;grid-template-columns:repeat(3,44px);
+  grid-template-rows:repeat(2,44px);gap:4px;
+  grid-template-areas:'. up .' 'left down right';
+}
+#silent-legacy-outer-space .outer-movement-grid button {
+  display:grid;place-items:center;min-height:44px;min-width:44px;
+  border:0;border-radius:5px;padding:0;background:#0c1b2ee6;
+  color:#e5f5ff;font:700 21px/1 monospace;cursor:pointer;touch-action:none;
+  box-shadow:inset 0 0 0 1px #8cacc469;
+}
+#silent-legacy-outer-space .outer-movement-grid button[data-move='KeyW'] {grid-area:up;}
+#silent-legacy-outer-space .outer-movement-grid button[data-move='KeyA'] {grid-area:left;}
+#silent-legacy-outer-space .outer-movement-grid button[data-move='KeyS'] {grid-area:down;}
+#silent-legacy-outer-space .outer-movement-grid button[data-move='KeyD'] {grid-area:right;}
+#silent-legacy-outer-space .outer-movement-grid button:is(:hover,:focus-visible,.is-pressed) {
+  background:#234466;color:#fff;box-shadow:inset 0 0 0 2px #9adfff;
+}
+#silent-legacy-outer-space .outer-movement-grid button:focus-visible {outline:none;}
+#silent-legacy-outer-space .outer-surface[data-phase='boarding'] .outer-mission-comms,
+#silent-legacy-outer-space .outer-surface[data-phase='launch'] .outer-mission-comms {opacity:.88;}
+@media(max-width:600px){
+  #silent-legacy-outer-space .outer-mission-comms {
+    bottom:121px;left:10px;width:min(290px,calc(100% - 20px));
+    font-size:10px;padding:9px 11px;
+  }
+  #silent-legacy-outer-space .outer-movement-pad {right:10px;bottom:10px;}
+  #silent-legacy-outer-space dialog.outer-surface .outer-surface-head {padding:12px;}
+  #silent-legacy-outer-space .outer-surface h2 {font-size:20px;}
+  #silent-legacy-outer-space .outer-surface-status {max-width:28ch;}
+}

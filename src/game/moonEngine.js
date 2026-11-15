@@ -3,6 +3,7 @@ import {createLunarSurface} from './lunarSurface';
 import {createArtifactViewer} from './artifactViewer';
 import {createLandingSequence} from './landingSequence';
 
+
 /** Independent Moon exploration, astronaut, scan and jump lifecycle. */
 export function mountMoonEngine(surface, onClosed) {
   const terrain = surface.querySelector('.outer-terrain');
@@ -18,6 +19,7 @@ export function mountMoonEngine(surface, onClosed) {
       guide.hidden=true;
       lunar.paint();
     },
+    onDeploy(finish){lunar.deploy(finish);},
     onLanded(){controls.hidden=false;lunar.start();},
     beforeLeave(){controls.hidden=true;guide.hidden=true;},
     board(finish){lunar.board(finish);},

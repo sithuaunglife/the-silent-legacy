@@ -12,7 +12,6 @@ export default function Moon({active, onClosed}) {
   }, [onClosed]);
   useEffect(() => {if(active)engine.current?.land();},[active]);
   return <SurfaceShell world="moon" ref={dialogRef}>
-    <p className="outer-gallery-note">Interactive NASA artifact gallery · real resting sites are separate</p>
     <div className="outer-site-nav" aria-label="Choose lunar final resting site" role="group"></div>
     <div className="outer-field-guide" aria-label="Surface artifacts" role="group" hidden></div>
     <div className="outer-lunar-controls" hidden>

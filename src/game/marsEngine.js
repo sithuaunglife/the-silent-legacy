@@ -2,7 +2,8 @@ import { mars } from '../data/mars';
 import { ASTRONAUT_ATLAS_URL } from '../data/astronautSprite';
 import { ASTRONAUT_HEIGHT_METERS, SURFACE_HEIGHTS_METERS, surfaceSpriteUrl } from '../data/surfaceScale';
 import { createArtifactViewer } from './artifactViewer';
-import { createLandingSequence } from './landingSequence';
+import { createLandingSequence, setMissionDialogue } from './landingSequence';
+import { bindSurfaceMovement } from './surfaceControls';
 import { paintMarsTerrain } from './marsTerrain';
 
 /**
@@ -32,7 +33,6 @@ export function mountMarsEngine(surface, onClosed) {
   const scanned = new Set();
   const counters = surface.querySelector('.outer-lunar-scan-count');
   const controls = surface.querySelector('.outer-mars-controls');
-  const jumpButton = controls.querySelector('.outer-lunar-jump');
   const siteNav = surface.querySelector('.outer-site-nav');
   siteNav.hidden=true;
   const siteLabel = document.createElement('div');
@@ -55,6 +55,7 @@ export function mountMarsEngine(surface, onClosed) {
   const playable = () => surface.open && surface.dataset.phase === 'landed' && !archiveOpen();
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let rAF = 0;
+  let egressFrame = 0;
   let lastTime = 0;
 
   // Keep all machines in the same ground-plane perspective instead of floating
@@ -205,8 +206,17 @@ export function mountMarsEngine(surface, onClosed) {
   }
   function stop() {
     cancelAnimationFrame(rAF);rAF = 0;lastTime = 0;
+    cancelAnimationFrame(egressFrame);egressFrame = 0;
     keys.clear();player.target = null;
   }
+
+  bindSurfaceMovement(surface, keys, playable, key => {
+    const [dx, dy] = directions[key] || [0, 0];
+    player.target = null;
+    player.x = clamp(player.x + dx * 3, 6, 94);
+    player.y = clamp(player.y + dy * 2.5, 58, 91);
+    updatePerson();
+  }, events.signal);
 
   on(window, 'keydown', event => {
     if (!playable() || event.ctrlKey || event.altKey || event.metaKey || event.target?.matches?.('input,textarea,[contenteditable]')) return;
@@ -230,11 +240,18 @@ export function mountMarsEngine(surface, onClosed) {
     if (y > 55) player.target = { x: clamp(x, 6, 94), y: clamp(y, 58, 91) };
   });
 
-  const updateCounter = () => { counters.textContent = `Artifacts scanned ${scanned.size}/${mars.records.length}`; };
+  const updateCounter = () => {
+    counters.textContent = `Artifacts scanned ${scanned.size}/${mars.records.length}`;
+    if (surface.dataset.phase === 'landed' && scanned.size > 0) {
+      setMissionDialogue(surface, scanned.size === mars.records.length
+        ? 'All Martian artifacts scanned. Archive mission complete! Return to orbit whenever you are ready.'
+        : `Mars archive updated: ${scanned.size}/${mars.records.length} machines scanned. Continue exploring the remaining equipment.`,
+      scanned.size === mars.records.length ? 'complete' : 'ready');
+    }
+  };
   function updateSiteLabel() {
     siteLabel.textContent='Illustrative artifact gallery — actual resting sites are documented individually.';
   }
-  on(jumpButton,'click',()=>{if(playable()&&!player.jump)player.jump=.001;});
   const transitions = createLandingSequence({
     surface, world: mars, onClosed,
     beforeLand() {
@@ -244,6 +261,33 @@ export function mountMarsEngine(surface, onClosed) {
       updateSiteLabel();updateCounter();
       siteNav.hidden=true;siteLabel.hidden=true;controls.hidden=true;
       guide.hidden = true;field.hidden = true;
+    },
+    onDeploy(finish) {
+      guide.hidden = true;
+      field.hidden = false;
+      controls.hidden = true;
+      person.hidden = false;
+      player.x = 50;player.y = 68;player.facing = -1;
+      player.frame = 0;player.target = null;player.jump = 0;
+      updatePerson();
+      if (reducedMotion.matches) {
+        player.x = 25;player.y = 86;
+        updatePerson();finish();return;
+      }
+      let beginning = 0;
+      const walk = now => {
+        if (!surface.open || surface.dataset.phase !== 'deploy') {egressFrame=0;return;}
+        if (!beginning) beginning = now;
+        const t = Math.min(1, (now - beginning) / 1800);
+        const ease = t * t * (3 - 2 * t);
+        player.x = 50 + (25 - 50) * ease;
+        player.y = 68 + (86 - 68) * ease;
+        player.frame = t < 1 ? (now - beginning) / 25 : 0;
+        updatePerson();
+        if (t < 1) egressFrame = requestAnimationFrame(walk);
+        else {egressFrame=0;finish();}
+      };
+      egressFrame = requestAnimationFrame(walk);
     },
     onLanded() {
       guide.hidden=true;field.hidden=false;

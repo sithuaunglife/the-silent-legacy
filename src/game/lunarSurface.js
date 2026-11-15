@@ -11,6 +11,7 @@ import {
 } from '../data/surfaceScale';
 import { EARTH_DAY_TEXTURE } from '../data/pixelEquipment';
 import { siteFor } from '../data/missionSites';
+import { bindSurfaceMovement } from './surfaceControls';
 
 const HORIZON_Y = 290;
 const GROUND_MIN_Y = 308;
@@ -106,6 +107,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   let frame = 0;
   let lastTime = 0;
   let boarding;
+  let egress;
   let skyTime = 0;
   const astronaut = new Image();
   astronaut.decoding = 'async';
@@ -408,6 +410,29 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
         rock.bezierCurveTo(375+n*75,475,260+n*150,422,210+n*260,482);rock.stroke();
       }
     }
+    // Extra 2.5D lunar surface: small ejecta fields, jagged scree and layered seams.
+    // Seeded noise keeps textures stable across redraws and landing cycles.
+    let geologySeed = 40217;
+    const grain = () => { geologySeed = (1664525 * geologySeed + 1013904223) >>> 0; return geologySeed / 4294967296; };
+    for (let i = 0; i < 125; i++) {
+      const x = Math.round(12 + grain() * 940);
+      const y = Math.round(306 + grain() * 227);
+      const size = 1 + Math.round(grain() * (y > 430 ? 7 : 3));
+      rock.fillStyle = i % 4 ? '#343e52' : '#9ba7b8';
+      rock.fillRect(x, y, size + 2, 1);
+      rock.fillStyle = i % 3 ? '#717e95' : '#4a536a';
+      rock.fillRect(x + 1, y - 2, size, 2);
+      rock.fillStyle = '#202b3c';
+      rock.fillRect(x + size, y + 1, Math.max(2, size), 1);
+    }
+    for (let n = 0; n < 11; n++) {
+      const x = 18 + n * 89, y = 342 + ((n * 71) % 170);
+      rock.strokeStyle = n % 2 ? '#8795aa6b' : '#2530458c';
+      rock.lineWidth = 1 + (n % 3 === 0 ? 1 : 0);
+      rock.beginPath();rock.moveTo(x - 18, y);
+      rock.bezierCurveTo(x - 2, y - 3, x + 9, y + 4, x + 27, y + 1);
+      rock.stroke();
+    }
     // Equipment-specific surface history: landing scars and wheel tracks. These
     // remain behind the physical machinery, helping the sprites feel planted.
     if (site.style === 'rille') for(let n=0;n<2;n++){
@@ -531,10 +556,26 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   function tick(now) {
     frame = 0;
     if (archiveOpen()) { frame = requestAnimationFrame(tick); return; }
-    if (!playable() && !boarding) return;
+    if (!playable() && !boarding && !egress) return;
     const dt = lastTime ? Math.min((now - lastTime) / 1000, .05) : 0;
     lastTime = now;
     if (!reducedMotion.matches) skyTime += dt;
+    if (egress) {
+      egress.time += dt;
+      const t = Math.min(1, egress.time / egress.duration);
+      const ease = t * t * (3 - 2 * t);
+      player.x = shipHatch.x + (egress.endX - shipHatch.x) * ease;
+      player.y = shipHatch.y + (egress.endY - shipHatch.y) * ease;
+      player.facing = 1;
+      player.step = t < 1 ? egress.time * 55 : 0;
+      draw(true);
+      if (t >= 1) {
+        const finish = egress.finish;
+        egress = null;
+        finish();
+      } else frame = requestAnimationFrame(tick);
+      return;
+    }
     if (boarding) {
       boarding.time += dt;
       const t = Math.min(1, boarding.time / boarding.duration);
@@ -595,7 +636,17 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     keys.clear();
     target = null;
     boarding = null;
+    egress = null;
   }
+
+  bindSurfaceMovement(surface, keys, () => playable() && !archiveOpen(), key => {
+    const [dx, dy] = directions[key] || [0, 0];
+    target = null;
+    player.x = clamp(player.x + dx * 27, 25, 935);
+    player.y = clamp(player.y + dy * 22, GROUND_MIN_Y, GROUND_MAX_Y);
+    selectNearest();
+    draw(true);
+  }, listeners.signal);
 
   on(window, 'keydown', event => {
     if (!playable() || archiveOpen() || event.altKey || event.metaKey || event.ctrlKey) return;
@@ -656,6 +707,21 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       updateSiteLabel();
       paintLunarGround();
       draw(false);
+    },
+    deploy(finish) {
+      stop();
+      const endX = 680, endY = 458;
+      Object.assign(player, {x: shipHatch.x, y: shipHatch.y, facing: 1, step: 0, jumpTime: 0});
+      card.hidden = true;
+      if (reducedMotion.matches) {
+        player.x = endX; player.y = endY;
+        draw(true);
+        finish();
+      } else {
+        egress = {endX, endY, time: 0, duration: 1.8, finish};
+        draw(true);
+        frame = requestAnimationFrame(tick);
+      }
     },
     start() {
       Object.assign(player, { x: 680, y: 458, facing: -1, step: 0, jumpTime: 0 });

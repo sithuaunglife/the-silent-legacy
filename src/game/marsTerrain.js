@@ -177,6 +177,26 @@ export function paintMarsTerrain(canvas, world, siteId = 'sojourner') {
         ctx.fillRect(x,y,7,2);ctx.fillRect(x+2,y-2,3,1);
       }
     }
+    // Higher-frequency regolith detail: scalloped dust, fractured rock veins,
+    // shallow sediment ledges and wind-carved ripples (interpretive 2.5D art).
+    for (let i = 0; i < 155; i++) {
+      const x = Math.round(4 + random() * 432);
+      const y = Math.round(144 + random() * 112);
+      const span = 1 + Math.round(random() * (y > 205 ? 7 : 3));
+      ctx.fillStyle = i % 3 ? '#633b39' : '#dd9b70';
+      ctx.fillRect(x, y, span, 1);
+      ctx.fillStyle = i % 4 ? '#a86650' : '#ddaa81';
+      ctx.fillRect(x + 1, y - 2, Math.max(1, span - 1), 1);
+    }
+    for (let i = 0; i < 17; i++) {
+      const x = 18 + i * 25;
+      const y = 168 + ((i * 39) % 83);
+      ctx.strokeStyle = i % 2 ? '#533337' : '#c38c6d';
+      ctx.lineWidth = 1;
+      ctx.beginPath();ctx.moveTo(x - 9, y);
+      ctx.quadraticCurveTo(x + 3, y - 4, x + 17, y + 2);ctx.stroke();
+      ctx.fillStyle = '#3f2a31';ctx.fillRect(x + 11, y + 3, 7, 1);
+    }
     // Independent wheel ruts and landing-blast scars anchor the machines.
     ctx.strokeStyle='#754335';ctx.lineWidth=1;
     for(let n=0;n<2;n++){
