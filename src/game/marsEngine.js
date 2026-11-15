@@ -112,13 +112,11 @@ export function mountMarsEngine(surface, onClosed) {
     label.className = 'outer-mars-marker-label';
     label.textContent = `${record[1]} · ${heightM}m`;
     button.append(footprint, icon, label);
-    // Direct Click/Tap on every artifact opens its NASA record.
-    // Collecting still requires a deliberate Scan in the archive.
+    // Optional manual exploration: tapping a rover moves the astronaut to
+    // it. Collect All is a separate button, never a tap on the equipment.
     on(button, 'click', () => {
       if (!playable()) return;
-      player.target = null;
-      keys.clear();
-      viewer.show(mars.records[index], index);
+      player.target = {x: clamp(x + (player.x > x ? 4 : -4), 6, 94), y: clamp(y + (player.y > y ? 3 : -3), 58, 91)};
     });
     // Keep the preview current without creating one inspection button per item.
     on(icon, 'load', () => {
@@ -303,6 +301,17 @@ export function mountMarsEngine(surface, onClosed) {
     if (y > 55) player.target = { x: clamp(x, 6, 94), y: clamp(y, 58, 91) };
   });
 
+  on(window,'silent:mission-progress',event=>{
+    const ids=event.detail?.progress?.mars;
+    if(!Array.isArray(ids))return;
+    mars.records.forEach((record,index)=>{
+      if(!ids.includes(record[0]))return;
+      scanned.add(index);
+      markers[index]?.classList.add('is-collected');
+      markers[index]?.setAttribute('aria-label',record[1]+' — collected ✓');
+    });
+    updateCounter();
+  });
   const updateCounter = () => {
     counters.textContent = `Artifacts scanned ${scanned.size}/${mars.records.length}`;
     if (nearestIndex >= 0) cardHint.textContent = scanned.has(nearestIndex)

@@ -26,6 +26,19 @@ export function recordArtifactScan(world,id){
   window.dispatchEvent(new CustomEvent('silent:mission-progress',{detail}));
   return detail;
 }
+// One collection action per destination. Emit one progress event to trigger
+// the original Moon/Mars to Earth ending exactly once.
+export function collectAllArtifacts(world){
+  if(!(world in worlds))return null;
+  const progress=readMissionProgress();
+  progress[world]=worlds[world].records.map(record=>record[0]);
+  try{sessionStorage.setItem(STORE,JSON.stringify(progress));}catch{}
+  const totals=getMissionTotals();
+  const complete=Object.keys(totals).every(key=>progress[key].length===totals[key]);
+  const detail={world,id:null,progress,totals,complete,allCollected:true};
+  window.dispatchEvent(new CustomEvent('silent:mission-progress',{detail}));
+  return detail;
+}
 export function clearMissionProgress(){
   try{sessionStorage.removeItem(STORE);}catch{}
 }

@@ -11,6 +11,16 @@ export function mountMoonEngine(surface, onClosed) {
   let lunar;
   const viewer = createArtifactViewer('moon', () => lunar);
   lunar = createLunarSurface(surface, terrain, moon.records, viewer.show);
+  // Keep canvas labels/counts in sync when the world-level Collect All
+  // button records all four artifacts in one transaction.
+  const syncCollected=event=>{
+    const ids=event.detail?.progress?.moon;
+    if(!Array.isArray(ids))return;
+    moon.records.forEach((record,index)=>{
+      if(ids.includes(record[0]))lunar.markScanned(index);
+    });
+  };
+  window.addEventListener('silent:mission-progress',syncCollected);
   const transitions = createLandingSequence({
     surface, world:moon, onClosed,
     beforeLand(){
@@ -29,6 +39,6 @@ export function mountMoonEngine(surface, onClosed) {
   });
   return {
     land: transitions.land,
-    destroy(){transitions.destroy();lunar.destroy();viewer.destroy();},
+    destroy(){window.removeEventListener('silent:mission-progress',syncCollected);transitions.destroy();lunar.destroy();viewer.destroy();},
   };
 }

@@ -695,10 +695,10 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     });
     if (index !== -1) {
       const site = sites[index];
-      // Direct Click/Tap opens NASA details; Scan is needed to collect.
-      target = null;
-      keys.clear();
-      openArtifact(records[index], index);
+      // Tap is navigation only; the separate Collect All action records the
+      // full collection, without accidentally opening a record.
+      target = {x:site.x+(player.x>site.x?28:-28),
+        y:clamp(site.y+(player.y>site.y?14:-14),GROUND_MIN_Y,GROUND_MAX_Y)};
     } else if (y >= HORIZON_Y) {
       const groundY = clamp(y, GROUND_MIN_Y, GROUND_MAX_Y);
       const horizontalScale = (groundPoint({ x: 960, y: groundY }).x - 480) / 480;

@@ -1,8 +1,23 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
+import { collectAllArtifacts, getMissionTotals, readMissionProgress } from '../game/missionProgress.js';
 import '../styles/surface.css';
 
 /** Shared visual landing frame; each world supplies its own exploration UI and engine. */
 const SurfaceShell = forwardRef(function SurfaceShell({ world, children, soundEnabled, onSoundToggle, language }, ref) {
+  const totals=getMissionTotals();
+  const [collected,setCollected]=useState(()=>readMissionProgress()[world].length);
+  useEffect(()=>{
+    const update=event=>{
+      if(event.detail?.progress?.[world])setCollected(event.detail.progress[world].length);
+    };
+    window.addEventListener('silent:mission-progress',update);
+    return()=>window.removeEventListener('silent:mission-progress',update);
+  },[world]);
+  const collect=()=>{
+    if(ref?.current?.dataset.phase!=='landed'||collected>=totals[world])return;
+    const result=collectAllArtifacts(world);
+    if(result)setCollected(result.progress[world].length);
+  };
   return <>
     <dialog ref={ref} className="outer-surface" data-world={world} aria-labelledby={`surface-title-${world}`}>
       <button type="button" className="outer-surface-sound" onClick={onSoundToggle}
@@ -20,6 +35,13 @@ const SurfaceShell = forwardRef(function SurfaceShell({ world, children, soundEn
         <p className="outer-surface-status" aria-live="polite"></p>
       </div><button className="outer-return cursor-interaction" type="button" disabled>Return to orbit</button></header>
       {children}
+      <button type="button" className="outer-collect-all cursor-interaction"
+        onClick={collect} disabled={collected>=totals[world]}
+        aria-label={language==='my'?(world==='moon'?'လ':'အင်္ဂါဂြိုလ်')+' စက်ပစ္စည်းအားလုံး စုဆောင်းရန်':'Collect all '+world+' artifacts'}>
+        {collected>=totals[world]
+          ? '✓ '+(language==='my'?'အားလုံးစုဆောင်းပြီး':'COLLECTED')+' '+collected+'/'+totals[world]
+          : '✦ '+(language==='my'?'အားလုံးစုဆောင်းရန်':'COLLECT ALL')+' '+totals[world]+'/'+totals[world]}
+      </button>
       <section className="outer-mission-dialogue" aria-label="Mission communication" role="status" aria-live="polite" aria-atomic="true" hidden>
         <div className="outer-mission-dialogue-icon" aria-hidden="true"><i /></div>
         <div className="outer-mission-dialogue-text">

@@ -407,3 +407,30 @@
    width:clamp(112px,29vw,138px)
  }
 }
+
+/* Collect-all action stays clear of centered WASD, scan counter and audio. */
+#silent-legacy-outer-space .outer-surface .outer-collect-all{
+ position:absolute;left:clamp(12px,2vw,24px);
+ bottom:clamp(88px,14vh,116px);z-index:1110;
+ padding:11px 16px;min-height:43px;
+ border:1px solid #65c6e6;border-radius:6px;
+ background:linear-gradient(135deg,#0e3850f2,#071a30f4);
+ color:#cef6ff;box-shadow:0 0 20px #2099d13b,inset 0 -2px #04111c;
+ font:700 12px/1.4 'Padauk',monospace;
+ letter-spacing:.025em;cursor:pointer;touch-action:manipulation;
+}
+#silent-legacy-outer-space .outer-surface .outer-collect-all:hover:not(:disabled){
+ border-color:#b9f9ff;background:#155173;
+}
+#silent-legacy-outer-space .outer-surface .outer-collect-all:disabled{
+ color:#91edb4;border-color:#47956c;opacity:.9;cursor:default;
+}
+#silent-legacy-outer-space .outer-surface:not([data-phase='landed']) .outer-collect-all{display:none}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-collect-all{
+ border-color:#d68c67;background:linear-gradient(135deg,#572b28f3,#261620f4);color:#ffdbba;
+}
+@media(max-width:600px){
+ #silent-legacy-outer-space .outer-surface .outer-collect-all{
+  left:9px;bottom:93px;min-height:37px;padding:8px 10px;font-size:10px;
+ }
+}
