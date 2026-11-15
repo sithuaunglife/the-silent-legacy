@@ -78,6 +78,12 @@ export function createLandingSequence({surface, world, beforeLand, onLanded, bef
     communicationTitle.textContent=renderMissionText(heading);
     communicationBody.textContent=renderMissionText(message);
     communication.hidden = false;
+    if (heading !== 'DESCENT IN PROGRESS' && heading !== 'FINAL APPROACH') {
+      window.dispatchEvent(new CustomEvent('silent:story-sfx',{detail:{
+        type: heading==='TOUCHDOWN CONFIRMED'?'touchdown':
+              heading==='RETURN TO ORBIT'?'liftoff':'mission'
+      }}));
+    }
     if(holdMs > 0) noticeTimeout = setTimeout(() => {if(!disposed) hideNotice();}, holdMs);
   }
   const bodyName = world.id === 'moon' ? 'lunar' : 'Martian';

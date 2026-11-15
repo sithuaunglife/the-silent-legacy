@@ -745,13 +745,8 @@ export function mountOuterSpaceEngine(root, { onLand }) {
       detail: { world: 'interstellar', id: 'voyager1' }
     }));
   };
-  on(ship, 'click', () => { if (ship.hasAttribute('data-ship-dragged')) return; inspectVoyager(); });
-  on(ship, 'keydown', event => {
-    if (event.code === 'Enter' || event.code === 'Space') {
-      event.preventDefault();
-      inspectVoyager();
-    }
-  });
+  // The player's ship is a navigation sprite, not an archive trigger.
+  // Only the separate Voyager probe opens the historical record.
   // The existing Voyager probe marker may also be used; no page is opened automatically.
   on(probe, 'click', inspectVoyager);
   on(record, 'close', startLoop);

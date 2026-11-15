@@ -504,7 +504,7 @@
   .crt-vignette{box-shadow:inset 0 0 65px #010714a8;border-radius:0}
   .hud-top{font-family:ui-monospace,'VT323',monospace}
   .hud-badge{background:#06172acc;border:1px solid #558db5}
-  .origin-selector,#btn-download-zip,#btn-skip,#btn-replay,#btn-switch-origin{display:none!important}
+  .origin-selector,#btn-download-zip,#btn-skip,#btn-replay,#btn-switch-origin,#btn-continue,#btn-audio{display:none!important}
   .victory-card{
     background:linear-gradient(155deg,#081d32f5,#040c1af7);
     border:2px solid #5eb7e2;border-radius:12px;
@@ -780,7 +780,9 @@
       class RetroAudioEngine {
         constructor() {
           this.ctx = null;
-          this.enabled = true;
+          // All ending audio is controlled by the global parent sound
+          // toggle. Avoid an independent iframe AudioContext/duplicate sounds.
+          this.enabled = false;
           this.fanfarePlayed = false;
           this.noiseBuffer = null;
         }
@@ -989,6 +991,54 @@
       // ------------------------------------------------------------------------
       // ENDING SEQUENCE STATE MACHINE & SCENE ENTITIES
       // ------------------------------------------------------------------------
+      const langMy=new URLSearchParams(window.location.search).get('lang')==='my';
+      const endingMy={
+        'STORY COMPLETE':'ဇာတ်လမ်း ပြီးဆုံးပါပြီ',
+        '★ SILENT LEGACY — ENDING ★':'★ THE SILENT LEGACY — နိဂုံး ★',
+        'MISSION ORIGIN':'ပြန်လာသည့် ဂြိုလ်',
+        'SPLASHDOWN ZONE':'ကမ္ဘာပေါ် ဆင်းသက်ရာနေရာ',
+        'LEGACY DATA CORE':'သမိုင်းဝင် မှတ်တမ်းများ',
+        'PILOT RANK':'အာကာသယာဉ်မှူး အဆင့်',
+        'PACIFIC OCEAN (14°N)':'ပစိဖိတ် သမုဒ္ဒရာ',
+        '100% RECOVERED':'၁၀၀% ပြန်လည် ရရှိပြီ',
+        '★ S-CLASS LEGEND ★':'★ မစ်ရှင်အောင်မြင် ★',
+        'LUNA BASE (MOON)':'လ',
+        'ARES SECTOR (MARS)':'အင်္ဂါဂြိုလ်',
+        '↻ RESTART STORY':'↻ ဇာတ်လမ်း ပြန်စရန်',
+        'SCENE 2/3 // DEEP SPACE TRANSIT':'အပိုင်း ၂/၃ // အာကာသခရီး',
+        'SCENE 3/3 // EARTH SPLASHDOWN':'အပိုင်း ၃/၃ // ကမ္ဘာသို့ ပြန်ရောက်ခြင်း',
+        '[SCENE 2/3] INTERPLANETARY CRUISE — MARS TO EARTH TRAJECTORY':'[အပိုင်း ၂/၃] အင်္ဂါဂြိုလ်မှ ကမ္ဘာသို့ ပြန်လာနေသည်',
+        '[SCENE 2/3] TRANSLUNAR INJECTION — RETURNING TO EARTH ORBIT':'[အပိုင်း ၂/၃] လမှ ကမ္ဘာသို့ ပြန်လာနေသည်',
+        '[SCENE 3/3] ATMOSPHERIC RE-ENTRY — HEAT SHIELD ENGAGED':'[အပိုင်း ၃/၃] ကမ္ဘာ့လေထုအတွင်း ပြန်လည် ဝင်ရောက်နေသည်',
+        '[SCENE 3/3] MAIN PARACHUTE DEPLOYED — DESCENT STABILIZED':'[အပိုင်း ၃/၃] လေထီးဖွင့်ပြီး ဆင်းသက်နေသည်',
+        '[SCENE 3/3] SPLASHDOWN CONFIRMED — PACIFIC OCEAN RECOVERY':'[အပိုင်း ၃/၃] ပစိဖိတ်သမုဒ္ဒရာပေါ် ဆင်းသက်ပြီး',
+        'SOUND: ON':'အသံ: ဖွင့်',
+        'SOUND: OFF':'အသံ: ပိတ်'
+      };
+      function localEndingText(text){
+        if(!langMy)return text;
+        if(endingMy[text])return endingMy[text];
+        if(text.startsWith('EARTH DIST:'))return text.replace('EARTH DIST:','ကမ္ဘာသို့ အကွာအဝေး:');
+        if(text.startsWith('ALT:'))return text.replace('ALT:','အမြင့်:').replace('VEL:','အလျင်:').replace('STATUS:','အခြေအနေ:');
+        return text;
+      }
+      function localizeEnding(){
+        if(!langMy)return;
+        const ids=['scene-badge-text','phase-banner','stat-origin-val','btn-audio','btn-continue'];
+        const els=[...ids.map(id=>document.getElementById(id)),...document.querySelectorAll('.game-title-tag,.mission-complete-header,.stat-label,.stat-value')];
+        for(const el of els)if(el){
+          const text=el.textContent.trim();
+          const translated=localEndingText(text);
+          if(translated!==text)el.textContent=translated;
+        }
+        const tele=document.getElementById('telemetry-readout')?.firstElementChild;
+        if(tele){
+          const text=tele.textContent;
+          const translated=localEndingText(text);
+          if(translated!==text)tele.textContent=translated;
+        }
+      }
+
       const ORIGINS = {
         MOON: 'MOON',
         MARS: 'MARS'
@@ -1008,8 +1058,11 @@
       };
 
       function getCongratsMessage(origin) {
-        const place = origin === ORIGINS.MARS ? 'MARS' : 'THE MOON';
-        return `CONGRATULATIONS! YOU HAVE COMPLETED THE TASK. AFTER DEPARTING ${place}, THE ASTRONAUT HAS SAFELY LANDED IN EARTH'S PACIFIC OCEAN. SILENT LEGACY RESTORED.`;
+        if(langMy)return 'မစ်ရှင် အောင်မြင်စွာ ပြီးဆုံးပါပြီ။ လနှင့် အင်္ဂါဂြိုလ်ပေါ်ရှိ စက်ပစ္စည်း ၉ ခုလုံးကို စကန်ဖတ်ပြီး မှတ်တမ်းတင်နိုင်ခဲ့ပါသည်။ '+
+          (origin===ORIGINS.MARS?'အင်္ဂါဂြိုလ်':'လ')+
+          'မှ ပြန်လာသော အာကာသယာဉ်မှူးသည် ကမ္ဘာမြေပေါ်သို့ ဘေးကင်းစွာ ပြန်လည်ရောက်ရှိခဲ့ပါပြီ။ THE SILENT LEGACY သမိုင်းကို ဆက်လက် ထိန်းသိမ်းနိုင်ခဲ့ပါပြီ။';
+        const place=origin===ORIGINS.MARS?'MARS':'THE MOON';
+        return 'MISSION COMPLETE! ALL EQUIPMENT ON THE MOON AND MARS HAS BEEN SCANNED. DEPARTING '+place+', THE ASTRONAUT HAS SAFELY RETURNED TO EARTH. THE SILENT LEGACY LIVES ON.';
       }
 
       // Support optional URL query (?origin=mars or ?origin=moon)
@@ -1229,6 +1282,7 @@
 
         if (newScene === SCENES.SPACE_TRANSIT) {
           state.transit.progress = 0;
+          window.parent.postMessage({type:'silent-ending-sfx',sound:'orbit'},window.location.origin);
           sceneBadgeEl.textContent = 'SCENE 2/3 // DEEP SPACE TRANSIT';
           phaseBannerEl.classList.remove('hidden');
           phaseBannerEl.textContent =
@@ -1246,6 +1300,7 @@
           state.ship.chuteOpen = 0;
           state.ship.chuteDeflate = 0;
           state.ship.inWater = false;
+          window.parent.postMessage({type:'silent-ending-sfx',sound:'mission'},window.location.origin);
 
           sceneBadgeEl.textContent = 'SCENE 3/3 // EARTH SPLASHDOWN';
           phaseBannerEl.classList.remove('hidden');
@@ -1291,6 +1346,7 @@
         } else if (newPhase === PHASES.SPLASHDOWN) {
           phaseBannerEl.textContent = '[SCENE 3/3] SPLASHDOWN CONFIRMED — PACIFIC OCEAN RECOVERY';
           audio.playSplashdown();
+          window.parent.postMessage({type:'silent-ending-sfx',sound:'touchdown'},window.location.origin);
           state.shakeTime = 0.38;
           state.shakeMag = 3.5;
           spawnSplashdownEffects(state.ship.x, state.ship.y);
@@ -1883,6 +1939,18 @@
       // ------------------------------------------------------------------------
       // SCENE 2 RENDERER: DEEP SPACE TRANSIT FROM MOON/MARS TO EARTH
       // ------------------------------------------------------------------------
+      const orbitPlanetArt={moon:new Image(),mars:new Image(),earth:new Image()};
+      orbitPlanetArt.moon.src='../assets/archive-inline-0.png';
+      orbitPlanetArt.mars.src='../assets/archive-inline-3.png';
+      orbitPlanetArt.earth.src='../assets/archive-inline-2.png';
+      function drawOrbitPlanet(image,x,y,r,fallback){
+        ctx.save();
+        ctx.shadowColor='rgba(61,158,228,.24)';ctx.shadowBlur=Math.min(22,r*.23);
+        if(image.complete&&image.naturalWidth){
+          ctx.imageSmoothingEnabled=false;ctx.drawImage(image,x-r,y-r,r*2,r*2);
+        }else{ctx.fillStyle=fallback;drawPixelCircle(x,y,r);}
+        ctx.restore();
+      }
       function drawScene2SpaceTransit() {
         const isMoon = state.origin === ORIGINS.MOON;
         const p = state.transit.progress;
@@ -1905,43 +1973,13 @@
           ctx.fillRect(Math.round(st.x), Math.round(st.y), st.size, st.size);
         });
 
-        // Departed Origin Body shrinking on the left (Moon or Mars)
-        const originRadius = Math.max(4, Math.round(28 * (1 - p * 0.85)));
-        const originX = Math.round(VW * 0.14 - p * 30);
-        const originY = Math.round(VH * 0.62);
-        if (originX + originRadius > 0) {
-          ctx.fillStyle = isMoon ? '#94a3b8' : '#ea580c';
-          drawPixelCircle(originX, originY, originRadius);
-          ctx.fillStyle = isMoon ? '#64748b' : '#9a3412';
-          drawPixelCircle(originX + Math.floor(originRadius * 0.25), originY - Math.floor(originRadius * 0.2), Math.max(2, Math.floor(originRadius * 0.35)));
-        }
-
-        // Approaching Earth growing vividly on the right!
-        const earthRadius = Math.round(14 + p * 34);
-        const earthX = Math.round(VW * 0.84);
-        const earthY = Math.round(VH * 0.48);
-
-        // Atmospheric blue halo
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
-        drawPixelCircle(earthX, earthY, earthRadius + 6);
-        ctx.fillStyle = '#0284c7';
-        drawPixelCircle(earthX, earthY, earthRadius);
-
-        // Pixel Continents & White Cloud Swirls on Earth
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(earthX, earthY, earthRadius, 0, Math.PI * 2);
-        ctx.clip();
-
-        ctx.fillStyle = '#22c55e';
-        const shift = Math.round(p * 10);
-        ctx.fillRect(earthX - Math.floor(earthRadius * 0.5) - shift, earthY - Math.floor(earthRadius * 0.4), Math.floor(earthRadius * 0.7), Math.floor(earthRadius * 0.55));
-        ctx.fillRect(earthX + 2 - shift, earthY + 2, Math.floor(earthRadius * 0.65), Math.floor(earthRadius * 0.6));
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.fillRect(earthX - earthRadius, earthY - Math.floor(earthRadius * 0.65), earthRadius * 2, Math.max(2, Math.floor(earthRadius * 0.16)));
-        ctx.fillRect(earthX - Math.floor(earthRadius * 0.6), earthY + Math.floor(earthRadius * 0.35), Math.floor(earthRadius * 1.4), Math.max(2, Math.floor(earthRadius * 0.14)));
-        ctx.restore();
+        // Re-use the 2.5D orbital planet artwork instead of placeholder circles.
+        const originRadius=Math.max(5,Math.round(45*(1-p*.78)));
+        const originX=Math.round(VW*.16-p*35);
+        const originY=Math.round(VH*.62);
+        drawOrbitPlanet(isMoon?orbitPlanetArt.moon:orbitPlanetArt.mars,originX,originY,originRadius,isMoon?'#aab6c7':'#ac5a39');
+        const earthRadius=Math.round(28+p*76);
+        drawOrbitPlanet(orbitPlanetArt.earth,Math.round(VW*.84),Math.round(VH*.46),earthRadius,'#165c9f');
 
         // Passing Pixel Asteroids
         state.transit.asteroids.forEach(ast => {
@@ -1962,7 +2000,7 @@
         // Cruising Spaceship pointed right toward Earth
         const shipX = Math.round(VW * (0.22 + p * 0.52));
         const shipY = Math.round(VH * 0.52 - Math.sin(p * Math.PI) * 26);
-        drawSpacecraftSprite(shipX, shipY, Math.PI * 0.5, true);
+        drawSpacecraftSprite(shipX, shipY, 0, true, true);
       }
 
       // ------------------------------------------------------------------------
@@ -2002,18 +2040,19 @@
         ctx.drawImage(image,-w/2,-h/2,w,h);
         ctx.restore();
       }
-      function drawSpacecraftSprite(sx,sy,angle,thrusterOn) {
+      function drawSpacecraftSprite(sx,sy,angle,thrusterOn,cruising=false) {
         ctx.save();
         ctx.translate(sx,sy);
         ctx.rotate(angle);
+        if(cruising)ctx.scale(-1,1); // mirrored return ship, not a 90-degree flip
         if(thrusterOn){
           const flicker=Math.sin(state.time*47)*3;
           ctx.fillStyle='#58d3ff';
-          ctx.fillRect(-5,11,10,10+flicker);
+          ctx.fillRect(cruising?12:-5,cruising?-4:11,cruising?12:10,cruising?7:10+flicker);
           ctx.fillStyle='#d6fbff';
-          ctx.fillRect(-2,10,4,5+flicker*.4);
+          ctx.fillRect(cruising?12:-2,cruising?-2:10,cruising?7:4,cruising?4:5+flicker*.4);
         }
-        paintStoryShip(angle===0?storyShip.vertical:storyShip.transit,21,26);
+        paintStoryShip(cruising?storyShip.transit:storyShip.vertical,cruising?29:21,cruising?21:26);
         ctx.restore();
       }
 
@@ -2359,6 +2398,7 @@
         }
 
         renderCRTShader(state.time);
+        localizeEnding();
         requestAnimationFrame(gameLoop);
       }
 

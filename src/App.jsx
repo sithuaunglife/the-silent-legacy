@@ -9,6 +9,7 @@ import './styles/sceneTransition.css';
 import { localizeInterface } from './i18n';
 import { readMissionProgress, clearMissionProgress, getMissionTotals } from './game/missionProgress';
 import './styles/ending.css';
+import { isStoryAudioEnabled, setStoryAudioEnabled, unlockStoryAudio, storySound } from './game/storyAudio';
 
 /** One React modal is shared by the Moon and Mars exploration engines. */
 export default function App(){
@@ -37,6 +38,31 @@ export default function App(){
   });
   const [storyProgress,setStoryProgress]=useState(readMissionProgress);
   const [endingFinished,setEndingFinished]=useState(false);
+  const [soundEnabled,setSoundEnabled]=useState(isStoryAudioEnabled);
+  const onSoundToggle=useCallback(()=>{
+    const next=!soundEnabled;
+    setStoryAudioEnabled(next);
+    setSoundEnabled(next);
+    if(next)unlockStoryAudio();
+    storySound('button');
+  },[soundEnabled]);
+  useEffect(()=>{
+    const unlock=()=>{unlockStoryAudio();};
+    window.addEventListener('pointerdown',unlock,{capture:true});
+    window.addEventListener('keydown',unlock,{capture:true});
+    return()=>{
+      window.removeEventListener('pointerdown',unlock,{capture:true});
+      window.removeEventListener('keydown',unlock,{capture:true});
+    };
+  },[]);
+  useEffect(()=>{
+    const cue=(event)=>{
+      if(event.detail?.type)storySound(event.detail.type);
+    };
+    window.addEventListener('silent:story-sfx',cue);
+    return()=>window.removeEventListener('silent:story-sfx',cue);
+  },[]);
+
   useEffect(()=>()=>{
     window.clearTimeout(handoffTimer.current);
     window.clearTimeout(returnTimer.current);
@@ -95,6 +121,7 @@ export default function App(){
       const detail=event.detail;
       if(!detail)return;
       setStoryProgress(detail.progress);
+      storySound('scan');
       if(!detail.complete || returnPending.current || endingOrigin)return;
       returnPending.current=true;
       const finalWorld=detail.world;
@@ -135,8 +162,11 @@ export default function App(){
   useEffect(()=>{
     const onRestart=event=>{
       if(event.origin!==window.location.origin)return;
-      if(event.data?.type==='silent-ending-complete'){
+      if(event.data?.type==='silent-ending-sfx' && ['orbit','touchdown','mission'].includes(event.data.sound)){
+        storySound(event.data.sound);
+      }else if(event.data?.type==='silent-ending-complete'){
         setEndingFinished(true);
+        storySound('victory');
       }else if(event.data?.type==='silent-ending-restart')restartStory();
     };
     window.addEventListener('message',onRestart);
@@ -153,6 +183,7 @@ export default function App(){
     window.clearTimeout(handoffTimer.current);
     handoffTimer.current=window.setTimeout(()=>{
       setLaunchComplete(true);
+      storySound('orbit');
       try{window.sessionStorage.setItem('silent:stage','orbit')}catch{}
     },1800);
   },[launchTransition]);
@@ -181,16 +212,26 @@ export default function App(){
   const toggleLanguage=useCallback(()=>setLanguage(current=>current==='en'?'my':'en'),[]);
 
   return <>
+    {!world && <button className="mission-sound-toggle" type="button" onClick={onSoundToggle}
+      aria-label={soundEnabled?'Mute story sounds':'Enable story sounds'}
+      aria-pressed={soundEnabled}>
+      {soundEnabled?'🔊':'🔇'} {language==='my'?'အသံ':'SOUND'} {soundEnabled?'ON':'OFF'}
+    </button>}
     {(launchComplete || launchTransition) && <main
       id="silent-legacy-outer-space"
       className="scene-space scene-space--visible"
     >
     <OuterSpace onLand={land} language={language}
       onLanguageToggle={toggleLanguage} onBackStart={backToStart}>
-      <Moon active={world==='moon'} onClosed={close}/>
-      <Mars active={world==='mars'} onClosed={close}/>
+      <Moon active={world==='moon'} onClosed={close} soundEnabled={soundEnabled} onSoundToggle={onSoundToggle} language={language}/>
+      <Mars active={world==='mars'} onClosed={close} soundEnabled={soundEnabled} onSoundToggle={onSoundToggle} language={language}/>
     </OuterSpace>
     <dialog ref={archiveRef} onCancel={e=>{e.preventDefault();closeArchive();}} className="archive-shell">
+      {selection&&<button className="archive-sound-toggle" type="button"
+        onClick={onSoundToggle} aria-label={soundEnabled?'Mute story sounds':'Enable story sounds'}
+        aria-pressed={soundEnabled}>
+        {soundEnabled?'🔊':'🔇'} {language==='my'?'အသံ':'SOUND'} {soundEnabled?'ON':'OFF'}
+      </button>}
       {selection&&<ArchiveDashboard selection={selection} onClose={closeArchive}
         language={language} onLanguageChange={setLanguage}/>}
     </dialog>
@@ -203,7 +244,7 @@ export default function App(){
     )}
     {endingOrigin && (
       <section className="story-ending" aria-label="Story ending — returning to Earth" role="region">
-        <iframe src={`/ending/index.html?origin=${endingOrigin}&start=transit`}
+        <iframe src={`/ending/index.html?origin=${endingOrigin}&start=transit&lang=${language}`}
           title="The Silent Legacy — Return to Earth and Story Complete"
           allow="autoplay" />
         {endingFinished && <button className="story-ending-restart" type="button" onClick={restartStory}>

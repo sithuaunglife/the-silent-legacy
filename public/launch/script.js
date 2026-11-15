@@ -1350,7 +1350,7 @@
     function updatePhysics(dt) {
       MISSION.time += dt;
       frameCounter++;
-      const padX = LOGICAL_W * 0.5;
+      const padX = 248;
       const padY = LOGICAL_H - 96;
       MISSION.shipAngle = -Math.PI / 2;
       if (MISSION.phase === 'PAD') {
@@ -1578,10 +1578,15 @@
         const next=event.data.language==='my'?'my':'en';
         if(next!==currentLang)toggleLanguage();
       }
+      if(event.data?.type==='silent-audio'){
+        const next=Boolean(event.data.enabled);
+        if(next!==sfxEnabled)toggleAudio();
+      }
     });
     // Initialize Everything on Window Load
     window.onload = function () {
       resizeCanvas();
       resetSimulation();
       requestAnimationFrame(renderFrame);
+      window.parent.postMessage({type:'silent-launch-ready'},window.location.origin);
     };

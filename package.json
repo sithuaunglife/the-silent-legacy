@@ -17,7 +17,8 @@
     "test:launch": "node scripts/test-launch-spaceplane.mjs",
     "test:navigation": "node scripts/test-navigation.mjs",
     "test:start": "node scripts/test-start-screen.mjs",
-    "test:ending": "node scripts/test-story-ending.mjs"
+    "test:ending": "node scripts/test-story-ending.mjs",
+    "test:polish": "node scripts/test-story-polish.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

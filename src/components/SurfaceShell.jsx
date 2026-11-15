@@ -2,9 +2,14 @@ import React, { forwardRef } from 'react';
 import '../styles/surface.css';
 
 /** Shared visual landing frame; each world supplies its own exploration UI and engine. */
-const SurfaceShell = forwardRef(function SurfaceShell({ world, children }, ref) {
+const SurfaceShell = forwardRef(function SurfaceShell({ world, children, soundEnabled, onSoundToggle, language }, ref) {
   return <>
     <dialog ref={ref} className="outer-surface" data-world={world} aria-labelledby={`surface-title-${world}`}>
+      <button type="button" className="outer-surface-sound" onClick={onSoundToggle}
+        aria-pressed={Boolean(soundEnabled)}
+        aria-label={soundEnabled?'Mute story sounds':'Enable story sounds'}>
+        {soundEnabled?'🔊':'🔇'} {language==='my'?'အသံ':'SOUND'} {soundEnabled?'ON':'OFF'}
+      </button>
       <canvas className="outer-terrain" aria-hidden="true" width="440" height="260" />
       <div className="outer-entry-effects" aria-hidden="true"></div>
       <i className="outer-landing-shadow" aria-hidden="true"></i>
@@ -30,6 +35,8 @@ const SurfaceShell = forwardRef(function SurfaceShell({ world, children }, ref) 
         <button className="outer-direction-down" type="button" data-move="KeyS" aria-label="Move down">S</button>
         <button className="outer-direction-right" type="button" data-move="KeyD" aria-label="Move right">D</button>
       </nav>
+      {world==='mars'&&<button type="button" className="outer-mars-jump" aria-keyshortcuts="Space" aria-label="Jump on Mars">SPACE · JUMP</button>}
+
     </dialog>
 
   </>;

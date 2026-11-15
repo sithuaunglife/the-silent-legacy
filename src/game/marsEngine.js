@@ -273,6 +273,8 @@ export function mountMarsEngine(surface, onClosed) {
     crewEgress = null;
   }
 
+  const marsJump=surface.querySelector('.outer-mars-jump');
+  on(marsJump,'click',()=>{if(playable()&&!player.jump)player.jump=.001;});
   on(window, 'keydown', event => {
     if (!playable() || event.ctrlKey || event.altKey || event.metaKey || event.target?.matches?.('input,textarea,[contenteditable]')) return;
     if (event.code === 'Space') {

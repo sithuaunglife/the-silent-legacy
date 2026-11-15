@@ -3,7 +3,7 @@ import SurfaceShell from './SurfaceShell';
 import {mountMarsEngine} from '../game/marsEngine';
 import '../styles/mars.css';
 
-export default function Mars({active,onClosed}) {
+export default function Mars({active,onClosed,soundEnabled,onSoundToggle,language}) {
   const dialogRef=useRef(null);
   const engine=useRef(null);
   useEffect(()=>{
@@ -11,7 +11,7 @@ export default function Mars({active,onClosed}) {
     return ()=>{engine.current?.destroy();engine.current=null;};
   },[onClosed]);
   useEffect(()=>{if(active)engine.current?.land();},[active]);
-  return <SurfaceShell world="mars" ref={dialogRef}>
+  return <SurfaceShell world="mars" ref={dialogRef} soundEnabled={soundEnabled} onSoundToggle={onSoundToggle} language={language}>
     <div className="outer-site-nav" aria-label="Choose Martian final resting site" role="group"></div>
     <div className="outer-lunar-controls outer-mars-controls" hidden>
       <p className="outer-lunar-scan-count" aria-live="polite"></p>

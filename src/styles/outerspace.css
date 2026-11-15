@@ -321,3 +321,30 @@ html{background:#000}body{margin:0}
  #silent-legacy-outer-space .outer-pad{bottom:max(10px,env(safe-area-inset-bottom));right:9px;grid-template-columns:repeat(3,32px);gap:3px}
  #silent-legacy-outer-space .outer-pad button{width:32px;height:32px}
 }
+
+/* Center the orbital WASD pad, away from fullscreen at lower-right. */
+#silent-legacy-outer-space .outer-scene > .outer-pad{
+ left:50%!important;right:auto!important;
+ bottom:max(14px,env(safe-area-inset-bottom))!important;
+ transform:translateX(-50%);
+ z-index:10;
+}
+#silent-legacy-outer-space .outer-controls{
+ right:max(16px,env(safe-area-inset-right))!important;
+ bottom:max(22px,env(safe-area-inset-bottom))!important;
+ z-index:11;
+}
+#silent-legacy-outer-space .outer-ship{
+ cursor:default!important;pointer-events:none!important;
+}
+#silent-legacy-outer-space .outer-ship:hover .outer-ship-angle{
+ filter:none!important;
+}
+@media(max-width:600px){
+ #silent-legacy-outer-space .outer-scene > .outer-pad{
+  left:50%!important;right:auto!important;bottom:max(12px,env(safe-area-inset-bottom))!important;
+ }
+ #silent-legacy-outer-space .outer-controls{
+  bottom:76px!important;right:10px!important;
+ }
+}

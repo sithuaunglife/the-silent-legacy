@@ -210,3 +210,18 @@
 #silent-legacy-outer-space .outer-surface[data-world='mars'] {width:100dvw;height:100dvh;max-width:none;max-height:none;border:0;margin:0;}
 #silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card{max-width:153px;min-height:36px;padding:3px 7px 3px 3px;box-shadow:0 2px 0 #120d18aa;border-width:1px;}
 @media(max-width:600px){#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card{max-width:125px;min-height:33px;}}
+
+/* Mars provides Space/Jump alongside the centered WASD controls. */
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-jump{
+ position:absolute;bottom:max(18px,env(safe-area-inset-bottom));
+ left:calc(50% + 96px);z-index:1100;min-width:85px;
+ height:38px;color:#ffdec0;border:1px solid #e3a57e;
+ background:#251725ea;border-radius:4px;
+ font:600 11px/1.2 monospace;cursor:pointer;touch-action:manipulation;
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars']:not([data-phase='landed']) .outer-mars-jump{display:none}
+@media(max-width:600px){
+ #silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-jump{
+ left:calc(50% + 77px);min-width:72px;font-size:9px;
+ }
+}

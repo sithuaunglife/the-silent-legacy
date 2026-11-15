@@ -3,7 +3,7 @@ import SurfaceShell from './SurfaceShell';
 import {mountMoonEngine} from '../game/moonEngine';
 import '../styles/moon.css';
 
-export default function Moon({active, onClosed}) {
+export default function Moon({active,onClosed,soundEnabled,onSoundToggle,language}) {
   const dialogRef = useRef(null);
   const engine = useRef(null);
   useEffect(() => {
@@ -11,7 +11,7 @@ export default function Moon({active, onClosed}) {
     return () => {engine.current?.destroy();engine.current=null;};
   }, [onClosed]);
   useEffect(() => {if(active)engine.current?.land();},[active]);
-  return <SurfaceShell world="moon" ref={dialogRef}>
+  return <SurfaceShell world="moon" ref={dialogRef} soundEnabled={soundEnabled} onSoundToggle={onSoundToggle} language={language}>
     <div className="outer-site-nav" aria-label="Choose lunar final resting site" role="group"></div>
     <div className="outer-field-guide" aria-label="Surface artifacts" role="group" hidden></div>
     <div className="outer-lunar-controls" hidden>
