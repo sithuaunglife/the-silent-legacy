@@ -18,7 +18,12 @@ export function mountMoonEngine(surface, onClosed) {
       guide.hidden=true;
       lunar.paint();
     },
-    onLanded(){controls.hidden=false;lunar.start();},
+    onLanded({crewReady}){
+      lunar.egress(()=>{
+        controls.hidden=false;
+        crewReady();
+      });
+    },
     beforeLeave(){controls.hidden=true;guide.hidden=true;},
     board(finish){lunar.board(finish);},
   });

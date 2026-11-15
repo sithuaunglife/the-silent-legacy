@@ -87,5 +87,5 @@
 #silent-legacy-outer-space .archive-site-credit a{color:#7dd2ff;text-decoration:none;white-space:nowrap}
 @media(max-width:640px){#silent-legacy-outer-space .archive-single-console{max-height:calc(100dvh - 10px)}}
 
-#silent-legacy-outer-space .pixel-diorama-reconstruction{position:absolute;left:8px;right:8px;bottom:39px;text-align:center;z-index:5;font:9px/1.45 monospace;background:#091b2de8;color:#f4daa4;border:1px solid #aa8b62;padding:4px 6px;pointer-events:none}
+
 #silent-legacy-outer-space .pixel-diorama-topline span:last-child{font-size:8px;max-width:58%;text-align:right;line-height:1.5;color:#f3d69a}

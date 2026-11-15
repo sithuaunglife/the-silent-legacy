@@ -16,7 +16,7 @@ for (const [world, records] of [['moon', moon.records], ['mars', mars.records]])
   for (const record of records) {
     const id = record[0];
     assert.ok(SURFACE_HEIGHTS_METERS[id] > 0, `${world}/${id}: missing height`);
-    const sprite=id==='eagle'?'eagle-reconstruction-pixel.png': id==='spirit'||id==='opportunity'?'twins-pixel.png':`${id}-pixel.png`;
+    const sprite=id==='eagle'?'eagle-user-reference.png': id==='spirit'||id==='opportunity'?'twins-pixel.png':`${id}-pixel.png`;
     assert.ok(fs.existsSync(path.join(base, `public/assets/surface/${sprite}`)), `${world}/${id}: missing artwork`);
   }
 }

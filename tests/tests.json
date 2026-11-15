@@ -1,73 +1,78 @@
 [
   {
-    "name": "Open directly in OuterSpace, no Start or Launch",
+    "name": "Fullscreen Moon and Mars exploration with controls",
     "sanity": true,
     "viewport": "desktop",
     "covers": [
-      "homepage starts in orbit",
-      "no intro or launch",
-      "no Voyager auto-open"
+      "fullscreen viewport on both worlds",
+      "no framed surface border",
+      "small right-hand WASD controls",
+      "preserved space and artifact dashboard"
     ],
-    "description": "Default route immediately displays the previous OuterSpace scene.",
+    "description": "Surface dialogs fill the entire visible viewport and keep reachable controls without changing the outer-space flight.",
     "steps": [
-      "Open / with no query parameters",
-      "Verify the original space map and moving classic ship display",
-      "Verify that no START or LAUNCH button appears",
-      "Check the Voyager archive is initially closed"
+      "Open ?surface=moon and verify the surface fills the full browser viewport without a framed black margin",
+      "After astronaut exits, confirm the small right-aligned borderless W A S D pad and Moon Jump control",
+      "Return to orbit and open Mars, verifying its full-screen viewport and W A S D pad",
+      "Verify the original spaceship and NASA inspect dashboard still work"
     ],
-    "expected": "The original OuterSpace view appears instantly, without a launch or start scene."
+    "expected": "Both landscapes use the full available viewport; smaller right-hand controls work and the original orbit remains accessible."
   },
   {
-    "name": "Classic spacecraft and deliberate archive interaction",
+    "name": "Moon astronaut emerges after touchdown and receives mission dialogue",
     "viewport": "desktop",
     "covers": [
-      "old pixel spaceship",
-      "Voyager click only",
-      "rotating 360 model absent"
+      "lunar landing narration",
+      "astronaut hidden before touchdown",
+      "visible walking hatch-to-field egress",
+      "scan-all lunar briefing"
     ],
-    "description": "The original sprite ship is kept.",
+    "description": "A contextual pixel mission-control box narrates landing stages without blocking flight and gives the scan assignment only after crew exit.",
     "steps": [
-      "Open /",
-      "Observe the classic pixel ship",
-      "Click it and verify the Voyager archive opens",
-      "Close the archive"
+      "Open the lunar scene from ?surface=moon",
+      "Observe APPROACH, DESCENT, and TOUCHDOWN communication messages while the astronaut is not yet outdoors",
+      "Wait until the hatch opens and see the astronaut walking from the ship to the field",
+      "After exit, verify the mission dialogue requests scanning all four artifacts, then try the E inspect command"
     ],
-    "expected": "Classic 8-direction pixel ship; archive opens only on click."
+    "expected": "The astronaut exits after touchdown instead of teleporting; the mission briefing appears after the exit and scanning still works."
   },
   {
-    "name": "Moon artifact gallery and scan",
+    "name": "Mars astronaut emerges and receives scanning objective",
     "viewport": "desktop",
     "covers": [
-      "Moon landing",
-      "all lunar machines in one environment",
-      "proximity inspection"
+      "Martian landing narration",
+      "Mars instruments stay visible on descent",
+      "crew egress animation",
+      "five-artifact scanning objective"
     ],
-    "description": "Explore Moon without separate location tabs.",
+    "description": "Mars shares the same mission dialogue lifecycle and crew-egress animation while preserving all equipment and proximity scans.",
     "steps": [
-      "Open /?surface=moon",
-      "Wait for landing",
-      "Walk near an artifact",
-      "Select INSPECT [E]",
-      "Close the NASA record and return to exploration"
+      "Open ?surface=mars",
+      "Verify rover and lander images remain visible while the ship lands and the astronaut remains indoors",
+      "Watch the astronaut come out of the ship and walk toward the Martian field",
+      "Read the mission dialogue asking to scan all five machines",
+      "Approach Sojourner, press E, and scan it in the mission dashboard"
     ],
-    "expected": "Moon gallery, landing and scanner remain unchanged."
+    "expected": "All Mars artifacts remain visible; the astronaut appears only after landing and the five-item scanning prompt is shown."
   },
   {
-    "name": "Mars artifact gallery and scan",
+    "name": "Responsive surface details and inspection boxes",
     "viewport": "mobile",
     "covers": [
-      "Mars landing",
-      "all martian machines together",
-      "jump",
-      "proximity inspection"
+      "responsive full-screen view",
+      "pixel crater and rock details",
+      "compact artifact card",
+      "small borderless right movement pad",
+      "mission dialog dismissal"
     ],
-    "description": "Mars interactions remain functional.",
+    "description": "Both terrains include more geological details, compact inspection UI, and an accessible mission briefing on mobile.",
     "steps": [
-      "Open /?surface=mars",
-      "Wait for landing",
-      "Walk or jump to a piece of equipment",
-      "Use INSPECT [E] when nearby"
+      "Open Moon and Mars at a mobile viewport",
+      "Check both full-screen terrains have fine pixel landscape detail without blurring",
+      "Confirm contextual INSPECT card is smaller and near the selected object",
+      "Confirm the right-aligned WASD pad has no ornamental outlines and remains tappable",
+      "Dismiss the mission briefing using its close control, then keep walking"
     ],
-    "expected": "Mars gallery, landing and scanners remain unchanged."
+    "expected": "The viewport remains filled; terrain details, inspection, dialogue and touch movement fit without overflowing."
   }
 ]

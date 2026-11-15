@@ -187,7 +187,6 @@ export default function PixelArtifactViewer({ craft }) {
       onError={onImageError}
       draggable={false}
     /> : <div className="pixel-diorama-unsupported">PIXEL MODEL NOT AVAILABLE</div>}
-    {siteId==='eagle' && <div className="pixel-diorama-reconstruction">Ascent cabin shown for context — it departed in 1969; descent stage remains.</div>}
     <div className="pixel-diorama-controls">
       <span>2.5D PIXEL SCENE • ~{equipmentMeters.toFixed(2)} m / 1.75 m HUMAN</span>
       <button type="button" aria-pressed={zoomed} onClick={() => setZoomed(value => !value)}>{zoomed ? '− ZOOM OUT' : '+ ZOOM'}</button>

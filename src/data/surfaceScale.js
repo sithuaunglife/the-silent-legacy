@@ -1,4 +1,4 @@
-import { eagleReconstructionArt } from './eagleArt.js';
+import { eagleReferenceArt } from './eagleArt.js';
 import { PIXEL_EQUIPMENT } from './pixelEquipment.js';
 
 /**
@@ -11,7 +11,7 @@ import { PIXEL_EQUIPMENT } from './pixelEquipment.js';
 export const ASTRONAUT_HEIGHT_METERS = 1.75;
 export const LUNAR_PIXELS_PER_METER = 34;
 export const SURFACE_HEIGHTS_METERS = Object.freeze({
-  eagle: 6.95, // Visualized complete module only; surviving descent hardware ~3.23 m.
+  eagle: 6.95, // Full lunar-module artwork supplied by user; only descent-stage hardware remains (~3.23 m).
   rover: 1.5,
   surveyor: 3.0,
   alsep: 0.95,
@@ -26,7 +26,7 @@ export const SURFACE_HEIGHTS_METERS = Object.freeze({
 // Preview deployments do not copy binary project assets. Use the versioned
 // public repository artwork there, while local builds load their own files.
 export const surfaceSpriteUrl = id => {
-  if(id === 'eagle') return eagleReconstructionArt;
+  if(id === 'eagle') return eagleReferenceArt;
   if(id === 'spirit' || id === 'opportunity') return PIXEL_EQUIPMENT.twins;
   // Prefer the sharp pixel remasters instead of browser-filtered WebP images.
   // Artifact perspective and meter ratios are preserved from the original scenes.

@@ -38,3 +38,6 @@
 #silent-legacy-outer-space .outer-lunar-card small{color:#e3cb82;font-size:10px}
 #silent-legacy-outer-space .outer-lunar-card:hover{background:linear-gradient(145deg,#234875,#0e203a)!important;}
 @media(max-width:520px){#silent-legacy-outer-space .outer-lunar-card{max-width:145px;white-space:normal;}}
+
+/* World-level guard against the legacy 84dvh framed Moon dialog. */
+#silent-legacy-outer-space .outer-surface[data-world='moon'] {width:100dvw;height:100dvh;max-width:none;max-height:none;border:0;margin:0;}

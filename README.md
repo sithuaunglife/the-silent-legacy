@@ -20,3 +20,15 @@ Windows Smart App Control: the project retains the Rollup WASM override.
 - Return to orbit: existing return control and departure animation.
 
 This package excludes the experimental StartPage, LaunchSequence and related intro engine/styles. It is a local revert; **no GitHub push** is included.
+
+## Eagle sprite reference
+
+Eagle uses the uploaded pixel-art lunar module reference as a single transparent sprite, in both the Moon surface and the inspection viewer. There is no second custom-drawn upper cabin/head. The original upload is preserved at `public/assets/reference/eagle-user-original.jpg`, the transparent game sprite at `public/assets/surface/eagle-user-reference.png`. The complete-module drawing is an educational visual; in reality only the descent stage remained on the Moon.
+
+
+### Full-screen expedition update (preview)
+- Moon/Mars surface dialogs fill the entire browser viewport, including small screens.
+- Contextual landing dialogue explains approach, descent and crew egress. The astronaut visibly walks out after touchdown, then a mission briefing asks to scan all equipment.
+- Smaller artifact inspection cards and minimal outline-free WASD controls at the right edge.
+- Additional pixel microcraters, basalt, wheel ruts and strata drawn in the existing terrain canvases.
+- No start page or Earth launch sequence; GitHub is not modified by preview deployments.

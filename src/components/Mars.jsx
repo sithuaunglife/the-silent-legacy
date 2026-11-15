@@ -12,11 +12,13 @@ export default function Mars({active,onClosed}) {
   },[onClosed]);
   useEffect(()=>{if(active)engine.current?.land();},[active]);
   return <SurfaceShell world="mars" ref={dialogRef}>
-    <p className="outer-gallery-note">Interactive NASA artifact gallery · real resting sites are separate</p>
     <div className="outer-site-nav" aria-label="Choose Martian final resting site" role="group"></div>
     <div className="outer-lunar-controls outer-mars-controls" hidden>
       <p className="outer-lunar-scan-count" aria-live="polite"></p>
-      <button className="outer-lunar-jump" aria-keyshortcuts="Space" type="button">Jump</button>
+      <button className="outer-lunar-card outer-mars-card" type="button" aria-keyshortcuts="E" hidden>
+        <canvas aria-hidden="true" width="44" height="44" />
+        <span><strong className="outer-lunar-card-title"></strong><small>Inspect artifact [E]</small></span>
+      </button>
     </div>
     <div className="outer-mars-field" aria-label="Mars surface equipment" role="group" hidden></div>
     <div className="outer-field-guide" aria-label="Surface artifacts" role="group" hidden></div>

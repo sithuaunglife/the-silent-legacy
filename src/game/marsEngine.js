@@ -1,3 +1,4 @@
+import { bindSurfaceDirectionPad } from './surfaceDirectionPad';
 import { mars } from '../data/mars';
 import { ASTRONAUT_ATLAS_URL } from '../data/astronautSprite';
 import { ASTRONAUT_HEIGHT_METERS, SURFACE_HEIGHTS_METERS, surfaceSpriteUrl } from '../data/surfaceScale';
@@ -32,7 +33,12 @@ export function mountMarsEngine(surface, onClosed) {
   const scanned = new Set();
   const counters = surface.querySelector('.outer-lunar-scan-count');
   const controls = surface.querySelector('.outer-mars-controls');
-  const jumpButton = controls.querySelector('.outer-lunar-jump');
+  const card = controls.querySelector('.outer-lunar-card');
+  const cardTitle = card.querySelector('.outer-lunar-card-title');
+  const cardHint = card.querySelector('small');
+  const previewCanvas = card.querySelector('canvas');
+  const preview = previewCanvas.getContext('2d');
+  preview.imageSmoothingEnabled = false;
   const siteNav = surface.querySelector('.outer-site-nav');
   siteNav.hidden=true;
   const siteLabel = document.createElement('div');
@@ -48,6 +54,11 @@ export function mountMarsEngine(surface, onClosed) {
   // All Martian artifacts stay visible in one continuous discovery scene.
   const navButtons = [];
   const keys = new Set();
+  const padKeys = new Set();
+  const directionPad = bindSurfaceDirectionPad(surface, padKeys, {
+    canMove: () => playable(),
+    onMove: () => { player.target = null; },
+  });
   const player = { x: 25, y: 86, target: null, frame: 0, jump: 0, facing: 1 };
   const INSPECT_RANGE = 12.2;
   let nearestIndex = -1;
@@ -56,10 +67,10 @@ export function mountMarsEngine(surface, onClosed) {
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let rAF = 0;
   let lastTime = 0;
+  let crewEgress = null;
 
   // Keep all machines in the same ground-plane perspective instead of floating
   // image boxes. Each illustration retains its own fine 2.5D pixel details.
-  const inspectors = [];
   const markers = mars.records.map((record, index) => {
     const { x, y, aspect, widthBonus } = locations[index];
     const id = record[0];
@@ -102,21 +113,11 @@ export function mountMarsEngine(surface, onClosed) {
       if (!playable()) return;
       player.target = {x: clamp(x + (player.x > x ? 4 : -4), 6, 94), y: clamp(y + (player.y > y ? 3 : -3), 58, 91)};
     });
-    const inspect = document.createElement('button');
-    inspect.type = 'button';
-    inspect.className = 'outer-mars-inspect outer-mars-scan-card';
-    inspect.innerHTML = `<span class="outer-inspect-icon">⌕</span><span><strong>${record[1]}</strong><small>INSPECT [E] · ${heightM}m</small></span>`;
-    inspect.setAttribute('aria-label', `Inspect ${record[1]} NASA mission data`);
-    inspect.hidden = true;
-    inspect.style.left = `${x}%`;
-    inspect.style.top = `${y}%`;
-    inspect.style.zIndex = String(Math.round(y * 10) + 4);
-    inspect.dataset.side = x > 72 ? 'left' : 'right';
-    on(inspect, 'click', () => {
-      if (playable() && nearestIndex === index) viewer.show(record,index);
+    // Keep the preview current without creating one inspection button per item.
+    on(icon, 'load', () => {
+      if (index === nearestIndex) paintPreview(index);
     });
-    inspectors.push(inspect);
-    field.append(button,inspect);
+    field.append(button);
     return button;
   });
 
@@ -131,17 +132,58 @@ export function mountMarsEngine(surface, onClosed) {
   person.append(body);
   field.append(person);
 
+  // The same 44×44 pixel-art preview used in the lunar inspection card.
+  function paintPreview(index) {
+    const image = markers[index]?.querySelector('img');
+    preview.clearRect(0, 0, 44, 44);
+    if (!image?.complete || !image.naturalWidth) return;
+    const scale = Math.min(38 / image.naturalWidth, 37 / image.naturalHeight);
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+    preview.drawImage(image, Math.round((44-width)/2), Math.round((44-height)/2), width, height);
+  }
+
   function refreshInspectors() {
     let best = -1;
     let bestDistance = INSPECT_RANGE;
     for (let i = 0; i < locations.length; i++) {
-      const {x,y} = locations[i];
-      const distance = Math.hypot((player.x - x) * .85, (player.y - y) * 1.5);
-      if (distance < bestDistance) { bestDistance=distance; best=i; }
+      const { x, y } = locations[i];
+      const distance = Math.hypot((player.x-x)*.85, (player.y-y)*1.5);
+      if (distance < bestDistance) { bestDistance = distance; best = i; }
     }
-    nearestIndex = best;
-    inspectors.forEach((button,i) => {button.hidden = i !== best || !playable();});
+    card.hidden = best < 0 || !playable();
+    if (best < 0) { nearestIndex = -1; return; }
+
+    const { x, y } = locations[best];
+    const side = x > 71 ? 'left' : 'right';
+    // The card is positioned by the artifact's ground contact, as on the Moon.
+    // Keep all controls inside the modal at narrow viewport widths.
+    const markerWidth = markers[best]?.getBoundingClientRect().width || 44;
+    const horizontalGap = Math.max(3.8, markerWidth / Math.max(surface.clientWidth, 1) * 54);
+    const cardX = side === 'left' ? x-horizontalGap : x+horizontalGap;
+    card.style.left = `${clamp(cardX, 4, 87)}%`;
+    card.style.top = `${clamp(y-10.5, 20, 82)}%`;
+    card.style.transform = side === 'left' ? 'translate(-100%, -50%)' : 'translateY(-50%)';
+    card.dataset.side = side;
+    if (nearestIndex !== best) {
+      nearestIndex = best;
+      cardTitle.textContent = mars.records[best][1];
+      card.setAttribute('aria-label', `Inspect ${mars.records[best][1]} NASA mission record`);
+      paintPreview(best);
+    }
+    cardHint.textContent = scanned.has(best) ? 'SCANNED ✓ · INSPECT [E]' : 'Inspect artifact [E]';
   }
+
+  function inspectNearest() {
+    if (!playable() || nearestIndex < 0) return;
+    // Recheck distance on click/keyboard to avoid stale proximity after movement.
+    const { x, y } = locations[nearestIndex];
+    if (Math.hypot((player.x-x)*.85, (player.y-y)*1.5) >= INSPECT_RANGE) return;
+    player.target = null;
+    keys.clear();
+    viewer.show(mars.records[nearestIndex], nearestIndex);
+  }
+  on(card, 'click', inspectNearest);
 
   function updatePerson() {
     person.style.left = `${player.x}%`;
@@ -159,7 +201,7 @@ export function mountMarsEngine(surface, onClosed) {
   }
 
   function tick(now) {
-    if (!surface.open || surface.dataset.phase !== 'landed') {
+    if (!surface.open || (surface.dataset.phase !== 'landed' && surface.dataset.phase !== 'egress')) {
       rAF = 0;
       lastTime = 0;
       return;
@@ -171,9 +213,26 @@ export function mountMarsEngine(surface, onClosed) {
     }
     const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.06) : 0;
     lastTime = now;
+    if (crewEgress) {
+      crewEgress.time += dt;
+      const u = Math.min(1, crewEgress.time / crewEgress.duration);
+      const ease = u*u*(3-2*u);
+      player.x = crewEgress.startX + (crewEgress.endX-crewEgress.startX)*ease;
+      player.y = crewEgress.startY + (crewEgress.endY-crewEgress.startY)*ease;
+      player.frame += dt*40;
+      updatePerson();
+      if (u >= 1) {
+        const done = crewEgress.done;
+        crewEgress = null;
+        player.frame = 0;
+        done();
+      }
+      rAF = requestAnimationFrame(tick);
+      return;
+    }
     if (player.jump) player.jump = player.jump + dt >= 0.85 ? 0 : player.jump + dt;
     let dx = 0, dy = 0;
-    for (const key of keys) {
+    for (const key of [...keys, ...padKeys]) {
       const direction = directions[key];
       if (!direction) continue;
       dx += direction[0];dy += direction[1];
@@ -200,12 +259,17 @@ export function mountMarsEngine(surface, onClosed) {
     rAF = 0;lastTime = 0;
     player.x = 25;player.y = 86;player.target = null;
     player.frame = 0;player.jump = 0;player.facing=1;
+    nearestIndex = -1;
+    card.hidden = true;
     updatePerson();
     rAF = requestAnimationFrame(tick);
   }
   function stop() {
     cancelAnimationFrame(rAF);rAF = 0;lastTime = 0;
-    keys.clear();player.target = null;
+    keys.clear();directionPad.reset();player.target = null;
+    nearestIndex = -1;
+    card.hidden = true;
+    crewEgress = null;
   }
 
   on(window, 'keydown', event => {
@@ -216,7 +280,7 @@ export function mountMarsEngine(surface, onClosed) {
       return;
     }
     if (event.code === 'KeyE' && !event.repeat && nearestIndex >= 0) {
-      event.preventDefault(); viewer.show(mars.records[nearestIndex],nearestIndex); return;
+      event.preventDefault(); inspectNearest(); return;
     }
     if (directions[event.code]) { event.preventDefault();keys.add(event.code); }
   });
@@ -230,11 +294,14 @@ export function mountMarsEngine(surface, onClosed) {
     if (y > 55) player.target = { x: clamp(x, 6, 94), y: clamp(y, 58, 91) };
   });
 
-  const updateCounter = () => { counters.textContent = `Artifacts scanned ${scanned.size}/${mars.records.length}`; };
+  const updateCounter = () => {
+    counters.textContent = `Artifacts scanned ${scanned.size}/${mars.records.length}`;
+    if (nearestIndex >= 0) cardHint.textContent = scanned.has(nearestIndex)
+      ? 'SCANNED ✓ · INSPECT [E]' : 'Inspect artifact [E]';
+  };
   function updateSiteLabel() {
     siteLabel.textContent='Illustrative artifact gallery — actual resting sites are documented individually.';
   }
-  on(jumpButton,'click',()=>{if(playable()&&!player.jump)player.jump=.001;});
   const transitions = createLandingSequence({
     surface, world: mars, onClosed,
     beforeLand() {
@@ -243,18 +310,36 @@ export function mountMarsEngine(surface, onClosed) {
       paintMarsTerrain(terrain, mars, 'gallery');
       updateSiteLabel();updateCounter();
       siteNav.hidden=true;siteLabel.hidden=true;controls.hidden=true;
-      guide.hidden = true;field.hidden = true;
+      // Show all Mars equipment from the first entry frame, as on the Moon.
+      // Only the astronaut and interactive controls wait until touchdown.
+      guide.hidden = true;
+      field.hidden = false;
+      person.hidden = true;
+      markers.forEach(marker => { marker.hidden = false; });
     },
-    onLanded() {
-      guide.hidden=true;field.hidden=false;
-      controls.hidden=false;siteNav.hidden=true;siteLabel.hidden=true;
+    onLanded({crewReady}) {
+      guide.hidden=true;field.hidden=false;person.hidden=false;
+      controls.hidden=true;siteNav.hidden=true;siteLabel.hidden=true;
       markers.forEach(marker=>{marker.hidden=false;});
-      start();
+      stop();
+      player.x = 50;player.y = 70;player.target=null;
+      player.frame=0;player.jump=0;player.facing=-1;
+      card.hidden = true;
+      updatePerson();
+      const finish=()=>{controls.hidden=false;updateCounter();crewReady();};
+      if (reducedMotion.matches) {
+        player.x=25;player.y=86;
+        updatePerson();finish();
+        rAF=requestAnimationFrame(tick);
+        return;
+      }
+      crewEgress = {startX:50,startY:70,endX:25,endY:86,time:0,duration:1.9,done:finish};
+      rAF = requestAnimationFrame(tick);
     },
-    beforeLeave() { stop();guide.hidden=true;field.hidden=true;siteNav.hidden=true;siteLabel.hidden=true;controls.hidden=true; },
+    beforeLeave() { stop();guide.hidden=true;field.hidden=false;person.hidden=true;siteNav.hidden=true;siteLabel.hidden=true;controls.hidden=true; },
   });
   return {
     land: transitions.land,
-    destroy() { stop();transitions.destroy();events.abort();viewer.destroy();siteLabel.remove();siteNav.replaceChildren(); },
+    destroy() { stop();directionPad.destroy();transitions.destroy();events.abort();viewer.destroy();siteLabel.remove();siteNav.replaceChildren(); },
   };
 }

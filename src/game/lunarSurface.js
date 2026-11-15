@@ -1,3 +1,4 @@
+import { bindSurfaceDirectionPad } from './surfaceDirectionPad';
 import {
   ASTRONAUT_ATLAS_URL,
   ASTRONAUT_ATLAS_FRAME_HEIGHT,
@@ -92,6 +93,11 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   // Every lunar artifact is available in the same explorable scene.
   const navButtons = [];
   const keys = new Set();
+  const padKeys = new Set();
+  const directionPad = bindSurfaceDirectionPad(surface, padKeys, {
+    canMove: () => playable() && !archiveOpen(),
+    onMove: () => { target = null; },
+  });
   const directions = {
     KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1],
     KeyA: [-1, 0], ArrowLeft: [-1, 0], KeyD: [1, 0], ArrowRight: [1, 0],
@@ -106,6 +112,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   let frame = 0;
   let lastTime = 0;
   let boarding;
+  let crewEgress = null;
   let skyTime = 0;
   const astronaut = new Image();
   astronaut.decoding = 'async';
@@ -388,6 +395,46 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       rock.fillRect(Math.round(x+width*.25),Math.round(y-height*.12),Math.max(3,Math.round(width*.72)),3);
     };
     reliefRocks.forEach(([x,y,size],index)=>drawRock(x,y,size,index));
+    // Fine relief pass: small impact pits, radial ejecta and angular shattered
+    // fragments. All fixed geometry is generated once on ground canvas.
+    for (let i=0; i<42; i++) {
+      const x = 26 + (i * 173 + i * i * 11) % 908;
+      const y = 312 + (i * 59 + i * i * 7) % 208;
+      const radius = 3 + i % 5;
+      rock.fillStyle = '#a4aec0';
+      rock.fillRect(x - radius, y - 2, radius * 2, 2);
+      rock.fillStyle = '#283248';
+      rock.fillRect(x - radius + 1, y, radius * 2 - 2, 3);
+      rock.fillStyle = '#626f86';
+      rock.fillRect(x - radius + 3, y + 3, Math.max(2, radius * 2 - 6), 2);
+      if (i % 3 === 0) {
+        rock.fillStyle = '#9faab9';
+        rock.fillRect(x - radius - 6, y - 3, 3, 1);
+        rock.fillRect(x + radius + 3, y + 1, 4, 1);
+      }
+    }
+    // Impact-shattered basalt: sunlit upper facet, dark lower face and
+    // a separate crisp shadow to establish the surface elevation.
+    for (let i=0; i<33; i++) {
+      const x=17+(i*139+i*i*13)%927;
+      const y=331+(i*71+i*i*3)%190;
+      const w=4+(i%5)*2, h=2+(i%4);
+      rock.fillStyle='#18233882';rock.fillRect(x+3,y+3,w+3,2);
+      rock.fillStyle=i%2?'#8a97aa':'#67768e';
+      rock.beginPath();rock.moveTo(x,y);rock.lineTo(x+3,y-h);rock.lineTo(x+w,y-h-1);
+      rock.lineTo(x+w+2,y+1);rock.closePath();rock.fill();
+      rock.fillStyle='#b7c2cd';rock.fillRect(x+3,y-h,Math.max(2,w-4),1);
+      rock.fillStyle='#303c53';rock.fillRect(x+w-2,y-1,3,3);
+    }
+    // Parallel rover tire ridges across the foreground, with a broken
+    // returning track so the surface looks visited rather than decorative.
+    for (let row=0; row<2; row++) {
+      for(let step=0; step<19; step++) {
+        const x=303+step*11, y=465+row*7+Math.round(Math.sin(step*.38)*7);
+        rock.fillStyle=row?'#374358':'#929aaa';
+        rock.fillRect(x,y,6,1);rock.fillRect(x+3,y+2,3,1);
+      }
+    }
     // Site-specific geology; drawings are 2.5D illustrations, not claimed to be
     // surveyed elevation maps of the resting sites.
     if(site.style === 'rille') {
@@ -531,10 +578,27 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   function tick(now) {
     frame = 0;
     if (archiveOpen()) { frame = requestAnimationFrame(tick); return; }
-    if (!playable() && !boarding) return;
+    if (!playable() && !boarding && !crewEgress) return;
     const dt = lastTime ? Math.min((now - lastTime) / 1000, .05) : 0;
     lastTime = now;
     if (!reducedMotion.matches) skyTime += dt;
+    if (crewEgress) {
+      crewEgress.time += dt;
+      const u = Math.min(1, crewEgress.time / crewEgress.duration);
+      const smooth = u * u * (3 - 2 * u);
+      player.x = crewEgress.startX + (crewEgress.endX - crewEgress.startX) * smooth;
+      player.y = crewEgress.startY + (crewEgress.endY - crewEgress.startY) * smooth;
+      player.step += dt * 55;
+      draw(true);
+      if (u >= 1) {
+        const done = crewEgress.done;
+        crewEgress = null;
+        player.step = 0;
+        done();
+      }
+      frame = requestAnimationFrame(tick);
+      return;
+    }
     if (boarding) {
       boarding.time += dt;
       const t = Math.min(1, boarding.time / boarding.duration);
@@ -555,7 +619,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       if (player.jumpTime) player.jumpTime = player.jumpTime + dt >= jumpDuration ? 0 : player.jumpTime + dt;
       let dx = 0;
       let dy = 0;
-      for (const key of keys) {
+      for (const key of [...keys, ...padKeys]) {
         const direction = directions[key];
         if (!direction) continue;
         dx += direction[0];
@@ -593,8 +657,10 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     cancelAnimationFrame(frame);
     frame = lastTime = 0;
     keys.clear();
+    directionPad.reset();
     target = null;
     boarding = null;
+    crewEgress = null;
   }
 
   on(window, 'keydown', event => {
@@ -657,6 +723,25 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       paintLunarGround();
       draw(false);
     },
+    egress(done) {
+      // The hatch is near the landed ship's center; astronaut walks out instead
+      // of appearing instantly at the remote exploration starting location.
+      stop();
+      Object.assign(player, {x: shipHatch.x + 4, y: shipHatch.y + 6, facing: 1, step: 0, jumpTime: 0});
+      activeSite = undefined;
+      card.hidden = true;
+      updateCount();
+      draw(true);
+      if (reducedMotion.matches) {
+        player.x = 680;player.y = 458;
+        draw(true);
+        done();
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      crewEgress = {startX:player.x,startY:player.y,endX:680,endY:458,time:0,duration:2.05,done};
+      frame = requestAnimationFrame(tick);
+    },
     start() {
       Object.assign(player, { x: 680, y: 458, facing: -1, step: 0, jumpTime: 0 });
       nav.hidden = true;siteLabel.hidden=true;
@@ -682,7 +767,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
       frame = requestAnimationFrame(tick);
     },
     stop,
-    destroy() { stop(); listeners.abort();siteLabel.remove();nav.replaceChildren(); },
+    destroy() { stop(); directionPad.destroy(); listeners.abort();siteLabel.remove();nav.replaceChildren(); },
     isScanned: index => scanned.has(index),
     markScanned(index) {
       scanned.add(index);

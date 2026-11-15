@@ -15,6 +15,21 @@ const SurfaceShell = forwardRef(function SurfaceShell({ world, children }, ref) 
         <p className="outer-surface-status" aria-live="polite"></p>
       </div><button className="outer-return cursor-interaction" type="button" disabled>Return to orbit</button></header>
       {children}
+      <section className="outer-mission-dialogue" aria-label="Mission communication" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <div className="outer-mission-dialogue-icon" aria-hidden="true"><i /></div>
+        <div className="outer-mission-dialogue-text">
+          <span className="outer-mission-dialogue-label">MISSION CONTROL <b className="outer-mission-dialogue-signal">● LIVE</b></span>
+          <strong className="outer-mission-dialogue-title" />
+          <p className="outer-mission-dialogue-body" />
+        </div>
+        <button type="button" className="outer-mission-dialogue-dismiss" aria-label="Dismiss mission briefing">×</button>
+      </section>
+      <nav className="outer-direction-pad" aria-label={`${world === 'moon' ? 'Moon' : 'Mars'} movement controls`}>
+        <button className="outer-direction-up" type="button" data-move="KeyW" aria-label="Move up">W</button>
+        <button className="outer-direction-left" type="button" data-move="KeyA" aria-label="Move left">A</button>
+        <button className="outer-direction-down" type="button" data-move="KeyS" aria-label="Move down">S</button>
+        <button className="outer-direction-right" type="button" data-move="KeyD" aria-label="Move right">D</button>
+      </nav>
     </dialog>
 
   </>;
