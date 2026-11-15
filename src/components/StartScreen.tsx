@@ -47,6 +47,8 @@ export default function StartScreen({ onBegin }: StartScreenProps) {
     <main
       ref={appRef}
       className='nasa-start app'
+      data-i18n-ignore='true'
+      lang='en'
       aria-label='The Silent Legacy 2.5D pixel archive start screen'
     >
       <canvas ref={canvasRef} id='stars' aria-hidden='true' />

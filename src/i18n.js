@@ -112,7 +112,12 @@ function translateTree(root,lang){
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
   const nodes=[];
   while(walker.nextNode())nodes.push(walker.currentNode);
-  for(const node of nodes)translateNode(node,lang);
+  // Keep branded/title-screen copy in English even when Myanmar UI is selected.
+  // The observer starts at document.body, so check every text node's ancestors.
+  for(const node of nodes){
+    if(node.parentElement?.closest('[data-i18n-ignore]'))continue;
+    translateNode(node,lang);
+  }
 }
 export function localizeInterface(language){
   let scheduled=false;
