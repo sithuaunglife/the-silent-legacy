@@ -922,63 +922,62 @@
     }
 
     function drawSkyAndStars(camY) {
-      // Transition sky gradient from Yangon Dusk/Night to Deep Orbital Space
-      const spaceFactor = Math.min(1, MISSION.altitudeKm / 60);
-      const grad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
-
-      if (spaceFactor < 0.7) {
-        grad.addColorStop(0, '#060c21');
-        grad.addColorStop(0.55, '#101f4a');
-        grad.addColorStop(1, '#1e3a6e');
-      } else {
-        grad.addColorStop(0, '#02040a');
-        grad.addColorStop(0.6, '#050b1c');
-        grad.addColorStop(1, '#0b1838');
-      }
+      // One continuous 2.5D ascent from atmospheric blue into deep black
+      // space; no pop-in sphere, no separate circular Earth overlay.
+      const t = Math.max(0, Math.min(1, MISSION.altitudeKm / 62));
+      const mix = (a, b, f) => Math.round(a + (b - a) * f);
+      const rgb = (a, b, f) => `rgb(${mix(a[0],b[0],f)},${mix(a[1],b[1],f)},${mix(a[2],b[2],f)})`;
+      const grad = ctx.createLinearGradient(0,0,0,LOGICAL_H);
+      grad.addColorStop(0, rgb([6,12,33],[1,3,10],t));
+      grad.addColorStop(.56, rgb([16,31,74],[2,5,18],t));
+      grad.addColorStop(1, rgb([30,58,110],[4,11,30],t));
       ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      ctx.fillRect(0,0,LOGICAL_W,LOGICAL_H);
 
-      // Twinkling Pixel Stars
-      MISSION.stars.forEach((s) => {
-        const screenY = ((s.y + camY * 0.25) % LOGICAL_H + LOGICAL_H) % LOGICAL_H;
-        const alpha = 0.4 + 0.6 * Math.abs(Math.sin(MISSION.time * 2 + s.twinkle));
-        ctx.fillStyle = `rgba(255, 255, 240, ${alpha.toFixed(2)})`;
-        ctx.fillRect(Math.round(s.x), Math.round(screenY), s.size, s.size);
-      });
+      // Stars fade in naturally as atmospheric scattering disappears.
+      const starOpacity = Math.max(.05,Math.min(1,(MISSION.altitudeKm-4)/41));
+      for(const star of MISSION.stars){
+        const y=((star.y+camY*.25)%LOGICAL_H+LOGICAL_H)%LOGICAL_H;
+        const twinkle=.43+.43*Math.abs(Math.sin(MISSION.time*2+star.twinkle));
+        ctx.fillStyle=`rgba(226,242,255,${(starOpacity*twinkle).toFixed(3)})`;
+        ctx.fillRect(Math.round(star.x),Math.round(y),star.size,star.size);
+      }
 
-      // 2.5D pixel-art Earth recedes as the spaceplane climbs; entire
-      // sphere is visible, with a bright atmosphere and layered cloud bands.
-      if (MISSION.altitudeKm > 2) {
-        const progress = Math.min(1,(MISSION.altitudeKm-2)/60);
-        const radius = (110-55*progress);
-        const centerX = LOGICAL_W*.5;
-        const centerY = LOGICAL_H + 60 - progress * (LOGICAL_H * 0.24 + 60);
-        const outer=ctx.createRadialGradient(centerX-radius*.25,centerY-radius*.45,4,centerX,centerY,radius*1.2);
-        outer.addColorStop(0,'#78d7ff');
-        outer.addColorStop(.19,'#1e8cc6');
-        outer.addColorStop(.52,'#174e88');
-        outer.addColorStop(.84,'#061d48');
-        outer.addColorStop(1,'#030b22');
+      // Earth's *curved horizon*, not a visible globe/circle:
+      // a huge ellipse extends past both sides of the viewport and sinks
+      // steadily beneath the camera while the ship climbs straight up.
+      if(t<.96){
+        const visibility=1-Math.max(0,(t-.66)/.30);
+        const centerY=LOGICAL_H+92+170*t;
+        const radiusX=LOGICAL_W*1.35;
+        const radiusY=145+32*t;
+        const horizonY=centerY-radiusY;
         ctx.save();
-        ctx.shadowBlur=22;
-        ctx.shadowColor='rgba(42,172,255,.75)';
+        ctx.globalAlpha=visibility;
+        // Soft thin atmosphere on the distant curved edge.
+        ctx.shadowBlur=27;
+        ctx.shadowColor='rgba(69,193,255,.7)';
+        ctx.fillStyle=rgb([16,71,120],[7,37,79],t);
         ctx.beginPath();
-        ctx.arc(centerX,centerY,radius,0,Math.PI*2);
-        ctx.fillStyle=outer;
+        ctx.ellipse(LOGICAL_W*.5,centerY,radiusX,radiusY,0,0,Math.PI*2);
         ctx.fill();
         ctx.shadowBlur=0;
-        ctx.clip();
-        for(let i=0;i<9;i++){
-          const oy=Math.round(centerY-radius*.55+i*radius*.19);
-          const shift=Math.sin(i*2.6)*radius*.45;
-          ctx.fillStyle=i%3===0?'rgba(131,213,237,.30)':'rgba(33,169,189,.30)';
-          ctx.fillRect(Math.round(centerX-radius+shift),oy,Math.round(radius*1.5),Math.max(2,Math.round(radius*.08)));
-          ctx.fillStyle='rgba(202,242,255,.30)';
-          ctx.fillRect(Math.round(centerX-radius*.8-shift*.35),oy+3,Math.round(radius*.95),Math.max(1,Math.round(radius*.025)));
+        ctx.strokeStyle='rgba(125,214,255,.6)';
+        ctx.lineWidth=3;
+        ctx.beginPath();
+        ctx.ellipse(LOGICAL_W*.5,centerY,radiusX,radiusY,0,Math.PI*1.10,Math.PI*1.90);
+        ctx.stroke();
+        // Sparse stepped cloud bands stay inside the wide atmospheric edge.
+        const cloudOffset=(camY*.12)%36;
+        for(let i=0;i<6;i++){
+          const y=horizonY+18+i*12+cloudOffset;
+          if(y>LOGICAL_H)break;
+          const x=40+((i*83+Math.round(camY*.14))%110);
+          ctx.fillStyle=i%2===0?'rgba(157,221,238,.22)':'rgba(52,161,196,.24)';
+          ctx.fillRect(x,Math.round(y),LOGICAL_W-x*2,3+(i%3));
         }
         ctx.restore();
       }
-
     }
 
     function drawYangonLandmarks(camY) {
@@ -1220,8 +1219,7 @@
     function drawCustomShipAssembly(targetCtx, opts) {
       // Single uninterrupted 2.5D spacecraft: no staged hardware or clipped
       // sprite-sheet cells. The source PNGs have transparent outer padding.
-      const ship = SHIP_DESIGN.customSpriteImg ||
-        (MISSION.phase === 'ORBIT' ? SPACEPLANE_SPRITES.cruise : SPACEPLANE_SPRITES.upright);
+      const ship = SHIP_DESIGN.customSpriteImg || SPACEPLANE_SPRITES.upright;
       if (!ship.complete || !ship.naturalWidth) return;
       const maxWidth = MISSION.phase === 'ORBIT' ? 76 : 78;
       const maxHeight = MISSION.phase === 'ORBIT' ? 65 : 86;
@@ -1230,7 +1228,7 @@
       const h = ship.naturalHeight * factor;
       targetCtx.save();
       targetCtx.imageSmoothingEnabled = false;
-      if (MISSION.phase === 'ORBIT') targetCtx.rotate(-0.25);
+      // Keep the nose aimed straight up through the end of the ascent.
       targetCtx.drawImage(ship,-w/2,-h/2,w,h);
       targetCtx.restore();
     }
