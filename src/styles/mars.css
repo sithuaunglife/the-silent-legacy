@@ -125,16 +125,6 @@
   #silent-legacy-outer-space .outer-mars-marker img { transition: none; }
 }
 
-/* Context-aware equipment interaction — no distant dashboard opening. */
-#silent-legacy-outer-space .outer-mars-inspect { position:absolute; padding:7px 10px;
-  transform:translate(12px,-125%); pointer-events:auto;z-index:8000;
-  cursor:pointer; white-space:nowrap; font:700 11px/1.2 'JetBrains Mono',monospace;
-  color:#fff1cf;background:#271c23ed; border:1px solid #e6ac78;
-  box-shadow:0 0 0 2px #130e19,0 0 15px #a9533460; }
-#silent-legacy-outer-space .outer-mars-inspect[data-side='left'] {transform:translate(calc(-100% - 12px),-125%);}
-#silent-legacy-outer-space .outer-mars-inspect[hidden] {display:none!important;}
-#silent-legacy-outer-space .outer-mars-inspect:hover,
-#silent-legacy-outer-space .outer-mars-inspect:focus-visible {background:#51342d; outline:2px solid #ffce9d;outline-offset:2px;}
 #silent-legacy-outer-space .outer-mars-avatar {transform-origin:center bottom;}
 
 /* The remastered sprites are palette-indexed PNGs, rendered without a soft halo. */
@@ -156,49 +146,67 @@
 #silent-legacy-outer-space .outer-mars-marker[data-model='twins'] .outer-mars-artifact-footprint,
 #silent-legacy-outer-space .outer-mars-marker[data-model='sojourner'] .outer-mars-artifact-footprint {height:14px;}
 
-/* Match the Moon's compact contextual inspection card; hide it until nearby. */
-#silent-legacy-outer-space .outer-mars-scan-card {
-  display:flex;align-items:center;gap:6px;text-align:left;
-  min-height:39px;max-width:178px;padding:5px 8px;
-  color:#fae7d2;background:linear-gradient(140deg,#3a2b2be8,#111821f0);
-  border:1px solid #e4a66f;box-shadow:0 4px 0 #140e16,0 0 11px #d78d4a5c;
-  transform:translate(8px,-80%);font-size:10px;
+/* Mars uses the identical Moon inspection-card component and 44px pixel preview. */
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-controls {
+  z-index: 1000;
+  pointer-events: none;
 }
-#silent-legacy-outer-space .outer-mars-scan-card[data-side='left'] {transform:translate(calc(-100% - 8px),-80%)}
-#silent-legacy-outer-space .outer-mars-scan-card[hidden]{display:none!important}
-#silent-legacy-outer-space .outer-mars-scan-card .outer-inspect-icon {font-size:22px;color:#ffb87f}
-#silent-legacy-outer-space .outer-mars-scan-card strong {display:block;color:#ffe0af;font-size:11px;white-space:normal}
-#silent-legacy-outer-space .outer-mars-scan-card small {display:block;color:#eab6a0;margin-top:2px;font-size:9px}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card {
+  position: absolute;
+  bottom: auto;
+  right: auto;
+  max-width: 180px;
+  width: max-content;
+  min-height: 44px;
+  padding: 4px 8px 4px 5px;
+  pointer-events: auto;
+  color: #ffe8d3;
+  background: linear-gradient(145deg,#39292afa,#101721fa);
+  border: 1px solid #f0b483;
+  box-shadow: 0 4px 0 #110b15,0 0 12px #da986655;
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card:hover {
+  background: linear-gradient(145deg,#533a35,#211925) !important;
+  border-color: #ffe1bc;
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card:focus-visible {
+  outline: 2px solid #ffdbb6;
+  outline-offset: 3px;
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card canvas {
+  background: #20151d;
+  border-color: #945f50;
+  image-rendering: pixelated;
+}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card strong { color: #fff2d7; }
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card small { color: #ffcf9d; }
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card::after { border-top-color: #ffd0ab; }
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card[hidden] { display:none !important; }
+@media(max-width:520px) {
+  #silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card { max-width: 145px; }
+}
 #silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-lunar-scan-count {color:#f8c1a6;border-color:#a76552;background:#1f141bdd}
 
 #silent-legacy-outer-space .outer-mars-marker[hidden]{display:none!important}
 #silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-site-detail{border-left-color:#f2a66d}
 
-/* Full-viewport Mars, compact borderless inspector and unobstructed right D-pad. */
-#silent-legacy-outer-space dialog.outer-surface[data-world='mars'] {
-  height:100vh;height:100dvh;width:100vw;max-width:none;max-height:none;
-  border:0;box-shadow:none;
+/* Artifact equipment remains visible throughout entry, descent, slide, and takeoff. */
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-field {z-index:1;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-person[hidden] {display:none!important;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-entry-effects {z-index:2;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-landing-shadow {z-index:2;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-descent-ship {z-index:3;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-landing-dust {z-index:4;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-surface-head {z-index:6;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-controls {z-index:7;}
+
+/* Keep instruments legible through the entry glow, rather than painting an opaque curtain over them. */
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-entry-effects {
+  background: radial-gradient(ellipse at 29% 18%, #ed683853, transparent 60%),
+    linear-gradient(150deg, #160b143d, #160b1408 70%, transparent);
 }
-#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-scan-card {
-  min-height:39px;max-width:142px;gap:4px;padding:5px 7px;
-  border:0;border-radius:5px;outline:0;box-shadow:0 4px 13px #2612199c;
-  background:#281c22ed;
-}
-#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-scan-card:focus-visible {
-  outline:none;box-shadow:0 0 0 2px #ffc28e,0 4px 13px #2612199c;
-}
-#silent-legacy-outer-space .outer-mars-scan-card .outer-inspect-icon {font-size:17px;}
-#silent-legacy-outer-space .outer-mars-scan-card strong {font-size:10px;}
-#silent-legacy-outer-space .outer-mars-scan-card small {font-size:8px;}
-#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mission-comms {
-  border-left-color:#e7a171;background:linear-gradient(130deg,#261719ef,#1c1e2be8);
-}
-#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mission-label {color:#ffc7a4;}
-#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-movement-grid button {
-  color:#ffe6d5;background:#301f27ed;box-shadow:inset 0 0 0 1px #cc886867;
-}
-#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-movement-grid button:is(:hover,:focus-visible,.is-pressed) {
-  background:#673a34;box-shadow:inset 0 0 0 2px #ffd19f;
-}
-#silent-legacy-outer-space .outer-mars-marker:focus-visible {outline:none;}
-#silent-legacy-outer-space .outer-mars-marker:focus-visible img {filter:drop-shadow(0 0 3px #ffc28e);}
+
+/* Small contextual Mars card and fullscreen viewport follow the shared Moon design. */
+#silent-legacy-outer-space .outer-surface[data-world='mars'] {width:100dvw;height:100dvh;max-width:none;max-height:none;border:0;margin:0;}
+#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card{max-width:153px;min-height:36px;padding:3px 7px 3px 3px;box-shadow:0 2px 0 #120d18aa;border-width:1px;}
+@media(max-width:600px){#silent-legacy-outer-space .outer-surface[data-world='mars'] .outer-mars-card{max-width:125px;min-height:33px;}}

@@ -177,25 +177,44 @@ export function paintMarsTerrain(canvas, world, siteId = 'sojourner') {
         ctx.fillRect(x,y,7,2);ctx.fillRect(x+2,y-2,3,1);
       }
     }
-    // Higher-frequency regolith detail: scalloped dust, fractured rock veins,
-    // shallow sediment ledges and wind-carved ripples (interpretive 2.5D art).
-    for (let i = 0; i < 155; i++) {
-      const x = Math.round(4 + random() * 432);
-      const y = Math.round(144 + random() * 112);
-      const span = 1 + Math.round(random() * (y > 205 ? 7 : 3));
-      ctx.fillStyle = i % 3 ? '#633b39' : '#dd9b70';
-      ctx.fillRect(x, y, span, 1);
-      ctx.fillStyle = i % 4 ? '#a86650' : '#ddaa81';
-      ctx.fillRect(x + 1, y - 2, Math.max(1, span - 1), 1);
+    // Wind-worn layered rock shelves, small polygonal pits and dust sheets.
+    // These are stylized geological details, not mapped rover coordinates.
+    for (let shelf=0; shelf<9; shelf++) {
+      const x=10+(shelf*89+shelf*shelf*17)%425;
+      const y=159+(shelf*23+shelf*shelf*5)%80;
+      const w=9+(shelf%5)*5;
+      ctx.fillStyle='#462b35';ctx.fillRect(x+3,y+5,w+4,3);
+      ctx.fillStyle=shelf%2?'#b97b5c':'#c18e69';
+      ctx.beginPath();ctx.moveTo(x,y+3);ctx.lineTo(x+5,y-3);
+      ctx.lineTo(x+w-5,y-5);ctx.lineTo(x+w+4,y+3);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#e0ab77';ctx.fillRect(x+5,y-3,w-10,1);
+      ctx.fillStyle='#8c4a3c';ctx.fillRect(x+w-3,y+1,4,3);
     }
-    for (let i = 0; i < 17; i++) {
-      const x = 18 + i * 25;
-      const y = 168 + ((i * 39) % 83);
-      ctx.strokeStyle = i % 2 ? '#533337' : '#c38c6d';
-      ctx.lineWidth = 1;
-      ctx.beginPath();ctx.moveTo(x - 9, y);
-      ctx.quadraticCurveTo(x + 3, y - 4, x + 17, y + 2);ctx.stroke();
-      ctx.fillStyle = '#3f2a31';ctx.fillRect(x + 11, y + 3, 7, 1);
+    for(let pit=0; pit<32; pit++) {
+      const x=7+(pit*67+pit*pit*11)%425;
+      const y=153+(pit*37+pit*pit*5)%103;
+      const radius=2+pit%4;
+      ctx.fillStyle='#e0a273';ctx.fillRect(x-radius,y-2,radius*2,1);
+      ctx.fillStyle='#633a38';ctx.fillRect(x-radius+1,y-1,radius*2-2,3);
+      ctx.fillStyle='#ad664e';ctx.fillRect(x-radius+2,y+2,radius*2-4,1);
+    }
+    // Fine two-tone ripple crests taper into the distance. Every ripple is
+    // drawn with hard pixel edges so objects stay sharp over the ground.
+    for(let row=0;row<11;row++) {
+      const y=173+row*8;
+      for(let stripe=0;stripe<6;stripe++) {
+        const x=(row*21+stripe*77)%435;
+        const width=8+(row+stripe)%11;
+        ctx.fillStyle='#dc996e';ctx.fillRect(x,y,width,1);
+        ctx.fillStyle='#76443e';ctx.fillRect(x+3,y+2,Math.max(1,width-4),1);
+      }
+    }
+    // Broken sweep of old traverse wheel tracks beneath the equipment gallery.
+    for(let side=0;side<2;side++) for(let step=0;step<19;step++) {
+      const x=116+step*10;
+      const y=223+side*4+Math.round(Math.sin(step*.38)*4);
+      ctx.fillStyle=side?'#7d4436':'#d49a6b';
+      ctx.fillRect(x,y,6,1);
     }
     // Independent wheel ruts and landing-blast scars anchor the machines.
     ctx.strokeStyle='#754335';ctx.lineWidth=1;

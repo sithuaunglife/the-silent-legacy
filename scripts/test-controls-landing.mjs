@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const get = name => fs.readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8');
+const shell = get('components/SurfaceShell.jsx');
+const moon = get('game/lunarSurface.js');
+const mars = get('game/marsEngine.js');
+const moonUI = get('components/Moon.jsx');
+const marsUI = get('components/Mars.jsx');
+const dashboard = get('components/archive/ArchiveDashboard.jsx');
+const pad = get('game/surfaceDirectionPad.js');
+const marsCSS = get('styles/mars.css');
+for (const k of ['KeyW', 'KeyA', 'KeyS', 'KeyD']) {
+  assert.match(shell, new RegExp(`data-move="${k}"`), `WASD ${k} button missing`);
+}
+assert.match(shell, /outer-direction-pad/, 'Shared controls must appear in both surface dialogs');
+assert.match(moon, /bindSurfaceDirectionPad\(surface, padKeys/, 'Moon must bind directional controls');
+assert.match(mars, /bindSurfaceDirectionPad\(surface, padKeys/, 'Mars must bind directional controls');
+assert.match(moon, /\.\.\.keys, \.\.\.padKeys/, 'Moon must consume pad input');
+assert.match(mars, /\.\.\.keys, \.\.\.padKeys/, 'Mars must consume pad input');
+assert.match(pad, /pointerdown/);
+assert.match(pad, /pointercancel/);
+assert.match(pad, /lostpointercapture/);
+assert.match(pad, /reset\(\)/);
+assert.doesNotMatch(marsUI, /outer-lunar-jump/, 'Mars jump button must be removed');
+assert.match(moonUI, /outer-lunar-jump/, 'Moon jump remains available');
+assert.doesNotMatch(moonUI + marsUI, /real resting sites are separate/, 'Remove obsolete gallery footer');
+assert.match(dashboard, /!\['eagle', 'opportunity'\]\.includes\(craft\.id\)/);
+assert.match(mars, /field\.hidden = false;\s*person\.hidden = true;\s*markers\.forEach/, 'Mars equipment appears before landing finishes');
+assert.match(mars, /beforeLeave\(\).*field\.hidden=false;person\.hidden=true/, 'Mars machines stay visible during takeoff');
+assert.match(marsCSS, /outer-mars-field \{z-index:1;\}/, 'Mars machines use stable z-order');
+assert.match(marsCSS, /outer-descent-ship \{z-index:3;\}/, 'Ship floats above Mars machines');
+console.log('PASS: shared W/A/S/D controls, Mars jump removal, Moon jump retained, landing artifacts persist, compact archive titles');

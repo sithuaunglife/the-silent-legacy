@@ -1,47 +1,49 @@
-/** Radio-copy helper shared by landing, egress and equipment scans. */
-export function setMissionDialogue(surface, message, mode = 'info') {
-  const box = surface.querySelector('.outer-mission-comms');
-  const line = box?.querySelector('.outer-mission-message');
-  if (!line) return;
-  line.textContent = message;
-  box.dataset.mode = mode;
-}
-
-/** Entry -> ship touchdown -> astronaut exits -> exploration -> return to orbit. */
-export function createLandingSequence({surface, world, beforeLand, onDeploy, onLanded, beforeLeave, board, onClosed}) {
+/** Shared landing lifecycle and unobtrusive mission-control dialogue. */
+export function createLandingSequence({surface, world, beforeLand, onLanded, beforeLeave, board, onClosed}) {
   const title = surface.querySelector('h2');
   const status = surface.querySelector('.outer-surface-status');
   const returnButton = surface.querySelector('.outer-return');
+  const communication = surface.querySelector('.outer-mission-dialogue');
+  const communicationTitle = communication.querySelector('.outer-mission-dialogue-title');
+  const communicationBody = communication.querySelector('.outer-mission-dialogue-body');
+  const dismiss = communication.querySelector('.outer-mission-dialogue-dismiss');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const events = new AbortController();
   const descentDuration = 1500;
   const slideDuration = 920;
   const launchDuration = 1550;
-  let timeout;
+  let timeout = null;
+  let noticeTimeout = null;
   let disposed = false;
-  const schedule = (fn, ms) => {timeout = setTimeout(() => {if (!disposed && surface.open) fn();}, ms);};
-  function clear() { clearTimeout(timeout); }
+  let epoch = 0;
+  const schedule = (fn, ms) => {
+    const sequence = epoch;
+    timeout = setTimeout(() => {if(!disposed && surface.open && epoch === sequence) fn();}, ms);
+  };
+  function clear() {
+    clearTimeout(timeout);
+    clearTimeout(noticeTimeout);
+    timeout = noticeTimeout = null;
+  }
+  function hideNotice() {
+    clearTimeout(noticeTimeout);
+    communication.hidden = true;
+  }
+  function announce(heading, message, holdMs = 0) {
+    if(disposed || !surface.open) return;
+    clearTimeout(noticeTimeout);
+    communicationTitle.textContent = heading;
+    communicationBody.textContent = message;
+    communication.hidden = false;
+    if(holdMs > 0) noticeTimeout = setTimeout(() => {if(!disposed) hideNotice();}, holdMs);
+  }
+  const bodyName = world.id === 'moon' ? 'lunar' : 'Martian';
+  const count = world.records.length;
+  dismiss.addEventListener('click', hideNotice, {signal:events.signal});
 
-  function arrived() {
-    if (disposed || !surface.open || surface.dataset.phase !== 'deploy') return;
-    surface.dataset.phase = 'landed';
-    status.textContent = world.arrival;
-    returnButton.disabled = false;
-    onLanded?.();
-    setMissionDialogue(surface,
-      'Astronaut on the surface. Your mission: approach and scan every abandoned machine. Walk with WASD or the right-hand controls; inspect with E.',
-      'ready');
-  }
-  function beginEgress() {
-    if (disposed || !surface.open) return;
-    surface.dataset.phase = 'deploy';
-    status.textContent = 'Touchdown confirmed · astronaut exiting lander';
-    setMissionDialogue(surface, 'Touchdown confirmed. The landing craft is secure. Opening the hatch and deploying the astronaut…', 'transit');
-    if (onDeploy) onDeploy(arrived);
-    else schedule(arrived, reducedMotion.matches ? 0 : 1200);
-  }
   function land() {
-    if (disposed || surface.open) return;
+    if(disposed || surface.open) return;
+    epoch++;
     clear();
     beforeLand();
     surface.dataset.phase = 'entry';
@@ -51,53 +53,70 @@ export function createLandingSequence({surface, world, beforeLand, onDeploy, onL
     surface.style.setProperty('--launch-duration', `${launchDuration}ms`);
     title.textContent = world.name;
     status.textContent = world.entry;
-    setMissionDialogue(surface, `Entering ${world.name} approach. Stand by for atmospheric / orbital descent.`, 'transit');
     returnButton.disabled = true;
     surface.showModal();
     title.focus({preventScroll:true});
-    if (reducedMotion.matches) { beginEgress(); return; }
+    announce('APPROACH VECTOR LOCKED', `Spaceship entering ${world.name} approach. Astronaut secured inside the capsule.`);
+    const crewReady = () => {
+      if(disposed || !surface.open || surface.dataset.phase !== 'egress') return;
+      surface.dataset.phase = 'landed';
+      status.textContent = world.arrival;
+      returnButton.disabled = false;
+      announce('EXPLORATION MISSION', `Astronaut deployed. Explore the ${bodyName} surface and scan all ${count} machines. Move with W A S D; approach an artifact, then press E to inspect.`, 9500);
+    };
+    const arrived = () => {
+      if(disposed || !surface.open) return;
+      surface.dataset.phase = 'egress';
+      status.textContent = 'Touchdown confirmed · Crew hatch opening';
+      announce('TOUCHDOWN CONFIRMED', 'The landing ship is down. Astronaut exiting the capsule now.');
+      // Engines call crewReady only once the astronaut has visibly left the ship.
+      onLanded({crewReady});
+    };
+    if(reducedMotion.matches) {arrived();return;}
     schedule(() => {
       surface.dataset.phase = 'descent';
       status.textContent = `Descending to ${world.name}`;
-      setMissionDialogue(surface, 'Landing trajectory locked. Thrusters active; crew secured inside the craft.', 'transit');
+      announce('DESCENT IN PROGRESS', 'Engines stabilizing. The astronaut remains inside until touchdown.');
       schedule(() => {
         surface.dataset.phase = 'slide';
-        status.textContent = 'Landing burn complete · settling on surface';
-        setMissionDialogue(surface, 'Final approach complete. Awaiting stable touchdown before astronaut egress.', 'transit');
-        schedule(beginEgress, slideDuration);
+        status.textContent = 'Sliding to a stop';
+        announce('FINAL APPROACH', 'Ground contact confirmed. Preparing the cabin for crew exit.');
+        schedule(arrived, slideDuration);
       }, descentDuration);
     }, world.entryDuration);
   }
 
   function leave() {
-    if (surface.dataset.phase !== 'landed' || disposed) return;
+    if(surface.dataset.phase !== 'landed' || disposed) return;
     returnButton.disabled = true;
+    hideNotice();
     beforeLeave?.();
     const liftOff = () => {
-      if (reducedMotion.matches) { closeAndLaunch(); return; }
-      surface.dataset.phase = 'launch';
-      status.textContent = 'Lifting off';
-      setMissionDialogue(surface, 'Crew secured. Beginning ascent to orbit.', 'transit');
-      schedule(closeAndLaunch, launchDuration);
+      if(reducedMotion.matches) {closeAndLaunch();return;}
+      surface.dataset.phase='launch';
+      status.textContent='Lifting off';
+      announce('RETURN TO ORBIT', 'Crew safely aboard. Engines firing for departure.');
+      schedule(closeAndLaunch,launchDuration);
     };
-    if (board) {
-      surface.dataset.phase = 'boarding';
-      status.textContent = 'Returning astronaut to the lander';
-      setMissionDialogue(surface, 'Mission control: return to the spacecraft for orbital departure.', 'transit');
+    if(board) {
+      surface.dataset.phase='boarding';
+      status.textContent='Returning to the spaceship';
+      announce('CREW RECALL', 'Astronaut returning to the lander. Departure systems online.');
       board(liftOff);
     } else liftOff();
   }
   function closeAndLaunch() {
-    if (!surface.open) return;
-    surface.dispatchEvent(new CustomEvent('orbit:launch', {bubbles:true, detail:world.id}));
+    if(!surface.open) return;
+    hideNotice();
+    surface.dispatchEvent(new CustomEvent('orbit:launch',{bubbles:true,detail:world.id}));
     surface.close();
-    surface.dispatchEvent(new CustomEvent('space:closed', {bubbles:true}));
+    surface.dispatchEvent(new CustomEvent('space:closed',{bubbles:true}));
     onClosed?.();
   }
-  function onClose() { clear(); }
-  function onCancel(event) { event.preventDefault(); }
+  function onClose() { epoch++;clear();hideNotice(); }
+  function onCancel(event) {event.preventDefault();}
   returnButton.addEventListener('click', leave, {signal:events.signal});
   surface.addEventListener('close', onClose, {signal:events.signal});
   surface.addEventListener('cancel', onCancel, {signal:events.signal});
-  return {land, leave, destroy(){disposed=true;clear();events.abort();if(surface.open)surface.close();}};
+  return {land,leave,destroy(){disposed=true;epoch++;clear();hideNotice();events.abort();if(surface.open)surface.close();}};
 }
