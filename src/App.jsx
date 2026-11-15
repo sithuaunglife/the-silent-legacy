@@ -33,6 +33,8 @@ export default function App(){
   const handoffTimer=useRef(null);
   const returnTimer=useRef(null);
   const returnPending=useRef(false);
+  const returnOriginRef=useRef(null);
+  const returnFallbackTimer=useRef(null);
   const [endingOrigin,setEndingOrigin]=useState(()=>{
     try{return window.sessionStorage.getItem('silent:ending-origin')||null}catch{return null}
   });
@@ -66,6 +68,7 @@ export default function App(){
   useEffect(()=>()=>{
     window.clearTimeout(handoffTimer.current);
     window.clearTimeout(returnTimer.current);
+    window.clearTimeout(returnFallbackTimer.current);
   },[]);
   useEffect(()=>{
     try{window.localStorage.setItem('silent:language',language)}catch{}
@@ -85,16 +88,38 @@ export default function App(){
     setWorld(name);
     try{window.sessionStorage.setItem('silent:world',name)}catch{}
   },[]);
+  // Both engines signal a closed return, but Moon has a longer astronaut
+  // boarding sequence. Preserve final world outside React re-renders.
+  const finishReturn=useCallback((origin)=>{
+    const finalWorld=origin||returnOriginRef.current;
+    if(!returnPending.current || !['moon','mars'].includes(finalWorld))return;
+    clearTimeout(returnFallbackTimer.current);
+    clearTimeout(returnTimer.current);
+    returnPending.current=false;
+    returnOriginRef.current=null;
+    setWorld(null);
+    setEndingOrigin(finalWorld);
+    setEndingFinished(false);
+    try{
+      window.sessionStorage.removeItem('silent:world');
+      window.sessionStorage.setItem('silent:ending-origin',finalWorld);
+    }catch{}
+  },[]);
   const close=useCallback(()=>{
     if(returnPending.current){
-      returnPending.current=false;
-      const finalWorld=world||'mars';
-      setWorld(null);
-      setEndingOrigin(finalWorld);
-      setEndingFinished(false);
-      try{window.sessionStorage.setItem('silent:ending-origin',finalWorld)}catch{}
+      finishReturn(returnOriginRef.current);
     }else setWorld(null);
-  },[world]);
+  },[finishReturn]);
+  useEffect(()=>{
+    const onDeparture=event=>{
+      const origin=event.detail;
+      if(returnPending.current && origin===returnOriginRef.current){
+        setTimeout(()=>finishReturn(origin),0);
+      }
+    };
+    window.addEventListener('orbit:launch',onDeparture);
+    return()=>window.removeEventListener('orbit:launch',onDeparture);
+  },[finishReturn]);
   const closeArchive=useCallback(()=>{
     document.documentElement.dataset.silentArchiveOpen='false';
     archiveRef.current?.close();
@@ -123,9 +148,13 @@ export default function App(){
       setStoryProgress(detail.progress);
       storySound('scan');
       if(!detail.complete || returnPending.current || endingOrigin)return;
-      returnPending.current=true;
       const finalWorld=detail.world;
+      if(!['moon','mars'].includes(finalWorld))return;
+      returnPending.current=true;
+      returnOriginRef.current=finalWorld;
       window.clearTimeout(returnTimer.current);
+      window.clearTimeout(returnFallbackTimer.current);
+      // Let scanner confirmation finish before boarding from either world.
       returnTimer.current=window.setTimeout(()=>{
         closeArchive();
         returnTimer.current=window.setTimeout(()=>{
@@ -133,23 +162,28 @@ export default function App(){
             '.outer-surface[data-world="'+finalWorld+'"][open] .outer-return:not([disabled])'
           );
           if(shipReturn)shipReturn.click();
-          else {
-            returnPending.current=false;
-            setWorld(null);
-            setEndingOrigin(finalWorld);
-            setEndingFinished(false);
-            try{window.sessionStorage.setItem('silent:ending-origin',finalWorld)}catch{}
-          }
-        },90);
+          else finishReturn(finalWorld);
+        },120);
       },1150);
+      // Graceful recovery for a stalled animation frame or interrupted Moon
+      // boarding sequence: preserve the completed story and final origin.
+      returnFallbackTimer.current=window.setTimeout(()=>{
+        if(!returnPending.current || returnOriginRef.current!==finalWorld)return;
+        const dialog=document.querySelector('.outer-surface[data-world="'+finalWorld+'"]');
+        if(dialog?.open)dialog.close();
+        finishReturn(finalWorld);
+      },10000);
     };
     window.addEventListener('silent:mission-progress',onProgress);
     return()=>window.removeEventListener('silent:mission-progress',onProgress);
-  },[closeArchive,endingOrigin]);
+  },[closeArchive,endingOrigin,finishReturn]);
 
   const restartStory=useCallback(()=>{
     window.clearTimeout(handoffTimer.current);
     window.clearTimeout(returnTimer.current);
+    window.clearTimeout(returnFallbackTimer.current);
+    returnPending.current=false;
+    returnOriginRef.current=null;
     clearMissionProgress();
     try {
       sessionStorage.removeItem('silent:ending-origin');
@@ -195,6 +229,8 @@ export default function App(){
     setEndingFinished(false);
     setStoryProgress({moon:[],mars:[]});
     returnPending.current=false;
+    returnOriginRef.current=null;
+    window.clearTimeout(returnFallbackTimer.current);
     clearMissionProgress();
     try{window.sessionStorage.removeItem('silent:ending-origin')}catch{}
     setLaunchTransition(false);
@@ -212,7 +248,7 @@ export default function App(){
   const toggleLanguage=useCallback(()=>setLanguage(current=>current==='en'?'my':'en'),[]);
 
   return <>
-    {!world && <button className="mission-sound-toggle" type="button" onClick={onSoundToggle}
+    {!world && !selection && <button className="mission-sound-toggle" type="button" onClick={onSoundToggle}
       aria-label={soundEnabled?'Mute story sounds':'Enable story sounds'}
       aria-pressed={soundEnabled}>
       {soundEnabled?'🔊':'🔇'} {language==='my'?'အသံ':'SOUND'} {soundEnabled?'ON':'OFF'}
@@ -227,11 +263,6 @@ export default function App(){
       <Mars active={world==='mars'} onClosed={close} soundEnabled={soundEnabled} onSoundToggle={onSoundToggle} language={language}/>
     </OuterSpace>
     <dialog ref={archiveRef} onCancel={e=>{e.preventDefault();closeArchive();}} className="archive-shell">
-      {selection&&<button className="archive-sound-toggle" type="button"
-        onClick={onSoundToggle} aria-label={soundEnabled?'Mute story sounds':'Enable story sounds'}
-        aria-pressed={soundEnabled}>
-        {soundEnabled?'🔊':'🔇'} {language==='my'?'အသံ':'SOUND'} {soundEnabled?'ON':'OFF'}
-      </button>}
       {selection&&<ArchiveDashboard selection={selection} onClose={closeArchive}
         language={language} onLanguageChange={setLanguage}/>}
     </dialog>

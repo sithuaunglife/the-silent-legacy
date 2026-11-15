@@ -52,9 +52,18 @@
  outline:2px solid #a9eaff;outline-offset:2px
 }
 
-.archive-shell .archive-sound-toggle {
- position:relative;float:right;z-index:90;margin:2px 0 8px 10px;
- font:600 11px 'Padauk',monospace;border:1px solid #76bde5;
- border-radius:5px;padding:7px 10px;color:#dff9ff;
- background:#081d30;cursor:pointer
+/* Audio controls do not cover navigation, camera, fullscreen or scanning. */
+.mission-sound-toggle{
+ top:auto!important;bottom:max(18px,env(safe-area-inset-bottom))!important;
+ left:14px!important;right:auto!important;z-index:41000;
+}
+#silent-legacy-outer-space .outer-surface .outer-surface-sound{
+ top:76px!important;right:14px!important;left:auto!important;
+ z-index:2000;max-width:118px;
+}
+@media(max-width:600px){
+ .mission-sound-toggle{bottom:max(12px,env(safe-area-inset-bottom))!important;left:9px!important}
+ #silent-legacy-outer-space .outer-surface .outer-surface-sound{
+  right:8px!important;top:74px!important;font-size:10px;max-width:100px;
+ }
 }
