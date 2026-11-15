@@ -57,13 +57,18 @@
  top:auto!important;bottom:max(18px,env(safe-area-inset-bottom))!important;
  left:14px!important;right:auto!important;z-index:41000;
 }
+/* Keep the scan counter unobstructed in BOTH worlds. The counter occupies
+   the upper-right edge at ~57-76px, so audio sits below the header on the
+   opposite (left) edge, not over its text or the return-to-orbit button. */
 #silent-legacy-outer-space .outer-surface .outer-surface-sound{
- top:76px!important;right:14px!important;left:auto!important;
+ top:clamp(102px,14vh,118px)!important;
+ left:12px!important;right:auto!important;
  z-index:2000;max-width:118px;
 }
 @media(max-width:600px){
  .mission-sound-toggle{bottom:max(12px,env(safe-area-inset-bottom))!important;left:9px!important}
  #silent-legacy-outer-space .outer-surface .outer-surface-sound{
-  right:8px!important;top:74px!important;font-size:10px;max-width:100px;
+  left:10px!important;right:auto!important;
+  top:100px!important;font-size:10px;max-width:100px;
  }
 }
