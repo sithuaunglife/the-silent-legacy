@@ -1,3 +1,4 @@
+import {isArtifactScanned} from './missionProgress.js';
 import { bindSurfaceDirectionPad } from './surfaceDirectionPad';
 import {
   ASTRONAUT_ATLAS_URL,
@@ -82,7 +83,7 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
   const preview = card.querySelector('canvas').getContext('2d');
   const jumpButton = surface.querySelector('.outer-lunar-jump');
   const count = surface.querySelector('.outer-lunar-scan-count');
-  const scanned = new Set();
+  const scanned = new Set(records.flatMap((record,index)=>isArtifactScanned('moon',record[0])?[index]:[]));
   let locationIndex = 0;
   const nav = surface.querySelector('.outer-site-nav');
   nav.hidden = true;

@@ -393,3 +393,17 @@
     bottom:max(12px,env(safe-area-inset-bottom));min-width:67px;
   }
 }
+
+/* Larger than the astronaut on the Moon and Mars; preserve full sprite. */
+#silent-legacy-outer-space .outer-surface[data-world] .outer-descent-ship{
+  width:clamp(112px,15vw,174px);
+  min-width:112px;height:auto;aspect-ratio:1;z-index:3;pointer-events:none;
+}
+#silent-legacy-outer-space .outer-surface[data-world] .outer-descent-ship img{
+  width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
+}
+@media(max-width:600px){
+ #silent-legacy-outer-space .outer-surface[data-world] .outer-descent-ship{
+   width:clamp(112px,29vw,138px)
+ }
+}

@@ -7,6 +7,8 @@ import LaunchSimulator from './components/LaunchSimulator';
 import StartScreen from './components/StartScreen';
 import './styles/sceneTransition.css';
 import { localizeInterface } from './i18n';
+import { readMissionProgress, clearMissionProgress, getMissionTotals } from './game/missionProgress';
+import './styles/ending.css';
 
 /** One React modal is shared by the Moon and Mars exploration engines. */
 export default function App(){
@@ -22,14 +24,22 @@ export default function App(){
   // Do not open an archive on first load. Every archive is selected by a click.
   const [selection,setSelection]=useState(null);
   const [launchComplete,setLaunchComplete]=useState(()=>{
-    try{return Boolean(initialWorld)||window.sessionStorage.getItem('silent:stage')==='orbit'}catch{return Boolean(initialWorld)}
+    try{return Boolean(initialWorld)||['orbit','ending'].includes(window.sessionStorage.getItem('silent:stage'))}catch{return Boolean(initialWorld)}
   });
   const [startDismissed,setStartDismissed]=useState(()=>launchComplete);
   const [launchKey,setLaunchKey]=useState(0);
   const [launchTransition,setLaunchTransition]=useState(false);
   const handoffTimer=useRef(null);
+  const returnTimer=useRef(null);
+  const returnPending=useRef(false);
+  const [endingOrigin,setEndingOrigin]=useState(()=>{
+    try{return window.sessionStorage.getItem('silent:ending-origin')||null}catch{return null}
+  });
+  const [storyProgress,setStoryProgress]=useState(readMissionProgress);
+  const [endingFinished,setEndingFinished]=useState(false);
   useEffect(()=>()=>{
     window.clearTimeout(handoffTimer.current);
+    window.clearTimeout(returnTimer.current);
   },[]);
   useEffect(()=>{
     try{window.localStorage.setItem('silent:language',language)}catch{}
@@ -39,17 +49,26 @@ export default function App(){
   },[language]);
   useEffect(()=>{
     try{
-      window.sessionStorage.setItem('silent:stage',launchComplete?'orbit':'start');
+      window.sessionStorage.setItem('silent:stage',endingOrigin?'ending':launchComplete?'orbit':'start');
       if(world)window.sessionStorage.setItem('silent:world',world);
       else window.sessionStorage.removeItem('silent:world');
     }catch{}
-  },[launchComplete,world]);
+  },[launchComplete,world,endingOrigin]);
   const archiveRef=useRef(null);
   const land=useCallback((name)=>{
     setWorld(name);
     try{window.sessionStorage.setItem('silent:world',name)}catch{}
   },[]);
-  const close=useCallback(()=>setWorld(null),[]);
+  const close=useCallback(()=>{
+    if(returnPending.current){
+      returnPending.current=false;
+      const finalWorld=world||'mars';
+      setWorld(null);
+      setEndingOrigin(finalWorld);
+      setEndingFinished(false);
+      try{window.sessionStorage.setItem('silent:ending-origin',finalWorld)}catch{}
+    }else setWorld(null);
+  },[world]);
   const closeArchive=useCallback(()=>{
     document.documentElement.dataset.silentArchiveOpen='false';
     archiveRef.current?.close();
@@ -69,6 +88,60 @@ export default function App(){
     window.addEventListener('silent:inspect',onInspect);
     return()=>window.removeEventListener('silent:inspect',onInspect);
   },[world]);
+  // Complete the story after BOTH equipment collections are fully scanned.
+  // Automatically board the departing ship, then play the Earth-return ending.
+  useEffect(()=>{
+    const onProgress=event=>{
+      const detail=event.detail;
+      if(!detail)return;
+      setStoryProgress(detail.progress);
+      if(!detail.complete || returnPending.current || endingOrigin)return;
+      returnPending.current=true;
+      const finalWorld=detail.world;
+      window.clearTimeout(returnTimer.current);
+      returnTimer.current=window.setTimeout(()=>{
+        closeArchive();
+        returnTimer.current=window.setTimeout(()=>{
+          const shipReturn=document.querySelector(
+            '.outer-surface[data-world="'+finalWorld+'"][open] .outer-return:not([disabled])'
+          );
+          if(shipReturn)shipReturn.click();
+          else {
+            returnPending.current=false;
+            setWorld(null);
+            setEndingOrigin(finalWorld);
+            setEndingFinished(false);
+            try{window.sessionStorage.setItem('silent:ending-origin',finalWorld)}catch{}
+          }
+        },90);
+      },1150);
+    };
+    window.addEventListener('silent:mission-progress',onProgress);
+    return()=>window.removeEventListener('silent:mission-progress',onProgress);
+  },[closeArchive,endingOrigin]);
+
+  const restartStory=useCallback(()=>{
+    window.clearTimeout(handoffTimer.current);
+    window.clearTimeout(returnTimer.current);
+    clearMissionProgress();
+    try {
+      sessionStorage.removeItem('silent:ending-origin');
+      sessionStorage.removeItem('silent:stage');
+      sessionStorage.removeItem('silent:world');
+    }catch{}
+    // Reset real Moon/Mars scanning engines as well as the visible counters.
+    window.location.replace(window.location.pathname);
+  },[]);
+  useEffect(()=>{
+    const onRestart=event=>{
+      if(event.origin!==window.location.origin)return;
+      if(event.data?.type==='silent-ending-complete'){
+        setEndingFinished(true);
+      }else if(event.data?.type==='silent-ending-restart')restartStory();
+    };
+    window.addEventListener('message',onRestart);
+    return()=>window.removeEventListener('message',onRestart);
+  },[restartStory]);
   useEffect(()=>{
     if(selection && archiveRef.current && !archiveRef.current.open)archiveRef.current.showModal();
     else if(!selection && archiveRef.current?.open)archiveRef.current.close();
@@ -87,6 +160,12 @@ export default function App(){
     window.clearTimeout(handoffTimer.current);
     closeArchive();
     setWorld(null);
+    setEndingOrigin(null);
+    setEndingFinished(false);
+    setStoryProgress({moon:[],mars:[]});
+    returnPending.current=false;
+    clearMissionProgress();
+    try{window.sessionStorage.removeItem('silent:ending-origin')}catch{}
     setLaunchTransition(false);
     setLaunchComplete(false);
     setStartDismissed(false);
@@ -116,6 +195,22 @@ export default function App(){
         language={language} onLanguageChange={setLanguage}/>}
     </dialog>
     </main>}
+    {launchComplete && !endingOrigin && (
+      <aside className="mission-progress-pill" aria-live="polite">
+        <span>☾ {language==='my'?'လ':'MOON'} {storyProgress.moon.length}/{getMissionTotals().moon}</span>
+        <span>◈ {language==='my'?'အင်္ဂါ':'MARS'} {storyProgress.mars.length}/{getMissionTotals().mars}</span>
+      </aside>
+    )}
+    {endingOrigin && (
+      <section className="story-ending" aria-label="Story ending — returning to Earth" role="region">
+        <iframe src={`/ending/index.html?origin=${endingOrigin}&start=transit`}
+          title="The Silent Legacy — Return to Earth and Story Complete"
+          allow="autoplay" />
+        {endingFinished && <button className="story-ending-restart" type="button" onClick={restartStory}>
+          ↻ {language==='my'?'ဇာတ်လမ်းအစမှ ပြန်စရန်':'Restart Story'}
+        </button>}
+      </section>
+    )}
     {!launchComplete && !startDismissed && <StartScreen onBegin={()=>setStartDismissed(true)} />}
     {!launchComplete && startDismissed && <>
       <LaunchSimulator key={launchKey}

@@ -1,3 +1,4 @@
+import {isArtifactScanned} from './missionProgress.js';
 import { bindSurfaceDirectionPad } from './surfaceDirectionPad';
 import { mars } from '../data/mars';
 import { ASTRONAUT_ATLAS_URL } from '../data/astronautSprite';
@@ -30,7 +31,7 @@ export function mountMarsEngine(surface, onClosed) {
   const terrain = surface.querySelector('.outer-terrain');
   const field = surface.querySelector('.outer-mars-field');
   const guide = surface.querySelector('.outer-field-guide');
-  const scanned = new Set();
+  const scanned = new Set(mars.records.flatMap((record,index)=>isArtifactScanned('mars',record[0])?[index]:[]));
   const counters = surface.querySelector('.outer-lunar-scan-count');
   const controls = surface.querySelector('.outer-mars-controls');
   const card = controls.querySelector('.outer-lunar-card');

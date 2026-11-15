@@ -1,3 +1,4 @@
+import {recordArtifactScan,isArtifactScanned} from '../../game/missionProgress.js';
 import React, { useEffect, useState } from 'react';
 import PixelArtifactViewer, { archiveAssetFallback, assetUrl } from './PixelArtifactViewer';
 import { matchArtifact } from '../../data/archiveCatalog';
@@ -62,12 +63,14 @@ export default function ArchiveDashboard({ selection, onClose, language='en', on
   const [phase, setPhase] = useState(0);
   const [scanStatus, setScanStatus] = useState('idle');
   useEffect(() => {
-    setTab('pixel'); setExpanded(false); setPhase(0); setScanStatus('idle');
+    setTab('pixel'); setExpanded(false); setPhase(0);
+    setScanStatus(selection?.world && selection?.id && isArtifactScanned(selection.world,selection.id)?'done':'idle');
   }, [selection?.id, selection?.world]);
   useEffect(() => {
     if (scanStatus !== 'scanning') return;
     const id = window.setTimeout(() => {
       selection?.onScan?.();
+      recordArtifactScan(selection?.world,selection?.id);
       setScanStatus('done');
     }, 650);
     return () => window.clearTimeout(id);

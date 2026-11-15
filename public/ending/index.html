@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Silent Legacy — Story Ending</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=VT323&amp;display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       CORE RESET & RETRO ARCADE VIEWPORT
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #03050a;
+      font-family: 'Press Start 2P', monospace;
+      color: #f8fafc;
+    }
+
+    /* ==========================================================================
+       CRT MONITOR HOUSING & FULL-SCREEN SHADER OVERLAYS
+       ========================================================================== */
+    #crt-monitor {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #040814;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Main Pixel Canvas */
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* WebGL Post-Processing Shader Overlay (Subtle RGB Shift & Phosphor Curvature) */
+    #crt-gl-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 15;
+      mix-blend-mode: screen;
+      opacity: 0.42;
+    }
+
+    /* Scanlines + RGB Aperture Grille */
+    .crt-scanlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      background:
+        linear-gradient(
+          rgba(18, 16, 16, 0) 50%,
+          rgba(0, 0, 0, 0.34) 50%
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255, 0, 0, 0.045),
+          rgba(0, 255, 0, 0.015),
+          rgba(0, 0, 255, 0.045)
+        );
+      background-size: 100% 4px, 6px 100%;
+    }
+
+    /* Subtle CRT Flicker & Rolling Sync Bar */
+    .crt-rolling-bar {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 14%;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(140, 220, 255, 0.045) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      pointer-events: none;
+      z-index: 21;
+      animation: crtRoll 8s linear infinite;
+    }
+
+    @keyframes crtRoll {
+      0% { top: -15%; }
+      100% { top: 115%; }
+    }
+
+    /* Curved Screen Bezel Vignette & Phosphor Bloom */
+    .crt-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      box-shadow:
+        inset 0 0 85px rgba(0, 0, 0, 0.78),
+        inset 0 0 24px rgba(0, 180, 255, 0.14);
+      border-radius: 18px;
+    }
+
+    /* ==========================================================================
+       ARCADE HUD & CONTROLS (TOP BAR)
+       ========================================================================== */
+    .hud-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: clamp(12px, 2.2vw, 24px);
+      pointer-events: none;
+      text-shadow: 2px 2px 0px #000, -1px -1px 0px #000, 0 0 10px rgba(56, 189, 248, 0.7);
+    }
+
+    .hud-telemetry {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: clamp(9px, 1.3vw, 12px);
+      color: #bae6fd;
+      letter-spacing: 0.06em;
+    }
+
+    .hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(5, 14, 30, 0.72);
+      border: 2px solid rgba(56, 189, 248, 0.55);
+      padding: 6px 10px;
+      border-radius: 6px;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.65);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+      animation: pulseDot 1s steps(2, end) infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    .hud-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .origin-selector {
+      display: inline-flex;
+      background: rgba(5, 14, 30, 0.88);
+      border: 2px solid #38bdf8;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 4px 0 #0369a1;
+    }
+
+    .origin-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(8px, 1.05vw, 10px);
+      color: #94a3b8;
+      background: transparent;
+      border: none;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .origin-btn:hover {
+      color: #ffffff;
+      background: rgba(56, 189, 248, 0.18);
+    }
+
+    .origin-btn.active-moon {
+      background: #0284c7;
+      color: #ffffff;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .origin-btn.active-mars {
+      background: #c2410c;
+      color: #fef08a;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .arcade-mini-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(8px, 1.1vw, 11px);
+      color: #e0f2fe;
+      background: rgba(7, 19, 38, 0.85);
+      border: 2px solid #38bdf8;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #0369a1, 0 0 12px rgba(56, 189, 248, 0.35);
+      transition: transform 0.08s ease, background 0.15s ease;
+    }
+
+    .arcade-mini-btn:hover {
+      background: #0c4a6e;
+      color: #ffffff;
+    }
+
+    .arcade-mini-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #0369a1;
+    }
+
+    /* ==========================================================================
+       PHASE SUBTITLE BANNER (BOTTOM TELEMETRY CALLOUTS)
+       ========================================================================== */
+    #phase-banner {
+      position: absolute;
+      bottom: clamp(18px, 4vh, 36px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 28;
+      background: rgba(4, 11, 24, 0.82);
+      border: 2px solid rgba(125, 211, 252, 0.6);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: clamp(9px, 1.35vw, 13px);
+      color: #fde047;
+      text-align: center;
+      white-space: nowrap;
+      text-shadow: 2px 2px 0 #000, 0 0 8px rgba(250, 204, 21, 0.6);
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.7);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: none;
+    }
+
+    #phase-banner.hidden {
+      opacity: 0;
+      transform: translate(-50%, 16px);
+    }
+
+    /* ==========================================================================
+       VICTORY / ENDING OVERLAY MODAL
+       ========================================================================== */
+    #victory-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 3vw, 28px);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    #victory-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .victory-card {
+      width: min(94vw, 760px);
+      background: linear-gradient(180deg, rgba(6, 16, 36, 0.90) 0%, rgba(4, 11, 26, 0.94) 100%);
+      border: 4px solid #38bdf8;
+      border-radius: 14px;
+      padding: clamp(18px, 3.5vw, 34px);
+      box-shadow:
+        0 0 0 4px #020617,
+        0 0 36px rgba(56, 189, 248, 0.45),
+        inset 0 0 24px rgba(14, 165, 233, 0.22);
+      text-align: center;
+      position: relative;
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #victory-overlay.visible .victory-card {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Pixel Corner Rivets */
+    .corner-rivet {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #fde047;
+      box-shadow: 0 0 8px #facc15;
+    }
+    .corner-rivet.tl { top: 8px; left: 8px; }
+    .corner-rivet.tr { top: 8px; right: 8px; }
+    .corner-rivet.bl { bottom: 8px; left: 8px; }
+    .corner-rivet.br { bottom: 8px; right: 8px; }
+
+    .game-title-tag {
+      font-size: clamp(10px, 1.4vw, 13px);
+      color: #38bdf8;
+      letter-spacing: 0.24em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 0 #000, 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+
+    .mission-complete-header {
+      font-size: clamp(18px, 3.6vw, 34px);
+      line-height: 1.25;
+      color: #fde047;
+      margin-bottom: 16px;
+      text-shadow:
+        3px 3px 0 #9a3412,
+        -1px -1px 0 #000,
+        0 0 18px rgba(250, 204, 21, 0.75);
+      animation: titleGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from {
+        text-shadow: 3px 3px 0 #9a3412, -1px -1px 0 #000, 0 0 12px rgba(250, 204, 21, 0.55);
+      }
+      to {
+        text-shadow: 3px 3px 0 #9a3412, -1px -1px 0 #000, 0 0 24px rgba(253, 224, 71, 0.95);
+      }
+    }
+
+    .congrats-box {
+      min-height: clamp(64px, 11vh, 92px);
+      background: rgba(2, 8, 20, 0.75);
+      border: 2px solid rgba(148, 163, 184, 0.35);
+      border-radius: 8px;
+      padding: clamp(12px, 2vw, 18px);
+      margin-bottom: 18px;
+      font-size: clamp(9px, 1.35vw, 13px);
+      line-height: 1.75;
+      color: #f1f5f9;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .cursor-block {
+      display: inline-block;
+      width: 9px;
+      height: 13px;
+      background: #4ade80;
+      vertical-align: middle;
+      margin-left: 4px;
+      animation: blinkCursor 0.7s steps(2, end) infinite;
+    }
+
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Retro Arcade Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    @media (max-width: 540px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-item {
+      background: rgba(15, 23, 42, 0.78);
+      border: 2px solid rgba(56, 189, 248, 0.35);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .stat-label {
+      font-size: clamp(8px, 1.05vw, 10px);
+      color: #94a3b8;
+    }
+
+    .stat-value {
+      font-size: clamp(10px, 1.3vw, 13px);
+      color: #4ade80;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .stat-value.gold {
+      color: #fde047;
+    }
+
+    .stat-value.cyan {
+      color: #38bdf8;
+    }
+
+    /* Action Buttons */
+    .victory-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .arcade-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(10px, 1.35vw, 13px);
+      padding: 13px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 3px solid;
+      transition: transform 0.08s ease, filter 0.15s ease;
+      text-transform: uppercase;
+    }
+
+    .arcade-btn-primary {
+      background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+      border-color: #86efac;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #052e16;
+      box-shadow: 0 5px 0 #14532d, 0 0 18px rgba(74, 222, 128, 0.5);
+      animation: pressStartPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pressStartPulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.22); }
+    }
+
+    .arcade-btn-secondary {
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      border-color: #7dd3fc;
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #082f49;
+      box-shadow: 0 5px 0 #0c4a6e, 0 0 16px rgba(56, 189, 248, 0.45);
+    }
+
+    .arcade-btn:hover {
+      filter: brightness(1.15);
+    }
+
+    .arcade-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #000;
+    }
+
+    /* Toast Message Box (Replaces alert) */
+    #arcade-toast {
+      position: absolute;
+      top: 72px;
+      left: 50%;
+      transform: translate(-50%, -12px);
+      z-index: 45;
+      background: #0f172a;
+      border: 3px solid #fde047;
+      color: #fde047;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: clamp(9px, 1.2vw, 12px);
+      text-shadow: 2px 2px 0 #000;
+      box-shadow: 0 6px 0 #000, 0 0 20px rgba(250, 204, 21, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    #arcade-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  </style>
+
+  <style id="integrated-ending-theme">
+  /* 2.5D NASA mission palette; ending uses the same pixel-spaceplane
+     as Earth launch instead of the original white rocket placeholder. */
+  html,body,#crt-monitor{background:#030915;color:#d8efff}
+  #crt-monitor{box-shadow:inset 0 0 95px #071a33}
+  .crt-scanlines{opacity:.38}
+  .crt-rolling-bar{opacity:.24}
+  #crt-gl-canvas{opacity:.16}
+  .crt-vignette{box-shadow:inset 0 0 65px #010714a8;border-radius:0}
+  .hud-top{font-family:ui-monospace,'VT323',monospace}
+  .hud-badge{background:#06172acc;border:1px solid #558db5}
+  .origin-selector,#btn-download-zip,#btn-skip,#btn-replay,#btn-switch-origin{display:none!important}
+  .victory-card{
+    background:linear-gradient(155deg,#081d32f5,#040c1af7);
+    border:2px solid #5eb7e2;border-radius:12px;
+    box-shadow:0 0 55px #1a80b14d,inset 0 0 38px #144e6440;
+  }
+  .mission-complete-header{color:#b9edff;text-shadow:0 0 22px #23aaff88}
+  .game-title-tag{color:#78c8f5}
+  .arcade-btn-primary{
+    background:linear-gradient(#117d9b,#0a4b72);
+    border-color:#92dcff;box-shadow:0 4px #062c46,0 0 25px #159ad288
+  }
+  .stats-grid .stat-item{border:1px solid #4e7894;background:#041729e8}
+  .stat-value.gold,.stat-value.cyan{color:#9fdaf6}
+  @media(max-width:600px){.hud-top{padding:10px}.victory-card{padding:16px}
+    .victory-actions{gap:6px}.arcade-btn-primary{font-size:10px}}
+  </style>
+</head>
+<body>
+  <div id="crt-monitor">
+    <!-- Crisp Low-Res Pixel Art Canvas scaled up cleanly -->
+    <canvas id="game-canvas" width="594" height="270"></canvas>
+
+    <!-- WebGL Post-Process Chromatic & Curvature Glow Shader Canvas -->
+    <canvas id="crt-gl-canvas" width="880" height="400"></canvas>
+
+    <!-- CRT Scanline, Rolling Bar, and Bezel Vignette Layers -->
+    <div class="crt-scanlines"></div>
+    <div class="crt-rolling-bar"></div>
+    <div class="crt-vignette"></div>
+
+    <!-- Top Retro Telemetry & Sound/Skip Controls -->
+    <header class="hud-top">
+      <div class="hud-telemetry">
+        <div class="hud-badge">
+          <span class="status-dot"></span>
+          <span id="scene-badge-text">SCENE 1/3 // LUNA DEPARTURE</span>
+        </div>
+        <div class="hud-badge" id="telemetry-readout"><span>LUNA EVA // APPROACHING LANDER</span></div>
+      </div>
+
+      <div class="hud-controls">
+        <div class="origin-selector" role="group" aria-label="Select Mission Origin">
+          <button id="btn-origin-moon" class="origin-btn active-moon" title="Launch Ending from Moon (Key 1)">
+            [1] MOON
+          </button>
+          <button id="btn-origin-mars" class="origin-btn" title="Launch Ending from Mars (Key 2)">
+            [2] MARS
+          </button>
+        </div>
+        <button id="btn-audio" class="arcade-mini-btn" title="Toggle Retro Chiptune &amp; SFX">
+          SOUND: ON
+        </button>
+        <button id="btn-download-zip" class="arcade-mini-btn" title="Download Project as .ZIP for VS Code">
+          ⬇ .ZIP
+        </button>
+        <button id="btn-skip" class="arcade-mini-btn" title="Skip to Splashdown / Victory">
+          SKIP &gt;&gt;
+        </button>
+      </div>
+    </header>
+
+    <!-- Toast Notification Banner -->
+    <div id="arcade-toast" role="status" aria-live="polite"></div>
+
+    <!-- Bottom Phase Narrative Banner -->
+    <div id="phase-banner">[SCENE 1/3] ASTRONAUT BOARDING CAPSULE ON LUNAR SURFACE</div>
+
+    <!-- Victory & Ending Credits Card -->
+    <section id="victory-overlay" aria-label="Story Complete Victory Screen">
+      <div class="victory-card">
+        <span class="corner-rivet tl"></span>
+        <span class="corner-rivet tr"></span>
+        <span class="corner-rivet bl"></span>
+        <span class="corner-rivet br"></span>
+
+        <div class="game-title-tag">★ SILENT LEGACY — ENDING ★</div>
+        <h1 class="mission-complete-header">STORY COMPLETE</h1>
+
+        <div class="congrats-box">
+          <span id="typewriter-text"></span><span class="cursor-block" id="typewriter-cursor"></span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">MISSION ORIGIN</span>
+            <span class="stat-value gold" id="stat-origin-val">LUNA BASE (MOON)</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">SPLASHDOWN ZONE</span>
+            <span class="stat-value cyan">PACIFIC OCEAN (14°N)</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">LEGACY DATA CORE</span>
+            <span class="stat-value">100% RECOVERED</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">PILOT RANK</span>
+            <span class="stat-value gold">★ S-CLASS LEGEND ★</span>
+          </div>
+        </div>
+
+        <div class="victory-actions">
+          <button id="btn-replay" class="arcade-btn arcade-btn-secondary">
+            ↺ REPLAY 3-SCENE ENDING
+          </button>
+          <button id="btn-switch-origin" class="arcade-btn arcade-btn-secondary">⇄ PLAY MARS ENDING</button>
+          <button id="btn-continue" class="arcade-btn arcade-btn-primary">
+            ↻ RESTART STORY
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /**
+     * ==========================================================================
+     * SILENT LEGACY — 3-SCENE 2.5D PIXEL-ART ARCADE ENDING ENGINE
+     * ==========================================================================
+     * Scene 1: Surface Boarding & Liftoff (MOON or MARS selectable)
+     *          - Astronaut walks/hops across 2.5D regolith/canyon terrain, climbs
+     *            ladder into ship, hatch seals, thrusters ignite, vertical liftoff.
+     * Scene 2: Deep Space Orbital Transit
+     *          - Multi-layer starfield, shrinking Moon/Mars behind, growing pixel
+     *            Earth ahead as the spacecraft aligns for atmospheric entry.
+     * Scene 3: Earth Re-Entry, Parachute & Pacific Ocean Splashdown
+     *          - Plasma re-entry -> striped parachute deployment -> splashdown ->
+     *            bobbing recovery beacon & STORY COMPLETE arcade overlay.
+     */
+
+    (() => {
+      'use strict';
+
+      // ------------------------------------------------------------------------
+      // DOM REFERENCES
+      // ------------------------------------------------------------------------
+      const canvas = document.getElementById('game-canvas');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const glCanvas = document.getElementById('crt-gl-canvas');
+
+      const sceneBadgeEl = document.getElementById('scene-badge-text');
+      const telemetryEl = document.getElementById('telemetry-readout');
+      const phaseBannerEl = document.getElementById('phase-banner');
+      const victoryOverlayEl = document.getElementById('victory-overlay');
+      const typewriterTextEl = document.getElementById('typewriter-text');
+      const statOriginEl = document.getElementById('stat-origin-val');
+      const toastEl = document.getElementById('arcade-toast');
+
+      const btnOriginMoon = document.getElementById('btn-origin-moon');
+      const btnOriginMars = document.getElementById('btn-origin-mars');
+      const btnAudio = document.getElementById('btn-audio');
+      const btnDownloadZip = document.getElementById('btn-download-zip');
+      const btnSkip = document.getElementById('btn-skip');
+      const btnReplay = document.getElementById('btn-replay');
+      const btnSwitchOrigin = document.getElementById('btn-switch-origin');
+      const btnContinue = document.getElementById('btn-continue');
+
+      // ------------------------------------------------------------------------
+      // VIRTUAL PIXEL RESOLUTION (16:9 Crisp Pixel Grid)
+      // ------------------------------------------------------------------------
+      const BASE_HEIGHT = 270;
+      let VW = 480;
+      let VH = 270;
+
+      function resizeCanvas() {
+        const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+        VH = BASE_HEIGHT;
+        VW = Math.max(320, Math.round(VH * aspect));
+        canvas.width = VW;
+        canvas.height = VH;
+        ctx.imageSmoothingEnabled = false;
+
+        glCanvas.width = Math.floor(window.innerWidth / 2);
+        glCanvas.height = Math.floor(window.innerHeight / 2);
+        initSceneEntities();
+      }
+
+      // ------------------------------------------------------------------------
+      // WEBGL CRT SHADER OVERLAY (Chromatic Aberration + Phosphor Vignette)
+      // ------------------------------------------------------------------------
+      let gl = null;
+      let glProgram = null;
+      let glTimeLoc = null;
+
+      function initCRTShader() {
+        try {
+          gl = glCanvas.getContext('webgl') || glCanvas.getContext('experimental-webgl');
+          if (!gl) return;
+
+          const vsSource = `
+            attribute vec2 a_pos;
+            varying vec2 v_uv;
+            void main() {
+              v_uv = a_pos * 0.5 + 0.5;
+              gl_Position = vec4(a_pos, 0.0, 1.0);
+            }
+          `;
+
+          const fsSource = `
+            precision mediump float;
+            varying vec2 v_uv;
+            uniform float u_time;
+
+            vec2 curveUV(vec2 uv) {
+              uv = uv * 2.0 - 1.0;
+              vec2 offset = abs(uv.yx) / vec2(5.5, 4.5);
+              uv = uv + uv * offset * offset;
+              uv = uv * 0.5 + 0.5;
+              return uv;
+            }
+
+            void main() {
+              vec2 uv = curveUV(v_uv);
+              if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+                gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                return;
+              }
+
+              // Subtle phosphor grille + warm/cool chromatic edge sheen
+              float dist = distance(uv, vec2(0.5));
+              float edgeGlow = smoothstep(0.25, 0.85, dist);
+              float scan = sin(uv.y * 540.0 + u_time * 4.0) * 0.5 + 0.5;
+              float r = edgeGlow * 0.16 * scan;
+              float g = (1.0 - edgeGlow) * 0.06;
+              float b = edgeGlow * 0.24;
+
+              gl_FragColor = vec4(r, g, b, 0.35);
+            }
+          `;
+
+          const compile = (type, src) => {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src);
+            gl.compileShader(s);
+            return s;
+          };
+
+          const vs = compile(gl.VERTEX_SHADER, vsSource);
+          const fs = compile(gl.FRAGMENT_SHADER, fsSource);
+          glProgram = gl.createProgram();
+          gl.attachShader(glProgram, vs);
+          gl.attachShader(glProgram, fs);
+          gl.linkProgram(glProgram);
+          gl.useProgram(glProgram);
+
+          const buf = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+          gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+            gl.STATIC_DRAW
+          );
+
+          const posLoc = gl.getAttribLocation(glProgram, 'a_pos');
+          gl.enableVertexAttribArray(posLoc);
+          gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+          glTimeLoc = gl.getUniformLocation(glProgram, 'u_time');
+        } catch (err) {
+          gl = null;
+        }
+      }
+
+      function renderCRTShader(t) {
+        if (!gl || !glProgram) return;
+        gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+        gl.uniform1f(glTimeLoc, t);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+
+      // ------------------------------------------------------------------------
+      // RETRO WEB AUDIO API SYNTHESIZER (8-BIT / 16-BIT SFX & VICTORY FANFARE)
+      // ------------------------------------------------------------------------
+      class RetroAudioEngine {
+        constructor() {
+          this.ctx = null;
+          this.enabled = true;
+          this.fanfarePlayed = false;
+          this.noiseBuffer = null;
+        }
+
+        ensureContext() {
+          if (!this.enabled) return false;
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return false;
+            this.ctx = new AudioCtx();
+            this.createNoiseBuffer();
+          }
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return true;
+        }
+
+        createNoiseBuffer() {
+          if (!this.ctx) return;
+          const length = this.ctx.sampleRate * 2.0;
+          const buffer = this.ctx.createBuffer(1, length, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < length; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          this.noiseBuffer = buffer;
+        }
+
+        toggle() {
+          this.enabled = !this.enabled;
+          if (this.enabled) {
+            this.ensureContext();
+            this.playBeep(660, 0.08, 'square', 0.08);
+          }
+          return this.enabled;
+        }
+
+        playBeep(freq, duration, type = 'square', vol = 0.08, delay = 0) {
+          if (!this.ensureContext()) return;
+          const now = this.ctx.currentTime + delay;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(vol, now + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        }
+
+        playParachuteDeploy() {
+          if (!this.ensureContext() || !this.noiseBuffer) return;
+          const now = this.ctx.currentTime;
+
+          // Crisp filtered noise "WHOOMP"
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(180, now);
+          filter.frequency.exponentialRampToValueAtTime(620, now + 0.14);
+          filter.frequency.exponentialRampToValueAtTime(140, now + 0.45);
+          filter.Q.value = 1.4;
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.linearRampToValueAtTime(0.22, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          src.start(now);
+          src.stop(now + 0.5);
+
+          // Retro confirmation chime
+          this.playBeep(523.25, 0.09, 'square', 0.06, 0.05);
+          this.playBeep(783.99, 0.14, 'square', 0.06, 0.14);
+        }
+
+        playSplashdown() {
+          if (!this.ensureContext() || !this.noiseBuffer) return;
+          const now = this.ctx.currentTime;
+
+          // White-noise water splash burst
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1400, now);
+          filter.frequency.exponentialRampToValueAtTime(240, now + 0.85);
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          src.start(now);
+          src.stop(now + 0.95);
+
+          // Low sub thud
+          const osc = this.ctx.createOscillator();
+          const oGain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(130, now);
+          osc.frequency.exponentialRampToValueAtTime(42, now + 0.35);
+          oGain.gain.setValueAtTime(0.22, now);
+          oGain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+          osc.connect(oGain);
+          oGain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        }
+
+        playThrusterIgnite() {
+          if (!this.ensureContext() || !this.noiseBuffer) return;
+          const now = this.ctx.currentTime;
+
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(220, now);
+          filter.frequency.linearRampToValueAtTime(780, now + 0.45);
+          filter.frequency.exponentialRampToValueAtTime(160, now + 2.2);
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.linearRampToValueAtTime(0.22, now + 0.3);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 2.3);
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          src.start(now);
+          src.stop(now + 2.35);
+
+          this.playBeep(110, 0.25, 'sawtooth', 0.06, 0);
+          this.playBeep(146.83, 0.35, 'sawtooth', 0.06, 0.18);
+        }
+
+        playHatchSeal() {
+          this.playBeep(330, 0.07, 'square', 0.06, 0);
+          this.playBeep(493.88, 0.11, 'square', 0.06, 0.08);
+        }
+
+        playVictoryFanfare() {
+          if (this.fanfarePlayed || !this.ensureContext()) return;
+          this.fanfarePlayed = true;
+
+          // Classic 16-bit Arcade Ending Victory Melody (C Major Heroic Cadence)
+          const melody = [
+            { f: 523.25, d: 0.13, t: 0.00 }, // C5
+            { f: 659.25, d: 0.13, t: 0.14 }, // E5
+            { f: 783.99, d: 0.13, t: 0.28 }, // G5
+            { f: 1046.50, d: 0.34, t: 0.42 }, // C6
+            { f: 880.00, d: 0.16, t: 0.80 }, // A5
+            { f: 1046.50, d: 0.55, t: 0.98 }, // C6
+            // Secondary warm harmonic phrase
+            { f: 783.99, d: 0.16, t: 1.62 }, // G5
+            { f: 880.00, d: 0.16, t: 1.80 }, // A5
+            { f: 987.77, d: 0.16, t: 1.98 }, // B5
+            { f: 1046.50, d: 0.75, t: 2.16 }  // C6
+          ];
+
+          const bass = [
+            { f: 130.81, d: 0.38, t: 0.00 }, // C3
+            { f: 196.00, d: 0.38, t: 0.42 }, // G3
+            { f: 174.61, d: 0.35, t: 0.80 }, // F3
+            { f: 130.81, d: 0.55, t: 1.16 }, // C3
+            { f: 196.00, d: 0.50, t: 1.62 }, // G3
+            { f: 261.63, d: 0.75, t: 2.16 }  // C4
+          ];
+
+          melody.forEach(n => this.playBeep(n.f, n.d, 'square', 0.075, n.t));
+          bass.forEach(n => this.playBeep(n.f, n.d, 'triangle', 0.09, n.t));
+        }
+
+        reset() {
+          this.fanfarePlayed = false;
+        }
+      }
+
+      const audio = new RetroAudioEngine();
+
+      // Unlock Web Audio on first user interaction anywhere
+      const unlockAudio = () => {
+        audio.ensureContext();
+        window.removeEventListener('pointerdown', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
+      };
+      window.addEventListener('pointerdown', unlockAudio);
+      window.addEventListener('keydown', unlockAudio);
+
+      // ------------------------------------------------------------------------
+      // ENDING SEQUENCE STATE MACHINE & SCENE ENTITIES
+      // ------------------------------------------------------------------------
+      const ORIGINS = {
+        MOON: 'MOON',
+        MARS: 'MARS'
+      };
+
+      const SCENES = {
+        SURFACE_LAUNCH: 'SURFACE_LAUNCH', // Scene 1: Moon or Mars Boarding & Liftoff
+        SPACE_TRANSIT: 'SPACE_TRANSIT',   // Scene 2: Deep Space Cruise to Earth
+        EARTH_LANDING: 'EARTH_LANDING'    // Scene 3: Re-entry, Parachute, Ocean & Victory
+      };
+
+      const PHASES = {
+        REENTRY: 'REENTRY',
+        PARACHUTE: 'PARACHUTE',
+        SPLASHDOWN: 'SPLASHDOWN',
+        VICTORY: 'VICTORY'
+      };
+
+      function getCongratsMessage(origin) {
+        const place = origin === ORIGINS.MARS ? 'MARS' : 'THE MOON';
+        return `CONGRATULATIONS! YOU HAVE COMPLETED THE TASK. AFTER DEPARTING ${place}, THE ASTRONAUT HAS SAFELY LANDED IN EARTH'S PACIFIC OCEAN. SILENT LEGACY RESTORED.`;
+      }
+
+      // Support optional URL query (?origin=mars or ?origin=moon)
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialOrigin =
+        (urlParams.get('origin') || '').toUpperCase() === 'MARS' ? ORIGINS.MARS : ORIGINS.MOON;
+
+      const state = {
+        origin: initialOrigin,
+        scene: SCENES.SURFACE_LAUNCH,
+        sceneTime: 0,
+        transitionAlpha: 0,
+        phase: PHASES.REENTRY,
+        time: 0,
+        phaseTime: 0,
+        cameraY: 0,
+        oceanHorizonY: 186,
+        // Scene 1: Astronaut & Lander State
+        surface: {
+          groundY: 212,
+          astroX: 0,
+          astroY: 0,
+          astroStep: 0,
+          astroStage: 'WALK', // WALK -> CLIMB -> BOARDED
+          climbProgress: 0,
+          hatchOpen: 1,       // 1 = open, 0 = sealed
+          thrusterPower: 0,
+          liftoffOffset: 0,
+          craters: [],
+          rocks: [],
+          dustPuffs: []
+        },
+        // Scene 2: Deep Space Transit State
+        transit: {
+          progress: 0,
+          asteroids: []
+        },
+        // Scene 3: Capsule & Earth Landing State
+        ship: {
+          x: 0,
+          y: 0,
+          vx: 0,
+          vy: 0,
+          angle: 0.52,
+          heatIntensity: 1.0,
+          chuteOpen: 0,
+          chuteSway: 0,
+          chuteDeflate: 0,
+          inWater: false,
+          bobPhase: 0,
+          beaconTimer: 0
+        },
+        stars: [],
+        clouds: [],
+        sparkles: [],
+        particles: [],
+        splashDroplets: [],
+        foamRings: [],
+        seagulls: [],
+        typewriterIndex: 0,
+        typewriterTimer: 0,
+        shakeTime: 0,
+        shakeMag: 0
+      };
+
+      function initSceneEntities() {
+        // Stars (used in Scene 1 space sky, Scene 2 deep space, and Scene 3 upper atmosphere)
+        state.stars = Array.from({ length: 95 }, () => ({
+          x: Math.random() * VW,
+          y: Math.random() * VH,
+          size: Math.random() < 0.22 ? 2 : 1,
+          speed: 8 + Math.random() * 48,
+          twinkle: Math.random() * Math.PI * 2,
+          color: Math.random() < 0.25 ? '#bae6fd' : (Math.random() < 0.15 ? '#fde047' : '#ffffff')
+        }));
+
+        // Scene 1 surface terrain features (craters & boulders)
+        state.surface.groundY = Math.round(VH * 0.78);
+        state.surface.craters = Array.from({ length: 7 }, (_, i) => ({
+          x: Math.round((i + 0.5) * (VW / 7) + (Math.random() - 0.5) * 18),
+          y: state.surface.groundY + 10 + (i % 3) * 12,
+          rx: 10 + (i % 4) * 5,
+          ry: 3 + (i % 2) * 2
+        }));
+
+        state.surface.rocks = Array.from({ length: 12 }, (_, i) => ({
+          x: Math.round((i / 12) * VW + Math.random() * 20),
+          y: state.surface.groundY + 3 + (i % 4) * 11,
+          w: 4 + (i % 3) * 3,
+          h: 3 + (i % 2) * 2
+        }));
+
+        // Scene 2 passing pixel asteroids
+        state.transit.asteroids = Array.from({ length: 6 }, (_, i) => ({
+          x: VW * 0.2 + i * (VW * 0.16),
+          y: 35 + ((i * 47) % (VH - 70)),
+          size: 3 + (i % 3) * 2,
+          speed: 35 + (i % 3) * 22
+        }));
+
+        // Multi-depth 2.5D clouds (Scene 3)
+        state.clouds = Array.from({ length: 11 }, (_, i) => ({
+          x: (i / 11) * VW + Math.random() * 40,
+          y: 42 + (i % 4) * 28 + Math.random() * 12,
+          w: 36 + (i % 3) * 18,
+          h: 10 + (i % 2) * 4,
+          speed: 3.5 + (i % 3) * 2.5,
+          layer: i % 2
+        }));
+
+        // Ocean specular pixel sparkles (Scene 3)
+        state.sparkles = Array.from({ length: 55 }, () => ({
+          x: Math.random() * VW,
+          y: 188 + Math.random() * (VH - 190),
+          phase: Math.random() * Math.PI * 2,
+          speed: 2.5 + Math.random() * 3.5
+        }));
+
+        // Distant coastal seabirds (Scene 3)
+        state.seagulls = Array.from({ length: 4 }, (_, i) => ({
+          x: VW * 0.15 + i * 55,
+          y: 145 + (i % 2) * 14,
+          wingPhase: i * 1.3,
+          speed: 10 + i * 2
+        }));
+      }
+
+      function updateOriginUI() {
+        const isMoon = state.origin === ORIGINS.MOON;
+        btnOriginMoon.classList.toggle('active-moon', isMoon);
+        btnOriginMars.classList.toggle('active-mars', !isMoon);
+        statOriginEl.textContent = isMoon ? 'LUNA BASE (MOON)' : 'ARES SECTOR (MARS)';
+        btnSwitchOrigin.textContent = isMoon ? '⇄ PLAY MARS ENDING' : '⇄ PLAY MOON ENDING';
+      }
+
+      function setOrigin(newOrigin) {
+        if (newOrigin !== ORIGINS.MOON && newOrigin !== ORIGINS.MARS) return;
+        state.origin = newOrigin;
+        updateOriginUI();
+        resetSequence();
+        showToast(
+          newOrigin === ORIGINS.MARS
+            ? 'ORIGIN SET: MARS — LAUNCHING RETURN SEQUENCE'
+            : 'ORIGIN SET: MOON — LAUNCHING RETURN SEQUENCE'
+        );
+      }
+
+      function resetSequence() {
+        updateOriginUI();
+        state.scene = SCENES.SURFACE_LAUNCH;
+        state.sceneTime = 0;
+        state.transitionAlpha = 0;
+        state.phase = PHASES.REENTRY;
+        state.time = 0;
+        state.phaseTime = 0;
+        state.cameraY = -170;
+        state.oceanHorizonY = Math.round(VH * 0.67);
+
+        // Reset Scene 1 Surface Boarding & Launch
+        const shipPadX = Math.round(VW * 0.56);
+        state.surface.groundY = Math.round(VH * 0.78);
+        state.surface.astroX = Math.round(VW * 0.24);
+        state.surface.astroY = state.surface.groundY;
+        state.surface.astroStep = 0;
+        state.surface.astroStage = 'WALK';
+        state.surface.climbProgress = 0;
+        state.surface.hatchOpen = 1;
+        state.surface.thrusterPower = 0;
+        state.surface.liftoffOffset = 0;
+        state.surface.dustPuffs = [];
+
+        // Reset Scene 2 Deep Space Transit
+        state.transit.progress = 0;
+
+        // Reset Scene 3 Earth Re-entry & Splashdown
+        state.ship.x = VW * 0.16;
+        state.ship.y = 48;
+        state.ship.vx = 28;
+        state.ship.vy = 22;
+        state.ship.angle = 0.56;
+        state.ship.heatIntensity = 1.0;
+        state.ship.chuteOpen = 0;
+        state.ship.chuteSway = 0;
+        state.ship.chuteDeflate = 0;
+        state.ship.inWater = false;
+        state.ship.bobPhase = 0;
+        state.ship.beaconTimer = 0;
+
+        state.particles = [];
+        state.splashDroplets = [];
+        state.foamRings = [];
+        state.typewriterIndex = 0;
+        state.typewriterTimer = 0;
+        state.shakeTime = 0;
+
+        const isMoon = state.origin === ORIGINS.MOON;
+        sceneBadgeEl.textContent = isMoon
+          ? 'SCENE 1/3 // LUNA DEPARTURE'
+          : 'SCENE 1/3 // MARS DEPARTURE';
+        telemetryEl.innerHTML = isMoon
+          ? '<span>RETURN: LUNA | ALL ARCHIVES SECURED</span>'
+          : '<span>RETURN: MARS | ALL ARCHIVES SECURED</span>';
+
+        typewriterTextEl.textContent = '';
+        victoryOverlayEl.classList.remove('visible');
+        phaseBannerEl.classList.remove('hidden');
+        phaseBannerEl.textContent = isMoon
+          ? '[SCENE 1/3] ASTRONAUT BOARDING CAPSULE ON LUNAR SURFACE'
+          : '[SCENE 1/3] ASTRONAUT BOARDING CAPSULE ON MARTIAN SURFACE';
+        audio.reset();
+      }
+
+      function enterScene(newScene) {
+        state.scene = newScene;
+        state.sceneTime = 0;
+        state.particles = [];
+
+        if (newScene === SCENES.SPACE_TRANSIT) {
+          state.transit.progress = 0;
+          sceneBadgeEl.textContent = 'SCENE 2/3 // DEEP SPACE TRANSIT';
+          phaseBannerEl.classList.remove('hidden');
+          phaseBannerEl.textContent =
+            state.origin === ORIGINS.MARS
+              ? '[SCENE 2/3] INTERPLANETARY CRUISE — MARS TO EARTH TRAJECTORY'
+              : '[SCENE 2/3] TRANSLUNAR INJECTION — RETURNING TO EARTH ORBIT';
+        } else if (newScene === SCENES.EARTH_LANDING) {
+          state.phase = PHASES.REENTRY;
+          state.phaseTime = 0;
+          state.cameraY = -170;
+          state.ship.x = VW * 0.16;
+          state.ship.y = 48;
+          state.ship.angle = 0.56;
+          state.ship.heatIntensity = 1.0;
+          state.ship.chuteOpen = 0;
+          state.ship.chuteDeflate = 0;
+          state.ship.inWater = false;
+
+          sceneBadgeEl.textContent = 'SCENE 3/3 // EARTH SPLASHDOWN';
+          phaseBannerEl.classList.remove('hidden');
+          phaseBannerEl.textContent = '[SCENE 3/3] ATMOSPHERIC RE-ENTRY — HEAT SHIELD ENGAGED';
+        }
+      }
+
+      function skipToVictory() {
+        audio.ensureContext();
+        state.scene = SCENES.EARTH_LANDING;
+        state.transitionAlpha = 0;
+        state.cameraY = 0;
+        state.ship.x = VW * 0.5;
+        state.ship.y = state.oceanHorizonY + 18;
+        state.ship.angle = 0;
+        state.ship.heatIntensity = 0;
+        state.ship.chuteOpen = 1;
+        state.ship.chuteDeflate = 1;
+        state.ship.inWater = true;
+
+        sceneBadgeEl.textContent = 'SCENE 3/3 // EARTH SPLASHDOWN';
+
+        if (state.phase !== PHASES.VICTORY) {
+          spawnSplashdownEffects(state.ship.x, state.ship.y);
+          audio.playSplashdown();
+        }
+
+        enterPhase(PHASES.VICTORY);
+        const fullMsg = getCongratsMessage(state.origin);
+        state.typewriterIndex = fullMsg.length;
+        typewriterTextEl.textContent = fullMsg;
+      }
+
+      function enterPhase(newPhase) {
+        state.phase = newPhase;
+        state.phaseTime = 0;
+
+        if (newPhase === PHASES.PARACHUTE) {
+          phaseBannerEl.textContent = '[SCENE 3/3] MAIN PARACHUTE DEPLOYED — DESCENT STABILIZED';
+          audio.playParachuteDeploy();
+          state.shakeTime = 0.25;
+          state.shakeMag = 2.5;
+        } else if (newPhase === PHASES.SPLASHDOWN) {
+          phaseBannerEl.textContent = '[SCENE 3/3] SPLASHDOWN CONFIRMED — PACIFIC OCEAN RECOVERY';
+          audio.playSplashdown();
+          state.shakeTime = 0.38;
+          state.shakeMag = 3.5;
+          spawnSplashdownEffects(state.ship.x, state.ship.y);
+        } else if (newPhase === PHASES.VICTORY) {
+          phaseBannerEl.classList.add('hidden');
+          victoryOverlayEl.classList.add('visible');
+          audio.playVictoryFanfare();
+          window.parent.postMessage({type:'silent-ending-complete'},window.location.origin);
+        }
+      }
+
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+          toastEl.classList.remove('show');
+        }, 2600);
+      }
+
+      // ------------------------------------------------------------------------
+      // PARTICLE & SPLASHDOWN GENERATORS
+      // ------------------------------------------------------------------------
+      function spawnReentryPlasma(x, y) {
+        for (let i = 0; i < 4; i++) {
+          const isCore = Math.random() < 0.45;
+          state.particles.push({
+            x: x + (Math.random() - 0.5) * 10,
+            y: y + (Math.random() - 0.5) * 8,
+            vx: -35 - Math.random() * 45,
+            vy: -25 - Math.random() * 35,
+            life: 0.28 + Math.random() * 0.25,
+            maxLife: 0.53,
+            size: isCore ? 3 : 2,
+            color: isCore ? '#fef08a' : (Math.random() < 0.5 ? '#fb923c' : '#ef4444')
+          });
+        }
+      }
+
+      function spawnSplashdownEffects(x, y) {
+        // Multi-tiered crisp pixel water droplets
+        for (let i = 0; i < 44; i++) {
+          const spread = (Math.random() - 0.5) * 2.2;
+          const speed = 35 + Math.random() * 75;
+          state.splashDroplets.push({
+            x: x + (Math.random() - 0.5) * 14,
+            y: y - 2,
+            vx: Math.sin(spread) * speed,
+            vy: -Math.abs(Math.cos(spread)) * speed - 18,
+            size: Math.random() < 0.35 ? 3 : 2,
+            color: Math.random() < 0.55 ? '#ffffff' : '#bae6fd',
+            waterY: y + 2
+          });
+        }
+
+        // Expanding 2.5D elliptical ocean foam rings
+        state.foamRings.push(
+          { x, y: y + 3, rx: 8, ry: 2, alpha: 1.0, speed: 26 },
+          { x, y: y + 4, rx: 4, ry: 1, alpha: 0.85, speed: 17 }
+        );
+      }
+
+      // ------------------------------------------------------------------------
+      // SIMULATION UPDATE LOOP (60 FPS DELTA-TIME)
+      // ------------------------------------------------------------------------
+      function update(dt) {
+        state.time += dt;
+        state.sceneTime += dt;
+        state.phaseTime += dt;
+
+        if (state.shakeTime > 0) {
+          state.shakeTime = Math.max(0, state.shakeTime - dt);
+        }
+
+        // Update generic particles
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+          const p = state.particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.life -= dt;
+          if (p.life <= 0) state.particles.splice(i, 1);
+        }
+
+        // ======================================================================
+        // SCENE 1: SURFACE BOARDING & LIFTOFF (MOON OR MARS)
+        // ======================================================================
+        if (state.scene === SCENES.SURFACE_LAUNCH) {
+          const shipPadX = Math.round(VW * 0.56);
+          const ladderX = shipPadX - 10;
+          const isMoon = state.origin === ORIGINS.MOON;
+
+          // Update surface dust clouds
+          for (let i = state.surface.dustPuffs.length - 1; i >= 0; i--) {
+            const d = state.surface.dustPuffs[i];
+            d.x += d.vx * dt;
+            d.y += d.vy * dt;
+            d.r += 9 * dt;
+            d.life -= dt;
+            if (d.life <= 0) state.surface.dustPuffs.splice(i, 1);
+          }
+
+          if (state.surface.astroStage === 'WALK') {
+            // Astronaut walks/low-g bounds toward ship boarding ladder
+            const walkSpeed = isMoon ? 34 : 38;
+            state.surface.astroX += walkSpeed * dt;
+            state.surface.astroStep += dt * (isMoon ? 7.5 : 9.5);
+
+            // Low-gravity bounce arc
+            const bounceFreq = isMoon ? 7.5 : 9.5;
+            const bounceAmp = isMoon ? 3.2 : 1.6;
+            state.surface.astroY =
+              state.surface.groundY - Math.abs(Math.sin(state.surface.astroStep)) * bounceAmp;
+
+            // Footstep dust kicks
+            if (Math.random() < 0.14) {
+              state.surface.dustPuffs.push({
+                x: state.surface.astroX - 2,
+                y: state.surface.groundY,
+                vx: -8 - Math.random() * 10,
+                vy: -3 - Math.random() * 5,
+                r: 2,
+                life: 0.45,
+                maxLife: 0.45
+              });
+            }
+
+            telemetryEl.innerHTML = isMoon
+              ? '<span>LUNA EVA // APPROACHING LANDER</span>'
+              : '<span>MARS EVA // APPROACHING LANDER</span>';
+
+            if (state.surface.astroX >= ladderX) {
+              state.surface.astroX = ladderX;
+              state.surface.astroY = state.surface.groundY;
+              state.surface.astroStage = 'CLIMB';
+              phaseBannerEl.textContent = '[SCENE 1/3] BOARDING SPACECRAFT — SEALING AIRLOCK';
+            }
+          } else if (state.surface.astroStage === 'CLIMB') {
+            // Astronaut climbs ladder into spacecraft hatch
+            state.surface.climbProgress += dt * 1.15;
+            state.surface.astroY = state.surface.groundY - Math.min(1, state.surface.climbProgress) * 18;
+            state.surface.astroX = ladderX + Math.min(1, state.surface.climbProgress) * 8;
+
+            if (state.surface.climbProgress >= 1.0) {
+              state.surface.astroStage = 'BOARDED';
+              state.surface.hatchOpen = 0;
+              audio.playHatchSeal();
+              audio.playThrusterIgnite();
+              phaseBannerEl.textContent = isMoon
+                ? '[SCENE 1/3] IGNITION! LAUNCHING FROM THE MOON TO EARTH'
+                : '[SCENE 1/3] IGNITION! LAUNCHING FROM MARS TO EARTH';
+            }
+          } else if (state.surface.astroStage === 'BOARDED') {
+            // Thruster spool-up & vertical launch into starry sky
+            state.surface.thrusterPower = Math.min(1, state.surface.thrusterPower + dt * 1.6);
+
+            if (state.surface.thrusterPower > 0.35) {
+              const accel = Math.pow(state.surface.thrusterPower - 0.35, 1.55) * 195;
+              state.surface.liftoffOffset += accel * dt;
+              state.shakeTime = 0.08;
+              state.shakeMag = 1.6 * state.surface.thrusterPower;
+            }
+
+            const shipCurrentY = state.surface.groundY - 18 - state.surface.liftoffOffset;
+
+            // Exhaust flames & billowing surface dust
+            for (let i = 0; i < 4; i++) {
+              state.particles.push({
+                x: shipPadX + (Math.random() - 0.5) * 10,
+                y: shipCurrentY + 12,
+                vx: (Math.random() - 0.5) * 28,
+                vy: 45 + Math.random() * 55,
+                life: 0.28 + Math.random() * 0.2,
+                maxLife: 0.48,
+                size: Math.random() < 0.5 ? 3 : 2,
+                color: Math.random() < 0.45 ? '#fef08a' : (isMoon ? '#38bdf8' : '#fb923c')
+              });
+            }
+
+            if (state.surface.liftoffOffset < 75 && Math.random() < 0.45) {
+              const dir = Math.random() < 0.5 ? -1 : 1;
+              state.surface.dustPuffs.push({
+                x: shipPadX + dir * (6 + Math.random() * 14),
+                y: state.surface.groundY,
+                vx: dir * (24 + Math.random() * 36),
+                vy: -4 - Math.random() * 12,
+                r: 4 + Math.random() * 3,
+                life: 0.75,
+                maxLife: 0.75
+              });
+            }
+
+            const altKm = (state.surface.liftoffOffset * 0.35).toFixed(1);
+            telemetryEl.innerHTML = `<span>ASCENT ALT: ${altKm} KM | THRUST: 100%</span>`;
+
+            // Fade to black briefly once ship clears the top of the screen
+            if (shipCurrentY < -35) {
+              state.transitionAlpha = Math.min(1, state.transitionAlpha + dt * 2.4);
+              if (state.transitionAlpha >= 1) {
+                enterScene(SCENES.SPACE_TRANSIT);
+              }
+            }
+          }
+          return;
+        }
+
+        // ======================================================================
+        // SCENE 2: DEEP SPACE TRANSIT TO EARTH
+        // ======================================================================
+        if (state.scene === SCENES.SPACE_TRANSIT) {
+          state.transitionAlpha = Math.max(0, state.transitionAlpha - dt * 2.4);
+          const duration = 5.2;
+          state.transit.progress = Math.min(1, state.sceneTime / duration);
+
+          // Scroll multi-layer parallax starfield leftwards
+          state.stars.forEach(st => {
+            st.x -= st.speed * dt * (1 + state.transit.progress * 0.8);
+            if (st.x < 0) st.x += VW;
+          });
+
+          // Scroll passing asteroids
+          state.transit.asteroids.forEach(ast => {
+            ast.x -= ast.speed * dt;
+            if (ast.x < -12) {
+              ast.x = VW + 12;
+              ast.y = 28 + Math.random() * (VH - 56);
+            }
+          });
+
+          // Spacecraft trajectory arching from left (Moon/Mars) toward Earth on right
+          const p = state.transit.progress;
+          const shipX = VW * (0.22 + p * 0.52);
+          const shipY = VH * 0.52 - Math.sin(p * Math.PI) * 26;
+
+          // Engine ion trail particles
+          for (let i = 0; i < 3; i++) {
+            state.particles.push({
+              x: shipX - 11,
+              y: shipY + (Math.random() - 0.5) * 4,
+              vx: -55 - Math.random() * 45,
+              vy: (Math.random() - 0.5) * 10,
+              life: 0.25 + Math.random() * 0.2,
+              maxLife: 0.45,
+              size: Math.random() < 0.5 ? 2 : 1,
+              color: Math.random() < 0.5 ? '#38bdf8' : '#fef08a'
+            });
+          }
+
+          const distEarth = Math.max(400, Math.round((1 - p) * (state.origin === ORIGINS.MARS ? 54600000 : 384400)));
+          telemetryEl.innerHTML = `<span>EARTH DIST: ${distEarth.toLocaleString()} KM</span>`;
+
+          if (p >= 0.88) {
+            state.transitionAlpha = Math.min(1, (p - 0.88) / 0.12);
+          }
+
+          if (p >= 1) {
+            enterScene(SCENES.EARTH_LANDING);
+          }
+          return;
+        }
+
+        // ======================================================================
+        // SCENE 3: EARTH RE-ENTRY, PARACHUTE & PACIFIC SPLASHDOWN
+        // ======================================================================
+        state.transitionAlpha = Math.max(0, state.transitionAlpha - dt * 2.2);
+
+        // Scroll clouds & sparkles continuously
+        state.clouds.forEach(c => {
+          c.x += c.speed * dt;
+          if (c.x - c.w > VW + 20) {
+            c.x = -c.w - 15;
+          }
+        });
+
+        state.sparkles.forEach(s => {
+          s.phase += s.speed * dt;
+          s.x -= 6 * dt;
+          if (s.x < 0) s.x += VW;
+        });
+
+        state.seagulls.forEach(g => {
+          g.x += g.speed * dt;
+          g.wingPhase += 6.5 * dt;
+          if (g.x > VW + 20) g.x = -20;
+        });
+
+        // Update splash water droplets
+        for (let i = state.splashDroplets.length - 1; i >= 0; i--) {
+          const d = state.splashDroplets[i];
+          d.x += d.vx * dt;
+          d.y += d.vy * dt;
+          d.vy += 175 * dt; // Gravity
+          if (d.y >= d.waterY && d.vy > 0) {
+            state.splashDroplets.splice(i, 1);
+          }
+        }
+
+        // Update expanding water foam rings
+        for (let i = state.foamRings.length - 1; i >= 0; i--) {
+          const r = state.foamRings[i];
+          r.rx += r.speed * dt;
+          r.ry += (r.speed * 0.28) * dt;
+          r.alpha -= 0.42 * dt;
+          if (r.alpha <= 0) state.foamRings.splice(i, 1);
+        }
+
+        // Phase-specific choreography
+        const targetShipX = VW * 0.5;
+        const splashY = state.oceanHorizonY + 18;
+
+        if (state.phase === PHASES.REENTRY) {
+          // Smooth camera descent from upper space into blue sky
+          const progress = Math.min(1, state.phaseTime / 4.2);
+          state.cameraY = -170 * Math.pow(1 - progress, 1.35);
+
+          // Diagonal trajectory toward center sky
+          state.ship.x += (targetShipX - state.ship.x) * 0.72 * dt;
+          state.ship.y = 48 + progress * 54;
+          state.ship.angle = 0.56 * (1 - progress * 0.65);
+          state.ship.heatIntensity = Math.max(0, 1 - progress * 1.15);
+
+          if (state.ship.heatIntensity > 0.08) {
+            spawnReentryPlasma(state.ship.x + 8, state.ship.y + 8);
+            if (Math.random() < 0.35) {
+              state.shakeTime = 0.06;
+              state.shakeMag = 1.2 * state.ship.heatIntensity;
+            }
+          }
+
+          // Update HUD telemetry
+          const alt = Math.max(14.5, 120 - progress * 105.5).toFixed(1);
+          const mach = Math.max(0.8, 7.8 - progress * 7.0).toFixed(1);
+          telemetryEl.innerHTML = `<span>ALT: ${alt} KM | VEL: MACH ${mach}</span>`;
+
+          if (state.phaseTime >= 4.2) {
+            enterPhase(PHASES.PARACHUTE);
+          }
+        } else if (state.phase === PHASES.PARACHUTE) {
+          state.cameraY += (0 - state.cameraY) * 4 * dt;
+
+          // Inflate parachute rapidly with slight elastic overshoot
+          state.ship.chuteOpen = Math.min(1, state.ship.chuteOpen + dt * 2.8);
+
+          // Harmonic pendulum sway under parachute
+          state.ship.chuteSway = Math.sin(state.phaseTime * 2.4) * 0.16 * Math.exp(-state.phaseTime * 0.14);
+          state.ship.angle = state.ship.chuteSway * 0.85;
+
+          // Gentle horizontal drift & steady parachute descent to ocean
+          state.ship.x += (targetShipX - state.ship.x) * 1.4 * dt + Math.sin(state.phaseTime * 2.4) * 5 * dt;
+          const remainingDist = splashY - state.ship.y;
+          state.ship.y += Math.max(15.5, remainingDist * 0.58) * dt;
+
+          const alt = Math.max(0.0, ((splashY - state.ship.y) / 86) * 14.5).toFixed(1);
+          telemetryEl.innerHTML = `<span>ALT: ${alt} KM | CHUTE: DEPLOYED</span>`;
+
+          if (state.ship.y >= splashY) {
+            state.ship.y = splashY;
+            state.ship.inWater = true;
+            enterPhase(PHASES.SPLASHDOWN);
+          }
+        } else if (state.phase === PHASES.SPLASHDOWN) {
+          // Capsule settles into the waves, parachute gently deflates onto the ocean
+          state.ship.bobPhase += dt * 3.2;
+          state.ship.chuteDeflate = Math.min(1, state.ship.chuteDeflate + dt * 0.65);
+
+          const settleDamp = Math.exp(-state.phaseTime * 1.8);
+          const dip = Math.sin(state.phaseTime * 6.5) * 4.5 * settleDamp;
+          state.ship.y = splashY + dip + Math.sin(state.ship.bobPhase) * 1.6;
+          state.ship.angle = Math.sin(state.phaseTime * 4.5) * 0.14 * settleDamp + Math.cos(state.ship.bobPhase * 0.8) * 0.04;
+          state.ship.beaconTimer += dt;
+
+          telemetryEl.innerHTML = `<span>ALT: 0.0 KM | STATUS: SPLASHDOWN OK</span>`;
+
+          if (state.phaseTime >= 2.2) {
+            enterPhase(PHASES.VICTORY);
+          }
+        } else if (state.phase === PHASES.VICTORY) {
+          // Gentle continuous ocean bobbing & recovery beacon blink
+          state.ship.bobPhase += dt * 2.4;
+          state.ship.y = splashY + Math.sin(state.ship.bobPhase) * 1.8;
+          state.ship.angle = Math.cos(state.ship.bobPhase * 0.75) * 0.045;
+          state.ship.beaconTimer += dt;
+
+          // Periodic gentle ocean foam ripples around floating capsule
+          if (Math.random() < 0.035) {
+            state.foamRings.push({
+              x: state.ship.x,
+              y: state.ship.y + 4,
+              rx: 9,
+              ry: 2,
+              alpha: 0.55,
+              speed: 10
+            });
+          }
+
+          // Typewriter effect for congratulations text
+          const fullMsg = getCongratsMessage(state.origin);
+          if (state.typewriterIndex < fullMsg.length) {
+            state.typewriterTimer += dt;
+            while (state.typewriterTimer >= 0.024 && state.typewriterIndex < fullMsg.length) {
+              state.typewriterTimer -= 0.024;
+              state.typewriterIndex++;
+              typewriterTextEl.textContent = fullMsg.slice(0, state.typewriterIndex);
+              if (state.typewriterIndex % 3 === 0) {
+                audio.playBeep(880, 0.025, 'square', 0.018);
+              }
+            }
+          }
+        }
+      }
+
+      // ------------------------------------------------------------------------
+      // SCENE 1 RENDERER: MOON OR MARS SURFACE BOARDING & LIFTOFF
+      // ------------------------------------------------------------------------
+      function drawScene1SurfaceLaunch() {
+        const isMoon = state.origin === ORIGINS.MOON;
+        const groundY = state.surface.groundY;
+
+        // 1. Sky Backdrop
+        if (isMoon) {
+          // Crisp deep-space lunar black-indigo sky
+          ctx.fillStyle = '#030612';
+          ctx.fillRect(0, 0, VW, VH);
+
+          state.stars.forEach(st => {
+            if (st.y < groundY) {
+              const alpha = 0.5 + 0.5 * Math.sin(state.time * 3 + st.twinkle);
+              ctx.fillStyle = st.color;
+              ctx.globalAlpha = alpha;
+              ctx.fillRect(Math.round(st.x), Math.round(st.y), st.size, st.size);
+            }
+          });
+          ctx.globalAlpha = 1;
+
+          // Distant Blue Earth hanging in the Lunar Sky (Destination!)
+          const ex = Math.round(VW * 0.22);
+          const ey = Math.round(VH * 0.24);
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.18)';
+          drawPixelCircle(ex, ey, 18);
+          ctx.fillStyle = '#0284c7';
+          drawPixelCircle(ex, ey, 13);
+          // Continents & cloud swirls
+          ctx.fillStyle = '#22c55e';
+          ctx.fillRect(ex - 5, ey - 4, 6, 5);
+          ctx.fillRect(ex + 2, ey + 1, 5, 6);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(ex - 8, ey - 7, 9, 2);
+          ctx.fillRect(ex - 2, ey + 5, 8, 2);
+        } else {
+          // Dusty Salmon / Amber Martian Sky
+          const marsSky = ctx.createLinearGradient(0, 0, 0, groundY);
+          marsSky.addColorStop(0, '#2b0d09');
+          marsSky.addColorStop(0.45, '#7c2d12');
+          marsSky.addColorStop(0.82, '#c2410c');
+          marsSky.addColorStop(1, '#fdba74');
+          ctx.fillStyle = marsSky;
+          ctx.fillRect(0, 0, VW, VH);
+
+          // Faint high-altitude stars + Phobos moon
+          state.stars.slice(0, 30).forEach(st => {
+            if (st.y < groundY * 0.42) {
+              ctx.fillStyle = 'rgba(254, 243, 199, 0.45)';
+              ctx.fillRect(Math.round(st.x), Math.round(st.y), 1, 1);
+            }
+          });
+
+          // Distant Pale Blue Dot (Earth) + Phobos
+          const ex = Math.round(VW * 0.22);
+          const ey = Math.round(VH * 0.22);
+          ctx.fillStyle = '#7dd3fc';
+          ctx.fillRect(ex, ey, 2, 2);
+          ctx.fillStyle = '#d6d3d1';
+          drawPixelCircle(Math.round(VW * 0.78), Math.round(VH * 0.2), 5);
+        }
+
+        // 2. 2.5D Distant Ridge / Mesas
+        if (isMoon) {
+          ctx.fillStyle = '#1e293b';
+          for (let x = 0; x < VW; x += 2) {
+            const h = Math.round(12 + Math.sin(x * 0.025) * 6 + Math.cos(x * 0.06) * 4);
+            ctx.fillRect(x, groundY - h, 2, h);
+          }
+        } else {
+          // Stratified Martian red-ochre mesas
+          ctx.fillStyle = '#7c2d12';
+          ctx.fillRect(Math.round(VW * 0.06), groundY - 22, 68, 22);
+          ctx.fillRect(Math.round(VW * 0.12), groundY - 28, 48, 6);
+          ctx.fillStyle = '#9a3412';
+          ctx.fillRect(Math.round(VW * 0.72), groundY - 26, 84, 26);
+          ctx.fillRect(Math.round(VW * 0.77), groundY - 33, 56, 7);
+        }
+
+        // 3. Foreground 2.5D Regolith / Red Sand Terrain
+        const groundGrad = ctx.createLinearGradient(0, groundY, 0, VH);
+        if (isMoon) {
+          groundGrad.addColorStop(0, '#94a3b8');
+          groundGrad.addColorStop(0.25, '#64748b');
+          groundGrad.addColorStop(1, '#334155');
+        } else {
+          groundGrad.addColorStop(0, '#ea580c');
+          groundGrad.addColorStop(0.28, '#c2410c');
+          groundGrad.addColorStop(1, '#7c2d12');
+        }
+        ctx.fillStyle = groundGrad;
+        ctx.fillRect(0, groundY, VW, VH - groundY);
+
+        // Horizon rim highlight
+        ctx.fillStyle = isMoon ? '#cbd5e1' : '#fed7aa';
+        ctx.fillRect(0, groundY, VW, 1);
+
+        // Craters & surface rocks
+        state.surface.craters.forEach(c => {
+          ctx.fillStyle = isMoon ? '#475569' : '#9a3412';
+          ctx.beginPath();
+          ctx.ellipse(c.x, c.y, c.rx, c.ry, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = isMoon ? '#cbd5e1' : '#fdba74';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.ellipse(c.x, c.y + 1, c.rx, c.ry, 0, 0, Math.PI);
+          ctx.stroke();
+        });
+
+        state.surface.rocks.forEach(rk => {
+          ctx.fillStyle = isMoon ? '#334155' : '#431407';
+          ctx.fillRect(rk.x, rk.y, rk.w, rk.h);
+          ctx.fillStyle = isMoon ? '#cbd5e1' : '#fb923c';
+          ctx.fillRect(rk.x, rk.y, rk.w - 1, 1);
+        });
+
+        // 4. Landed Spaceship + Boarding Ladder
+        const shipPadX = Math.round(VW * 0.56);
+        const shipY = Math.round(groundY - 18 - state.surface.liftoffOffset);
+
+        // Boarding ladder (remains on pad or retracts on liftoff)
+        if (state.surface.liftoffOffset < 6) {
+          const lx = shipPadX - 10;
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(lx, groundY - 16, 1, 16);
+          ctx.fillRect(lx + 4, groundY - 16, 1, 16);
+          for (let ry = groundY - 14; ry < groundY; ry += 3) {
+            ctx.fillRect(lx, ry, 5, 1);
+          }
+        }
+
+        // Draw Lander Legs (retract slightly after liftoff)
+        if (state.surface.liftoffOffset < 28) {
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(shipPadX - 12, shipY + 7, 3, 11);
+          ctx.fillRect(shipPadX + 9, shipY + 7, 3, 11);
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(shipPadX - 14, shipY + 17, 6, 2);
+          ctx.fillRect(shipPadX + 8, shipY + 17, 6, 2);
+        }
+
+        // Exhaust particles behind ship
+        state.particles.forEach(p => {
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+          ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+        });
+        ctx.globalAlpha = 1;
+
+        // Draw Spaceship Body
+        drawSpacecraftSprite(shipPadX, shipY, 0, state.surface.thrusterPower > 0.1);
+
+        // Open Hatch Glow if astronaut hasn't sealed it yet
+        if (state.surface.hatchOpen > 0) {
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(shipPadX - 5, shipY - 1, 3, 5);
+        }
+
+        // 5. Pixel Astronaut EVA Sprite (before boarding completes)
+        if (state.surface.astroStage !== 'BOARDED') {
+          drawAstronautSprite(
+            Math.round(state.surface.astroX),
+            Math.round(state.surface.astroY),
+            state.surface.astroStep
+          );
+        }
+
+        // 6. Surface Dust Puffs
+        state.surface.dustPuffs.forEach(d => {
+          ctx.fillStyle = isMoon
+            ? `rgba(203, 213, 225, ${Math.max(0, d.life / d.maxLife) * 0.65})`
+            : `rgba(253, 186, 116, ${Math.max(0, d.life / d.maxLife) * 0.65})`;
+          drawPixelCircle(Math.round(d.x), Math.round(d.y), Math.round(d.r));
+        });
+      }
+
+      // ------------------------------------------------------------------------
+      // SCENE 2 RENDERER: DEEP SPACE TRANSIT FROM MOON/MARS TO EARTH
+      // ------------------------------------------------------------------------
+      function drawScene2SpaceTransit() {
+        const isMoon = state.origin === ORIGINS.MOON;
+        const p = state.transit.progress;
+
+        // Deep Space Backdrop
+        ctx.fillStyle = '#02040c';
+        ctx.fillRect(0, 0, VW, VH);
+
+        // Subtle Galactic Nebula Band
+        const nebGrad = ctx.createLinearGradient(0, 0, VW, VH);
+        nebGrad.addColorStop(0, 'rgba(30, 58, 138, 0.18)');
+        nebGrad.addColorStop(0.5, isMoon ? 'rgba(14, 165, 233, 0.12)' : 'rgba(234, 88, 12, 0.14)');
+        nebGrad.addColorStop(1, 'rgba(15, 23, 42, 0.1)');
+        ctx.fillStyle = nebGrad;
+        ctx.fillRect(0, 0, VW, VH);
+
+        // Parallax Stars
+        state.stars.forEach(st => {
+          ctx.fillStyle = st.color;
+          ctx.fillRect(Math.round(st.x), Math.round(st.y), st.size, st.size);
+        });
+
+        // Departed Origin Body shrinking on the left (Moon or Mars)
+        const originRadius = Math.max(4, Math.round(28 * (1 - p * 0.85)));
+        const originX = Math.round(VW * 0.14 - p * 30);
+        const originY = Math.round(VH * 0.62);
+        if (originX + originRadius > 0) {
+          ctx.fillStyle = isMoon ? '#94a3b8' : '#ea580c';
+          drawPixelCircle(originX, originY, originRadius);
+          ctx.fillStyle = isMoon ? '#64748b' : '#9a3412';
+          drawPixelCircle(originX + Math.floor(originRadius * 0.25), originY - Math.floor(originRadius * 0.2), Math.max(2, Math.floor(originRadius * 0.35)));
+        }
+
+        // Approaching Earth growing vividly on the right!
+        const earthRadius = Math.round(14 + p * 34);
+        const earthX = Math.round(VW * 0.84);
+        const earthY = Math.round(VH * 0.48);
+
+        // Atmospheric blue halo
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+        drawPixelCircle(earthX, earthY, earthRadius + 6);
+        ctx.fillStyle = '#0284c7';
+        drawPixelCircle(earthX, earthY, earthRadius);
+
+        // Pixel Continents & White Cloud Swirls on Earth
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(earthX, earthY, earthRadius, 0, Math.PI * 2);
+        ctx.clip();
+
+        ctx.fillStyle = '#22c55e';
+        const shift = Math.round(p * 10);
+        ctx.fillRect(earthX - Math.floor(earthRadius * 0.5) - shift, earthY - Math.floor(earthRadius * 0.4), Math.floor(earthRadius * 0.7), Math.floor(earthRadius * 0.55));
+        ctx.fillRect(earthX + 2 - shift, earthY + 2, Math.floor(earthRadius * 0.65), Math.floor(earthRadius * 0.6));
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.fillRect(earthX - earthRadius, earthY - Math.floor(earthRadius * 0.65), earthRadius * 2, Math.max(2, Math.floor(earthRadius * 0.16)));
+        ctx.fillRect(earthX - Math.floor(earthRadius * 0.6), earthY + Math.floor(earthRadius * 0.35), Math.floor(earthRadius * 1.4), Math.max(2, Math.floor(earthRadius * 0.14)));
+        ctx.restore();
+
+        // Passing Pixel Asteroids
+        state.transit.asteroids.forEach(ast => {
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(Math.round(ast.x), Math.round(ast.y), ast.size, ast.size);
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(Math.round(ast.x), Math.round(ast.y), Math.max(1, ast.size - 1), 1);
+        });
+
+        // Ion Thruster Trail Particles
+        state.particles.forEach(pt => {
+          ctx.fillStyle = pt.color;
+          ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+          ctx.fillRect(Math.round(pt.x), Math.round(pt.y), pt.size, pt.size);
+        });
+        ctx.globalAlpha = 1;
+
+        // Cruising Spaceship pointed right toward Earth
+        const shipX = Math.round(VW * (0.22 + p * 0.52));
+        const shipY = Math.round(VH * 0.52 - Math.sin(p * Math.PI) * 26);
+        drawSpacecraftSprite(shipX, shipY, Math.PI * 0.5, true);
+      }
+
+      // ------------------------------------------------------------------------
+      // SHARED PIXEL SPRITE HELPERS (ASTRONAUT & SPACECRAFT)
+      // ------------------------------------------------------------------------
+      function drawAstronautSprite(x, y, stepPhase) {
+        const legSwing = Math.round(Math.sin(stepPhase) * 2);
+        // Backpack PLSS
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(x - 4, y - 11, 3, 6);
+        // White EVA Torso
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x - 2, y - 11, 5, 6);
+        // Helmet & Gold Reflective Visor
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(x - 2, y - 16, 6, 5);
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(x + 1, y - 15, 3, 3);
+        // Animated Legs
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(x - 2 + legSwing, y - 5, 2, 5);
+        ctx.fillRect(x + 1 - legSwing, y - 5, 2, 5);
+      }
+
+      const storyShip = {
+        vertical: new Image(),
+        transit: new Image()
+      };
+      storyShip.vertical.src = '../launch/assets/spacecraft-upright.png';
+      storyShip.transit.src = '../launch/assets/spacecraft-cruise.png';
+      function paintStoryShip(image,halfWidth,halfHeight) {
+        if(!image.complete || !image.naturalWidth) return;
+        ctx.save();
+        ctx.imageSmoothingEnabled=false;
+        const scale=Math.min(halfWidth*2/image.naturalWidth,halfHeight*2/image.naturalHeight);
+        const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+        ctx.drawImage(image,-w/2,-h/2,w,h);
+        ctx.restore();
+      }
+      function drawSpacecraftSprite(sx,sy,angle,thrusterOn) {
+        ctx.save();
+        ctx.translate(sx,sy);
+        ctx.rotate(angle);
+        if(thrusterOn){
+          const flicker=Math.sin(state.time*47)*3;
+          ctx.fillStyle='#58d3ff';
+          ctx.fillRect(-5,11,10,10+flicker);
+          ctx.fillStyle='#d6fbff';
+          ctx.fillRect(-2,10,4,5+flicker*.4);
+        }
+        paintStoryShip(angle===0?storyShip.vertical:storyShip.transit,21,26);
+        ctx.restore();
+      }
+
+      // ------------------------------------------------------------------------
+      // 2.5D PIXEL-ART RENDERING PIPELINE
+      // ------------------------------------------------------------------------
+      function drawSkyAndAtmosphere() {
+        // Interpolate sky palette from deep space (cameraY = -170) to crisp Pacific blue (cameraY = 0)
+        const spaceFactor = Math.max(0, Math.min(1, -state.cameraY / 170));
+
+        const grad = ctx.createLinearGradient(0, 0, 0, state.oceanHorizonY);
+        if (spaceFactor > 0.05) {
+          grad.addColorStop(0, lerpColor('#0284c7', '#02040d', spaceFactor));
+          grad.addColorStop(0.55, lerpColor('#38bdf8', '#0c1e4a', spaceFactor));
+          grad.addColorStop(0.88, lerpColor('#bae6fd', '#ea580c', spaceFactor * 0.75));
+          grad.addColorStop(1, lerpColor('#fef3c7', '#fde047', spaceFactor * 0.8));
+        } else {
+          // Crisp sunny Pacific Ocean sky
+          grad.addColorStop(0, '#0369a1');
+          grad.addColorStop(0.45, '#0ea5e9');
+          grad.addColorStop(0.82, '#7dd3fc');
+          grad.addColorStop(1, '#e0f2fe');
+        }
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, VW, VH);
+
+        // Twinkling upper-atmosphere stars
+        if (spaceFactor > 0.05) {
+          state.stars.forEach(st => {
+            const alpha = spaceFactor * (0.45 + 0.55 * Math.sin(state.time * 4 + st.twinkle));
+            ctx.fillStyle = st.color;
+            ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+            ctx.fillRect(Math.round(st.x), Math.round(st.y - state.cameraY * 0.25), st.size, st.size);
+          });
+          ctx.globalAlpha = 1;
+        }
+
+        // Pixel Sun & Atmospheric Halo near horizon
+        const sunX = Math.round(VW * 0.78);
+        const sunY = Math.round(state.oceanHorizonY - 46 - state.cameraY * 0.55);
+        if (sunY < state.oceanHorizonY + 12) {
+          // Outer pixel glow rings
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.22)';
+          drawPixelCircle(sunX, sunY, 22);
+          ctx.fillStyle = 'rgba(254, 249, 195, 0.45)';
+          drawPixelCircle(sunX, sunY, 15);
+          ctx.fillStyle = '#fef9c3';
+          drawPixelCircle(sunX, sunY, 10);
+        }
+
+        // 2.5D Parallax Pixel Clouds
+        state.clouds.forEach(c => {
+          const parallaxY = c.y - state.cameraY * (c.layer === 0 ? 0.65 : 0.85);
+          if (parallaxY > -20 && parallaxY < state.oceanHorizonY - 6) {
+            drawPixelCloud(Math.round(c.x), Math.round(parallaxY), c.w, c.h, c.layer);
+          }
+        });
+
+        // Distant Pacific Atoll / Island Silhouette on the Horizon
+        const horizonScreenY = Math.round(state.oceanHorizonY - state.cameraY);
+        if (horizonScreenY < VH + 10) {
+          const islX = Math.round(VW * 0.18);
+          ctx.fillStyle = '#1e3a5f';
+          ctx.fillRect(islX, horizonScreenY - 3, 38, 3);
+          ctx.fillRect(islX + 6, horizonScreenY - 6, 24, 3);
+          ctx.fillRect(islX + 12, horizonScreenY - 8, 11, 2);
+        }
+
+        // Distant Seagulls flying low over the Pacific
+        if (spaceFactor < 0.25) {
+          ctx.fillStyle = '#f8fafc';
+          state.seagulls.forEach(g => {
+            const gx = Math.round(g.x);
+            const gy = Math.round(g.y - state.cameraY);
+            const flap = Math.sin(g.wingPhase) > 0 ? -1 : 1;
+            ctx.fillRect(gx, gy, 2, 1);
+            ctx.fillRect(gx - 2, gy + flap, 2, 1);
+            ctx.fillRect(gx + 2, gy + flap, 2, 1);
+          });
+        }
+      }
+
+      function drawPixelCloud(x, y, w, h, layer) {
+        ctx.fillStyle = layer === 0 ? '#bae6fd' : '#ffffff';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillRect(x + 4, y - 3, w - 8, 3);
+        ctx.fillRect(x + 9, y - 5, Math.max(6, w - 18), 2);
+        // Subtle sunlit underside shadow
+        ctx.fillStyle = layer === 0 ? '#7dd3fc' : '#cbd5e1';
+        ctx.fillRect(x + 2, y + h - 2, w - 4, 2);
+      }
+
+      function draw25DOcean() {
+        const horizonY = Math.round(state.oceanHorizonY - state.cameraY);
+        if (horizonY >= VH) return;
+
+        // Base clean deep-to-tropical Pacific blue gradient
+        const waterGrad = ctx.createLinearGradient(0, horizonY, 0, VH);
+        waterGrad.addColorStop(0, '#0284c7');
+        waterGrad.addColorStop(0.35, '#0369a1');
+        waterGrad.addColorStop(0.75, '#075985');
+        waterGrad.addColorStop(1, '#0c4a6e');
+        ctx.fillStyle = waterGrad;
+        ctx.fillRect(0, horizonY, VW, VH - horizonY);
+
+        // Crisp bright horizon shimmer line
+        ctx.fillStyle = '#bae6fd';
+        ctx.fillRect(0, horizonY, VW, 1);
+
+        // Sun reflection column on the water
+        const sunX = Math.round(VW * 0.78);
+        for (let row = horizonY + 2; row < VH; row += 3) {
+          const depth = (row - horizonY) / Math.max(1, VH - horizonY);
+          const shimmerW = Math.round(6 + depth * 22 + Math.sin(state.time * 5 + row * 0.4) * 5);
+          const offsetX = Math.round(Math.sin(state.time * 3 + row * 0.25) * 4);
+          ctx.fillStyle = depth < 0.35 ? 'rgba(254, 249, 195, 0.55)' : 'rgba(186, 230, 253, 0.28)';
+          ctx.fillRect(sunX - Math.floor(shimmerW / 2) + offsetX, row, shimmerW, 1);
+        }
+
+        // 4 Layered 2.5D Parallax Wave Bands (Perspective-scaled amplitude & speed)
+        const waveLayers = [
+          { yOff: 6,  amp: 1.2, freq: 0.07, speed: 1.4, color: '#0ea5e9', crest: '#7dd3fc' },
+          { yOff: 22, amp: 1.8, freq: 0.055, speed: 2.2, color: '#0284c7', crest: '#bae6fd' },
+          { yOff: 44, amp: 2.5, freq: 0.042, speed: 3.1, color: '#0369a1', crest: '#e0f2fe' },
+          { yOff: 68, amp: 3.2, freq: 0.032, speed: 4.2, color: '#075985', crest: '#ffffff' }
+        ];
+
+        waveLayers.forEach((wl, idx) => {
+          const baseY = horizonY + wl.yOff;
+          if (baseY >= VH) return;
+
+          ctx.fillStyle = wl.color;
+          for (let x = 0; x < VW; x += 2) {
+            const wy = Math.round(
+              baseY +
+              Math.sin(x * wl.freq + state.time * wl.speed + idx) * wl.amp +
+              Math.cos(x * wl.freq * 0.5 - state.time * wl.speed * 0.7) * (wl.amp * 0.5)
+            );
+            ctx.fillRect(x, wy, 2, VH - wy);
+
+            // Pixel whitecap / specular crest highlights on wave peaks
+            if (Math.sin(x * wl.freq + state.time * wl.speed + idx) > 0.72) {
+              ctx.fillStyle = wl.crest;
+              ctx.fillRect(x, wy, 2, 1);
+              ctx.fillStyle = wl.color;
+            }
+          }
+        });
+
+        // Specular water sparkles
+        state.sparkles.forEach(sp => {
+          const sy = Math.round(sp.y - state.cameraY);
+          if (sy > horizonY + 2 && sy < VH) {
+            const blink = Math.sin(sp.phase);
+            if (blink > 0.65) {
+              ctx.fillStyle = blink > 0.88 ? '#ffffff' : '#bae6fd';
+              ctx.fillRect(Math.round(sp.x), sy, 2, 1);
+              if (blink > 0.92) {
+                ctx.fillRect(Math.round(sp.x), sy - 1, 1, 3);
+              }
+            }
+          }
+        });
+
+        // Expanding 2.5D elliptical foam rings around splashdown zone
+        state.foamRings.forEach(r => {
+          const ryScreen = Math.round(r.y - state.cameraY);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, r.alpha)})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.ellipse(Math.round(r.x), ryScreen, Math.round(r.rx), Math.max(1, Math.round(r.ry)), 0, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+      }
+
+      function drawParachuteAndCapsule() {
+        const sx = Math.round(state.ship.x);
+        const sy = Math.round(state.ship.y - state.cameraY);
+
+        // 1. Draw Retro Pixel Parachute (if deployed)
+        if (state.ship.chuteOpen > 0.01) {
+          const open = state.ship.chuteOpen;
+          const deflate = state.ship.chuteDeflate;
+
+          // Canopy settles gracefully onto the ocean surface after splashdown
+          const canopyOffsetX = Math.round(Math.sin(state.ship.chuteSway) * 26 + deflate * 28);
+          const canopyOffsetY = Math.round(-36 * open * (1 - deflate * 0.88) + deflate * 6);
+          const cx = sx + canopyOffsetX;
+          const cy = sy + canopyOffsetY;
+
+          const canopyW = Math.round((38 * open) * (1 + deflate * 0.18));
+          const canopyH = Math.round((20 * open) * (1 - deflate * 0.65));
+
+          // Suspension Cords (before canopy settles fully)
+          if (deflate < 0.85) {
+            ctx.strokeStyle = 'rgba(241, 245, 249, 0.85)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(sx - 2, sy - 7);
+            ctx.lineTo(cx - Math.floor(canopyW * 0.42), cy + Math.floor(canopyH * 0.4));
+            ctx.moveTo(sx + 2, sy - 7);
+            ctx.lineTo(cx + Math.floor(canopyW * 0.42), cy + Math.floor(canopyH * 0.4));
+            ctx.moveTo(sx, sy - 7);
+            ctx.lineTo(cx, cy + Math.floor(canopyH * 0.4));
+            ctx.stroke();
+          }
+
+          // Pixel-art striped retro orange & white parachute dome
+          const halfW = Math.max(4, Math.floor(canopyW / 2));
+          const h = Math.max(3, canopyH);
+          for (let py = 0; py < h; py++) {
+            const normY = py / h;
+            const rowHalfW = Math.max(2, Math.round(halfW * Math.sin((1 - normY * 0.72) * Math.PI * 0.5)));
+            for (let px = -rowHalfW; px < rowHalfW; px++) {
+              // Alternating international aerospace orange & crisp white panels
+              const stripe = Math.floor(((px + rowHalfW) / Math.max(1, rowHalfW * 2)) * 5);
+              if (py === h - 1) {
+                ctx.fillStyle = '#9a3412'; // Bottom rim trim
+              } else if (stripe % 2 === 0) {
+                ctx.fillStyle = py < h * 0.35 ? '#fb923c' : '#ea580c';
+              } else {
+                ctx.fillStyle = py < h * 0.35 ? '#ffffff' : '#e2e8f0';
+              }
+              ctx.fillRect(cx + px, cy - h + py, 1, 1);
+            }
+          }
+        }
+
+        // 2. Draw SILENT LEGACY Spaceship / Re-entry Capsule
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(state.ship.angle);
+
+        // Re-entry Plasma Heat Shield Glow (Phase 1)
+        if (state.ship.heatIntensity > 0.05) {
+          const glowR = Math.round(14 + Math.sin(state.time * 40) * 2);
+          ctx.fillStyle = `rgba(251, 146, 60, ${0.35 * state.ship.heatIntensity})`;
+          drawPixelCircle(0, 4, glowR);
+          ctx.fillStyle = `rgba(254, 240, 138, ${0.75 * state.ship.heatIntensity})`;
+          ctx.fillRect(-9, 6, 18, 3);
+        }
+
+        // Same source asset as the initial launch, Moon and Mars lander.
+        paintStoryShip(storyShip.vertical,20,24);
+
+        // Recovery Beacon Light (blinks brightly once in the Pacific Ocean)
+        if (state.ship.inWater) {
+          const blinkOn = Math.sin(state.ship.beaconTimer * 8) > 0.1;
+          ctx.fillStyle = blinkOn ? '#4ade80' : '#166534';
+          ctx.fillRect(-1, -12, 2, 2);
+          if (blinkOn) {
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.35)';
+            drawPixelCircle(0, -11, 5);
+          }
+        }
+
+        ctx.restore();
+
+        // Waterline occlusion & gentle foam collar when floating in the ocean
+        if (state.ship.inWater) {
+          ctx.fillStyle = '#0369a1';
+          ctx.fillRect(sx - 11, sy + 5, 22, 6);
+          ctx.fillStyle = '#e0f2fe';
+          const collarW = 16 + Math.round(Math.sin(state.time * 4) * 2);
+          ctx.fillRect(sx - Math.floor(collarW / 2), sy + 4, collarW, 1);
+        }
+      }
+
+      function drawParticles() {
+        // Re-entry plasma embers
+        state.particles.forEach(p => {
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+          ctx.fillRect(Math.round(p.x), Math.round(p.y - state.cameraY), p.size, p.size);
+        });
+        ctx.globalAlpha = 1;
+
+        // Splashdown water droplets
+        state.splashDroplets.forEach(d => {
+          ctx.fillStyle = d.color;
+          ctx.fillRect(Math.round(d.x), Math.round(d.y - state.cameraY), d.size, d.size);
+        });
+      }
+
+      // ------------------------------------------------------------------------
+      // UTILITY DRAWING HELPERS
+      // ------------------------------------------------------------------------
+      function drawPixelCircle(cx, cy, r) {
+        for (let y = -r; y <= r; y++) {
+          const w = Math.round(Math.sqrt(r * r - y * y));
+          ctx.fillRect(cx - w, cy + y, w * 2, 1);
+        }
+      }
+
+      function lerpColor(hexA, hexB, t) {
+        const a = parseInt(hexA.slice(1), 16);
+        const b = parseInt(hexB.slice(1), 16);
+        const rA = (a >> 16) & 255, gA = (a >> 8) & 255, bA = a & 255;
+        const rB = (b >> 16) & 255, gB = (b >> 8) & 255, bB = b & 255;
+        const r = Math.round(rA + (rB - rA) * t);
+        const g = Math.round(gA + (gB - gA) * t);
+        const bl = Math.round(bA + (bB - bA) * t);
+        return `rgb(${r}, ${g}, ${bl})`;
+      }
+
+      // ------------------------------------------------------------------------
+      // MAIN ANIMATION LOOP
+      // ------------------------------------------------------------------------
+      let lastTimestamp = 0;
+
+      function gameLoop(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
+        lastTimestamp = timestamp;
+
+        update(dt);
+
+        ctx.save();
+        if (state.shakeTime > 0) {
+          const sx = Math.round((Math.random() - 0.5) * 2 * state.shakeMag);
+          const sy = Math.round((Math.random() - 0.5) * 2 * state.shakeMag);
+          ctx.translate(sx, sy);
+        }
+
+        if (state.scene === SCENES.SURFACE_LAUNCH) {
+          drawScene1SurfaceLaunch();
+        } else if (state.scene === SCENES.SPACE_TRANSIT) {
+          drawScene2SpaceTransit();
+        } else {
+          drawSkyAndAtmosphere();
+          draw25DOcean();
+          drawParticles();
+          drawParachuteAndCapsule();
+        }
+
+        ctx.restore();
+
+        // Smooth scene-to-scene crossfade curtain
+        if (state.transitionAlpha > 0.005) {
+          ctx.fillStyle = `rgba(2, 4, 12, ${Math.min(1, state.transitionAlpha)})`;
+          ctx.fillRect(0, 0, VW, VH);
+        }
+
+        renderCRTShader(state.time);
+        requestAnimationFrame(gameLoop);
+      }
+
+      // ------------------------------------------------------------------------
+      // UI EVENT LISTENERS
+      // ------------------------------------------------------------------------
+      btnOriginMoon.addEventListener('click', () => {
+        audio.ensureContext();
+        audio.playBeep(660, 0.07, 'square', 0.07);
+        setOrigin(ORIGINS.MOON);
+      });
+
+      btnOriginMars.addEventListener('click', () => {
+        audio.ensureContext();
+        audio.playBeep(440, 0.07, 'square', 0.07);
+        setOrigin(ORIGINS.MARS);
+      });
+
+      btnSwitchOrigin.addEventListener('click', () => {
+        audio.ensureContext();
+        const nextOrigin = state.origin === ORIGINS.MOON ? ORIGINS.MARS : ORIGINS.MOON;
+        setOrigin(nextOrigin);
+      });
+
+      btnAudio.addEventListener('click', () => {
+        const isOn = audio.toggle();
+        btnAudio.textContent = isOn ? 'SOUND: ON' : 'SOUND: OFF';
+        showToast(isOn ? 'RETRO SYNTH AUDIO ENABLED' : 'AUDIO MUTED');
+      });
+
+      btnSkip.addEventListener('click', () => {
+        skipToVictory();
+      });
+
+      btnReplay.addEventListener('click', () => {
+        audio.ensureContext();
+        audio.playBeep(523.25, 0.08, 'square', 0.08);
+        resetSequence();
+      });
+
+      btnContinue.addEventListener('click', () => {
+        if (state.phase !== PHASES.VICTORY) return;
+        window.parent.postMessage({type:'silent-ending-restart'},window.location.origin);
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') &&
+          state.scene === SCENES.EARTH_LANDING && state.phase === PHASES.VICTORY) {
+          e.preventDefault();
+          btnContinue.click();
+        } else if (e.key.toLowerCase() === 'm') btnAudio.click();
+      });
+
+      window.addEventListener('resize', resizeCanvas);
+
+      // ------------------------------------------------------------------------
+      // BOOTSTRAP ON WINDOW LOAD
+      // ------------------------------------------------------------------------
+      window.onload = () => {
+        initCRTShader();
+        resizeCanvas();
+        resetSequence();
+        // Moon/Mars already completed boarding and departure in the main
+        // surface animation. Begin with the return flight to avoid replaying
+        // the exact same takeoff twice.
+        if(urlParams.get('start')==='transit')enterScene(SCENES.SPACE_TRANSIT);
+        requestAnimationFrame(gameLoop);
+      };
+    })();
+  </script>
+
+</body></html>
