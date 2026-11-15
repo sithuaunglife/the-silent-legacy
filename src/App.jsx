@@ -6,7 +6,7 @@ import ArchiveDashboard from './components/archive/ArchiveDashboard';
 import LaunchSimulator from './components/LaunchSimulator';
 import StartScreen from './components/StartScreen';
 import './styles/sceneTransition.css';
-import { localizeInterface, translate } from './i18n';
+import { localizeInterface } from './i18n';
 
 /** One React modal is shared by the Moon and Mars exploration engines. */
 export default function App(){
@@ -27,12 +27,9 @@ export default function App(){
   const [startDismissed,setStartDismissed]=useState(()=>launchComplete);
   const [launchKey,setLaunchKey]=useState(0);
   const [launchTransition,setLaunchTransition]=useState(false);
-  const [orbitTransitionVisible,setOrbitTransitionVisible]=useState(false);
   const handoffTimer=useRef(null);
-  const entryTimer=useRef(null);
   useEffect(()=>()=>{
     window.clearTimeout(handoffTimer.current);
-    window.clearTimeout(entryTimer.current);
   },[]);
   useEffect(()=>{
     try{window.localStorage.setItem('silent:language',language)}catch{}
@@ -80,21 +77,17 @@ export default function App(){
   const completeLaunch=useCallback(()=>{
     if(launchTransition)return;
     setLaunchTransition(true);
-    setOrbitTransitionVisible(true);
     window.clearTimeout(handoffTimer.current);
     handoffTimer.current=window.setTimeout(()=>{
       setLaunchComplete(true);
       try{window.sessionStorage.setItem('silent:stage','orbit')}catch{}
-      entryTimer.current=window.setTimeout(()=>setOrbitTransitionVisible(false),220);
-    },1700);
+    },1800);
   },[launchTransition]);
   const backToStart=useCallback(()=>{
     window.clearTimeout(handoffTimer.current);
-    window.clearTimeout(entryTimer.current);
     closeArchive();
     setWorld(null);
     setLaunchTransition(false);
-    setOrbitTransitionVisible(false);
     setLaunchComplete(false);
     setStartDismissed(false);
     setLaunchKey(key=>key+1);
@@ -132,13 +125,7 @@ export default function App(){
         {language==='en'?'EN / မြန်မာ':'မြန်မာ / EN'}
       </button>
     </>}
-    {orbitTransitionVisible && <div className="earth-orbit-transition" aria-hidden="true">
-      <div className="earth-orbit-transition__planet" role="img" aria-label="Earth"/>
-      <img className="earth-orbit-transition__ship" src="/launch/assets/spacecraft-upright.png" alt="" />
-      <div className="earth-orbit-transition__beam"/>
-      <div className="earth-orbit-transition__caption">{translate(language,'EARTH DEPARTURE')} <span>→</span> {translate(language,'OUTER SPACE')}</div>
-      <div className="earth-orbit-transition__sub">{translate(language,'ORBIT INSERTION COMPLETE • CONTINUING MISSION')}</div>
-    </div>}
+
 
   </>;
 }

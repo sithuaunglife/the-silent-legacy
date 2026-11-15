@@ -1384,11 +1384,18 @@
             if (MISSION.phase !== 'ORBIT' || orbitHandoffSent) return;
             orbitHandoffSent=true;
             window.parent.postMessage({type:'silent-launch-orbit'},window.location.origin);
-          },2200);
+          },800);
           showEventBanner(currentLang==='my'
             ? 'ကမ္ဘာမှထွက်ခွာပြီး အာကာသပတ်လမ်းသို့ ရောက်ရှိပါပြီ'
             : 'EARTH DEPARTURE COMPLETE • ORBIT ACHIEVED');
         }
+      } else {
+        // Keep flying upward during the transition, instead of freezing on orbit.
+        MISSION.altitudeKm += 3.1 * dt;
+        MISSION.cameraY += 210 * dt;
+        const targetY = Math.max(LOGICAL_H * .17, MISSION.shipY - 50 * dt);
+        MISSION.shipY += (targetY - MISSION.shipY) * Math.min(1,dt * 6);
+        MISSION.shipX += (padX - MISSION.shipX) * Math.min(1,dt * 4);
       }
       // Limit particle allocation during tab throttling, reducing white flashes.
       if(MISSION.particles.length>650)MISSION.particles.splice(0,MISSION.particles.length-650);

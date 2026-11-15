@@ -1,133 +1,21 @@
+/* Crossfade the live 2.5D rocket camera into interactive orbit.
+   No duplicated ship, no circle overlay, no separate transition scene. */
 .scene-space {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  visibility: hidden;
-  opacity: 0;
-  transform: scale(0.97);
-  transition:
-    opacity 1700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 1700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    visibility 0s linear 1700ms;
+  position:fixed;inset:0;z-index:1;
+  opacity:0;visibility:hidden;transform:scale(.995);
+  transition:opacity 1800ms ease,transform 1800ms ease,visibility 0s linear 1800ms;
 }
-
-.scene-space--entering,
-.scene-space--visible {
-  visibility: visible;
-  opacity: 1;
-  transform: scale(1);
-  transition-delay: 0s;
+.scene-space--entering,.scene-space--visible{
+  opacity:1;visibility:visible;transform:scale(1);transition-delay:0s;
 }
-
 .launch-gateway {
-  transition: opacity 1700ms ease, transform 1700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:opacity 1800ms cubic-bezier(.33,0,.67,1);
+  will-change:opacity;
 }
-
-.launch-gateway--exiting {
-  opacity: 0;
-  transform: scale(1.035);
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scene-space,
-  .launch-gateway {
-    transition-duration: 1ms;
-  }
-}
-
-
-/* Cinematic 2.5D Earth -> orbit: full ship/planet always fit in viewport. */
-.earth-orbit-transition{
-  position:fixed;inset:0;z-index:1002;overflow:hidden;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 82%,rgba(50,163,232,.28),transparent 55%),
-    linear-gradient(180deg,rgba(1,4,13,.72),rgba(2,11,35,.92));
-  animation:orbit-veil 2.2s ease-in-out both
-}
-.earth-orbit-transition__planet{
-  position:absolute;left:50%;bottom:-17vmin;width:min(77vmin,75vw);aspect-ratio:1;
-  border-radius:50%;
-  transform:translateX(-50%);
-  background:
-    radial-gradient(ellipse at 38% 24%,rgba(230,249,255,.65) 0 4%,transparent 24%),
-    repeating-linear-gradient(176deg,transparent 0 12px,rgba(162,231,255,.11) 12px 18px,transparent 18px 40px),
-    radial-gradient(circle at 30% 25%,#66d5f3 0 6%,#1d8abf 24%,#125789 54%,#081c40 77%,#020b1c 100%);
-  outline:3px solid rgba(99,201,250,.65);
-  box-shadow:0 0 29px 6px rgba(30,142,228,.28),inset -26px -18px 44px #04112ecc;
-  animation:orbit-planet-away 2.2s ease-in both
-}
-.earth-orbit-transition__planet::before{
-  content:"";position:absolute;inset:11% 5% 10% 4%;border-radius:48%;
-  background:
-    linear-gradient(100deg,transparent 29%,rgba(144,219,242,.35) 30% 33%,transparent 34%),
-    radial-gradient(ellipse at 30% 40%,rgba(43,155,141,.48) 0 14%,transparent 15%),
-    radial-gradient(ellipse at 68% 55%,rgba(30,140,119,.46) 0 19%,transparent 20%);
-  transform:rotate(-12deg)
-}
-.earth-orbit-transition__ship{
-  position:absolute;left:50%;bottom:27%;transform:translateX(-50%);
-  width:clamp(95px,16vw,175px);height:auto;max-height:30vh;object-fit:contain;
-  image-rendering:pixelated;filter:drop-shadow(0 0 15px rgba(44,172,255,.48));
-  animation:orbit-ship-straight 2.2s cubic-bezier(.16,.67,.29,1) both
-}
-.earth-orbit-transition__beam{
-  position:absolute;left:50%;bottom:4%;width:6px;height:43vh;
-  transform:translateX(-50%);
-  background:linear-gradient(0deg,transparent,rgba(67,213,255,.4),transparent);
-  filter:blur(5px);animation:orbit-streak 2.2s ease-out both
-}
-.earth-orbit-transition__caption,.earth-orbit-transition__sub{
-  position:absolute;left:50%;transform:translateX(-50%);color:#d9f4ff;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  text-align:center;width:min(94%,680px);text-shadow:0 0 17px #0bb9ff;
-  letter-spacing:.12em;animation:orbit-label 2.2s ease-in-out both
-}
-.earth-orbit-transition__caption{top:19%;font-weight:800;font-size:clamp(12px,2.4vw,23px)}
-.earth-orbit-transition__sub{top:27%;font-size:clamp(9px,.95vw,12px)}
-.earth-orbit-transition__caption span{color:#7be7ff}
-.orbit-entry{
-  pointer-events:none;position:fixed;left:50%;top:25%;z-index:50;
-  display:flex;align-items:center;flex-direction:column;gap:9px;
-  filter:drop-shadow(0 0 18px rgba(0,175,255,.4));
-  animation:orbit-depart 2.6s ease-in forwards
-}
-.orbit-entry img{
-  width:clamp(125px,15vw,210px);height:auto;max-height:33vh;object-fit:contain;
-  image-rendering:pixelated
-}
-.orbit-entry span{padding:5px 11px;border:1px solid rgba(125,221,255,.48);
-  background:rgba(3,9,29,.86);color:#bfe9ff;
-  font:10px ui-monospace,monospace;letter-spacing:.06em;text-align:center}
-@keyframes orbit-planet-away{
-  from{transform:translate(-50%,0) scale(1.28);opacity:1}
-  to{transform:translate(-50%,48vh) scale(.72);opacity:.20}
-}
-@keyframes orbit-ship-straight{
-  0%{transform:translate(-50%,25vh) scale(1.2);opacity:.7}
-  30%{opacity:1}
-  100%{transform:translate(-50%,-32vh) scale(.80);opacity:0}
-}
-@keyframes orbit-streak{0%,100%{opacity:0}25%,70%{opacity:.7}}
-@keyframes orbit-label{0%,100%{opacity:0}28%,72%{opacity:1}}
-@keyframes orbit-veil{0%,100%{opacity:0}18%,68%{opacity:1}}
-@keyframes orbit-depart{
-  from{opacity:0;transform:translate(-50%,24vh) scale(.75)}
-  22%{opacity:1}
-  70%{opacity:1}
-  to{opacity:0;transform:translate(10%,-12vh) scale(.56)}
-}
-@media(max-width:600px){
-  .orbit-entry{top:30%}
-  .orbit-entry span{max-width:210px;font-size:9px}
-  .earth-orbit-transition__ship{bottom:31%}
-}
+.launch-gateway--exiting {opacity:0;pointer-events:none;}
 @media(prefers-reduced-motion:reduce){
-  .earth-orbit-transition,.earth-orbit-transition__planet,
-  .earth-orbit-transition__beam,.earth-orbit-transition__ship,
-  .earth-orbit-transition__caption,.earth-orbit-transition__sub,
-  .orbit-entry{animation-duration:1ms}
+ .scene-space,.launch-gateway{transition-duration:1ms}
 }
-
 .launch-global-language{
   position:fixed;right:clamp(12px,3vw,32px);top:clamp(12px,3vw,24px);z-index:1004;
   border:1px solid #76caffba;padding:10px 14px;border-radius:8px;
