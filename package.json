@@ -14,7 +14,8 @@
     "test:mars": "node scripts/test-mars-scan.mjs",
     "test:controls": "node scripts/test-controls-landing.mjs",
     "test:eagle": "node scripts/test-eagle-reference.mjs",
-    "test:launch": "node scripts/test-launch-spaceplane.mjs"
+    "test:launch": "node scripts/test-launch-spaceplane.mjs",
+    "test:navigation": "node scripts/test-navigation.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -256,3 +256,42 @@ html{background:#000}body{margin:0}
 #silent-legacy-outer-space .outer-ship-art-reference { image-rendering: pixelated; }
 #silent-legacy-outer-space .outer-ship-art-reference { image-rendering: pixelated; }
 @media(max-width:580px){ #silent-legacy-outer-space .outer-ship { max-width:98px; } }
+
+/* 2.5D orbit depth without another WebGL scene or blocking canvas input. */
+#silent-legacy-outer-space .outer-scene{background:#020713}
+#silent-legacy-outer-space .outer-sky::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 47% 70%,rgba(22,86,154,.16),transparent 48%),
+    radial-gradient(ellipse at 76% 28%,rgba(91,60,163,.14),transparent 35%);
+  mix-blend-mode:screen;
+}
+#silent-legacy-outer-space .outer-planet,
+#silent-legacy-outer-space .outer-earth{
+  filter:drop-shadow(4px 5px 6px #0008)
+}
+#silent-legacy-outer-space .outer-nav{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  max-width:calc(100vw - 26px)
+}
+#silent-legacy-outer-space .outer-home,
+#silent-legacy-outer-space .outer-language{
+  background:linear-gradient(135deg,#142c45d9,#061222ea);
+  color:#d7f2ff;border:1px solid #45779b9c;box-shadow:inset 0 1px #7ed4ff22;
+  padding:9px 12px;border-radius:7px;white-space:nowrap;letter-spacing:.015em;
+  font:inherit;cursor:pointer
+}
+#silent-legacy-outer-space .outer-home:hover,
+#silent-legacy-outer-space .outer-language:hover{background:#1c3c5f}
+@media(max-width:650px){
+  #silent-legacy-outer-space .outer-nav{gap:5px;justify-content:center}
+  #silent-legacy-outer-space .outer-home,
+  #silent-legacy-outer-space .outer-language{padding:7px 8px;font-size:10px}
+}
+:lang(my) .outer-nav,:lang(my) .outer-mission-dialogue,:lang(my) .outer-surface-head,
+:lang(my) .archive-shell{font-family:'Padauk','Noto Sans Myanmar',sans-serif!important}
+
+/* All NASA objects remain within their own layout box during camera zoom. */
+#silent-legacy-outer-space .outer-planet img,
+#silent-legacy-outer-space .outer-earth-fallback,
+#silent-legacy-outer-space .outer-probe img,
+#silent-legacy-outer-space .outer-ship img{object-fit:contain}

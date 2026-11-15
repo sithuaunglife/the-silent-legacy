@@ -53,10 +53,11 @@ function MissionPhotos({ craft }) {
 }
 
 /** Selected-item-only panel. No archive carousel, no cross-world filter, no other equipment. */
-export default function ArchiveDashboard({ selection, onClose }) {
+export default function ArchiveDashboard({ selection, onClose, language='en', onLanguageChange=()=>{} }) {
   const craft = selection ? matchArtifact(selection.world, selection.id) : null;
   const [tab, setTab] = useState('pixel');
-  const [lang, setLang] = useState('en');
+  const lang = language;
+  const setLang = onLanguageChange;
   const [expanded, setExpanded] = useState(false);
   const [phase, setPhase] = useState(0);
   const [scanStatus, setScanStatus] = useState('idle');

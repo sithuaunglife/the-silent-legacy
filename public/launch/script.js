@@ -1,8 +1,8 @@
 // =========================================================================
     // 1. STATE & BILINGUAL DIALOGUE DATA (ENGLISH & MYANMAR)
     // =========================================================================
-    let currentLang = 'en'; // 'en' or 'my'
-    let autoStage = true;
+    let currentLang = 'en'; // synced with main NASA Archive language selector
+    let autoStage = false;
     let sfxEnabled = true;
 
     // Physics & Mission State
@@ -31,9 +31,9 @@
     // Custom Spacecraft Configuration State
     const SHIP_DESIGN = {
       hull: 'shuttle',      // 2.5D pixel spaceplane reference
-      fairing: true,        // Clamshell aerodynamic payload fairing halves encasing folded wings
+      fairing: false,       // No fairing; complete spaceplane stays intact
       wings: 'delta',       // dark aircraft wings
-      boosters: 'twin',     // 'twin', 'quad', 'single'
+      boosters: 'single',   // No separations; one continuous ascending spaceplane
       paint: 'navy',        // navy/orange reference
       flame: 'cyan',        // blue pixel thrusters
       customSpriteImg: null // Optional HTMLImageElement uploaded by user
@@ -569,14 +569,14 @@
       MISSION.time = 0;
       MISSION.altitudeKm = 0;
       MISSION.velocityMs = 0;
-      MISSION.massTons = metrics.totalPadMass;
+      MISSION.massTons = metrics.orbiterMass;
       MISSION.accelG = 1.0;
       MISSION.cameraY = 0;
       MISSION.shakeIntensity = 0;
       MISSION.shipAngle = -Math.PI / 2;
-      MISSION.hasSideBoosters = SHIP_DESIGN.boosters !== 'single';
-      MISSION.hasCoreStage = true;
-      MISSION.hasFairings = Boolean(SHIP_DESIGN.fairing);
+      MISSION.hasSideBoosters = false;
+      MISSION.hasCoreStage = false;
+      MISSION.hasFairings = false;
       MISSION.wingDeployProgress = SHIP_DESIGN.fairing ? 0 : 1;
       MISSION.detachedParts = [];
       MISSION.particles = [];
@@ -946,21 +946,39 @@
         ctx.fillRect(Math.round(s.x), Math.round(screenY), s.size, s.size);
       });
 
-      // Curved Earth Horizon Glow when high in orbit
-      if (MISSION.altitudeKm > 35) {
-        const horizonY = LOGICAL_H + (MISSION.altitudeKm - 35) * 2.2;
-        if (horizonY < LOGICAL_H + 140) {
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-          ctx.beginPath();
-          ctx.arc(LOGICAL_W / 2, horizonY + 420, 445, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#0f294a';
-          ctx.beginPath();
-          ctx.arc(LOGICAL_W / 2, horizonY + 420, 435, 0, Math.PI * 2);
-          ctx.fill();
+      // 2.5D pixel-art Earth recedes as the spaceplane climbs; entire
+      // sphere is visible, with a bright atmosphere and layered cloud bands.
+      if (MISSION.altitudeKm > 2) {
+        const progress = Math.min(1,(MISSION.altitudeKm-2)/60);
+        const radius = (110-55*progress);
+        const centerX = LOGICAL_W*.5;
+        const centerY = LOGICAL_H + 60 - progress * (LOGICAL_H * 0.24 + 60);
+        const outer=ctx.createRadialGradient(centerX-radius*.25,centerY-radius*.45,4,centerX,centerY,radius*1.2);
+        outer.addColorStop(0,'#78d7ff');
+        outer.addColorStop(.19,'#1e8cc6');
+        outer.addColorStop(.52,'#174e88');
+        outer.addColorStop(.84,'#061d48');
+        outer.addColorStop(1,'#030b22');
+        ctx.save();
+        ctx.shadowBlur=22;
+        ctx.shadowColor='rgba(42,172,255,.75)';
+        ctx.beginPath();
+        ctx.arc(centerX,centerY,radius,0,Math.PI*2);
+        ctx.fillStyle=outer;
+        ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.clip();
+        for(let i=0;i<9;i++){
+          const oy=Math.round(centerY-radius*.55+i*radius*.19);
+          const shift=Math.sin(i*2.6)*radius*.45;
+          ctx.fillStyle=i%3===0?'rgba(131,213,237,.30)':'rgba(33,169,189,.30)';
+          ctx.fillRect(Math.round(centerX-radius+shift),oy,Math.round(radius*1.5),Math.max(2,Math.round(radius*.08)));
+          ctx.fillStyle='rgba(202,242,255,.30)';
+          ctx.fillRect(Math.round(centerX-radius*.8-shift*.35),oy+3,Math.round(radius*.95),Math.max(1,Math.round(radius*.025)));
         }
+        ctx.restore();
       }
+
     }
 
     function drawYangonLandmarks(camY) {
@@ -1200,54 +1218,28 @@
     }
 
     function drawCustomShipAssembly(targetCtx, opts) {
-      const pal = PAINT_PALETTES[SHIP_DESIGN.paint] || PAINT_PALETTES.navy;
-      const hasBoosters = opts.hasSideBoosters && SHIP_DESIGN.boosters !== 'single';
-      const hasCore = Boolean(opts.hasCoreStage);
-      // Rocket stages fall away but the reference spaceplane remains intact.
-      if (hasCore) {
-        targetCtx.save();
-        targetCtx.translate(0, 32);
-        drawCoreBoosterSprite(targetCtx, pal);
-        targetCtx.restore();
-      }
-      if (hasBoosters) {
-        const offsets = SHIP_DESIGN.boosters === 'quad' ? [-32, -23, 23, 32] : [-29, 29];
-        for (const offset of offsets) {
-          targetCtx.save();
-          targetCtx.translate(offset, 35);
-          drawSingleBoosterSprite(targetCtx, pal);
-          targetCtx.restore();
-        }
-      }
-      const uploaded = SHIP_DESIGN.customSpriteImg;
-      const orbital = !hasCore && !hasBoosters && !uploaded;
-      const ship = uploaded || (orbital ? SPACEPLANE_SPRITES.cruise : SPACEPLANE_SPRITES.upright);
-      if (ship && ship.complete && ship.naturalWidth > 0) {
-        targetCtx.save();
-        targetCtx.imageSmoothingEnabled = false;
-        if (orbital) {
-          targetCtx.rotate(Math.PI / 2);
-          targetCtx.drawImage(ship, -43, -31, 86, 62);
-        } else {
-          targetCtx.drawImage(ship, -37, -64, 74, 78);
-        }
-        targetCtx.restore();
-      } else {
-        drawRocketStageRect(targetCtx, -17, -39, 34, 33, '#28345e');
-        drawRocketStageRect(targetCtx, -12, -47, 24, 13, '#454e80');
-        drawRocketStageRect(targetCtx, -7, -43, 14, 18, '#2385ef');
-        drawRocketStageRect(targetCtx, -29, -24, 58, 8, '#35426c');
-      }
-      if (opts.hasFairings && hasCore) {
-        drawRocketStageRect(targetCtx, -39, -15, 3, 12, '#fb923c');
-        drawRocketStageRect(targetCtx, 36, -15, 3, 12, '#fb923c');
-      }
+      // Single uninterrupted 2.5D spacecraft: no staged hardware or clipped
+      // sprite-sheet cells. The source PNGs have transparent outer padding.
+      const ship = SHIP_DESIGN.customSpriteImg ||
+        (MISSION.phase === 'ORBIT' ? SPACEPLANE_SPRITES.cruise : SPACEPLANE_SPRITES.upright);
+      if (!ship.complete || !ship.naturalWidth) return;
+      const maxWidth = MISSION.phase === 'ORBIT' ? 76 : 78;
+      const maxHeight = MISSION.phase === 'ORBIT' ? 65 : 86;
+      const factor = Math.min(maxWidth / ship.naturalWidth, maxHeight / ship.naturalHeight);
+      const w = ship.naturalWidth * factor;
+      const h = ship.naturalHeight * factor;
+      targetCtx.save();
+      targetCtx.imageSmoothingEnabled = false;
+      if (MISSION.phase === 'ORBIT') targetCtx.rotate(-0.25);
+      targetCtx.drawImage(ship,-w/2,-h/2,w,h);
+      targetCtx.restore();
     }
 
     function drawSpacecraft() {
       ctx.save();
       ctx.translate(Math.round(MISSION.shipX), Math.round(MISSION.shipY));
-      // Rotate so 0 rad = pointing right, -PI/2 = pointing straight up
+      // Fixed upright attitude while climbing; a tiny tilt is reserved
+      // for the final orbital view only.
       ctx.rotate(MISSION.shipAngle + Math.PI / 2);
 
       drawCustomShipAssembly(ctx, {
@@ -1282,9 +1274,9 @@
     }
 
     function spawnExhaustAndSmoke() {
-      if (MISSION.phase === 'PAD') return;
+      if (MISSION.phase === 'PAD' || MISSION.phase === 'ORBIT') return;
 
-      const tailDist = MISSION.hasCoreStage ? 63 : 27;
+      const tailDist = 34;
       const exhaustX = MISSION.shipX - Math.cos(MISSION.shipAngle) * tailDist;
       const exhaustY = MISSION.shipY - Math.sin(MISSION.shipAngle) * tailDist;
 
@@ -1360,83 +1352,47 @@
     function updatePhysics(dt) {
       MISSION.time += dt;
       frameCounter++;
-
-      const padX = 248;
-      const padStandY = LOGICAL_H - 76;
-
+      const padX = LOGICAL_W * 0.5;
+      const padY = LOGICAL_H - 96;
+      MISSION.shipAngle = -Math.PI / 2;
       if (MISSION.phase === 'PAD') {
         MISSION.shipX = padX;
-        MISSION.shipY = padStandY;
-        MISSION.shipAngle = -Math.PI / 2;
+        MISSION.shipY = padY;
         MISSION.cameraY = 0;
-      } else {
-        // Thrust & Realistic Tsiolkovsky Mass-Shedding Acceleration!
-        const metrics = getDesignMetrics();
-        const thrustForce = MISSION.hasCoreStage ? metrics.maxThrust : Math.round(metrics.maxThrust * 0.63);
-        const netAccel = Math.max(0.4, (thrustForce / MISSION.massTons) - 0.5);
-        MISSION.accelG = 1.0 + netAccel * 0.55;
-
-        if (MISSION.phase === 'IGNITION') {
-          MISSION.velocityMs += netAccel * 12 * dt;
-          MISSION.altitudeKm += (MISSION.velocityMs / 1000) * dt * 2.5;
-        } else {
-          MISSION.velocityMs += netAccel * 85 * dt;
-          MISSION.altitudeKm += (MISSION.velocityMs / 1000) * dt * 6.5;
-
-          // Gradual orbital gravity turn pitch over Yangon skyline
-          const targetAngle = -Math.PI / 2 + Math.min(1.08, MISSION.altitudeKm * 0.016);
-          MISSION.shipAngle += (targetAngle - MISSION.shipAngle) * dt * 1.4;
-        }
-
-        // Camera smoothly tracks the climbing spacecraft while keeping Bandula Park visible early on
-        const climbPixels = MISSION.altitudeKm * 18;
-        MISSION.cameraY = climbPixels;
-
-        // Ship screen position smoothly transitions from pad to upper-center flight framing
-        const targetScreenX = Math.min(LOGICAL_W * 0.54, padX + MISSION.altitudeKm * 2.4);
-        const targetScreenY = Math.max(LOGICAL_H * 0.34, padStandY - Math.min(LOGICAL_H * 0.45, climbPixels * 0.85));
-
-        MISSION.shipX += (targetScreenX - MISSION.shipX) * dt * 3;
-        MISSION.shipY += (targetScreenY - MISSION.shipY) * dt * 3;
-
-        // Automatic realistic staging if AUTO-STAGE is enabled
-        if (autoStage) {
-          if (MISSION.hasSideBoosters && MISSION.altitudeKm >= 14.0) {
-            detachSideBoosters();
-          } else if (!MISSION.hasSideBoosters && MISSION.hasCoreStage && MISSION.altitudeKm >= 46.0) {
-            detachCoreStage();
-          }
-        }
-
-        // Smoothly unfold solar array wings once fairings are detached!
-        if (!MISSION.hasFairings && MISSION.wingDeployProgress < 1) {
-          MISSION.wingDeployProgress = Math.min(1, MISSION.wingDeployProgress + dt * 1.45);
-        }
-
-        // Decay camera shake
-        if (MISSION.shakeIntensity > 0) {
-          MISSION.shakeIntensity = Math.max(0, MISSION.shakeIntensity - dt * 2.2);
-        }
-
+      } else if (MISSION.phase !== 'ORBIT') {
+        // Straight, smooth cinematic ascent. No stage separation or pitch.
+        const ignition = MISSION.phase === 'IGNITION';
+        const accel = ignition ? 46 : 325;
+        MISSION.velocityMs = Math.min(3100,MISSION.velocityMs+accel*dt);
+        MISSION.altitudeKm += MISSION.velocityMs*dt*(ignition ? 0.002 : 0.016);
+        MISSION.accelG = ignition ? 1.4 : 2.6;
+        const climb = MISSION.altitudeKm * 13;
+        MISSION.cameraY = climb;
+        const targetY = Math.max(LOGICAL_H*.27,padY-Math.min(LOGICAL_H*.55,climb*.8));
+        MISSION.shipX += (padX - MISSION.shipX)*Math.min(1,dt*4);
+        MISSION.shipY += (targetY - MISSION.shipY)*Math.min(1,dt*3);
+        MISSION.shakeIntensity = Math.max(0,MISSION.shakeIntensity-dt*8);
         spawnExhaustAndSmoke();
-      }
-
-      // Update detached boosters / core stage tumbling backward & downward
-      for (let i = MISSION.detachedParts.length - 1; i >= 0; i--) {
-        const part = MISSION.detachedParts[i];
-        part.x += part.vx * dt;
-        part.y += part.vy * dt;
-        part.vy += 42 * dt; // Gravity pull
-        part.angle += part.vAngle;
-
-        if (part.y > LOGICAL_H + 120 || part.x < -100 || part.x > LOGICAL_W + 100) {
-          MISSION.detachedParts.splice(i, 1);
+        // Once Earth is behind us, automatically transition into orbit.
+        if(MISSION.altitudeKm >= 62 && MISSION.phase!=='ORBIT'){
+          MISSION.phase='ORBIT';
+          MISSION.velocityMs=3100;
+          MISSION.altitudeKm=62;
+          orbitHandoffSent=false;
+          clearTimeout(orbitHandoffTimer);
+          orbitHandoffTimer=window.setTimeout(()=>{
+            if (MISSION.phase !== 'ORBIT' || orbitHandoffSent) return;
+            orbitHandoffSent=true;
+            window.parent.postMessage({type:'silent-launch-orbit'},window.location.origin);
+          },2200);
+          showEventBanner(currentLang==='my'
+            ? 'ကမ္ဘာမှထွက်ခွာပြီး အာကာသပတ်လမ်းသို့ ရောက်ရှိပါပြီ'
+            : 'EARTH DEPARTURE COMPLETE • ORBIT ACHIEVED');
         }
       }
-
-      if (frameCounter % 4 === 0) {
-        updateTelemetryUI();
-      }
+      // Limit particle allocation during tab throttling, reducing white flashes.
+      if(MISSION.particles.length>650)MISSION.particles.splice(0,MISSION.particles.length-650);
+      if(frameCounter%5===0)updateTelemetryUI();
     }
 
     function renderFrame(timestamp) {
@@ -1457,7 +1413,6 @@
       drawSkyAndStars(MISSION.cameraY);
       drawYangonLandmarks(MISSION.cameraY);
       updateAndDrawParticles(dt);
-      drawDetachedParts();
       drawSpacecraft();
 
       ctx.restore();
@@ -1611,6 +1566,14 @@
       showEventBanner('📦 DOWNLOADING ZIP: index.html + style.css + script.js');
     }
 
+    // Synchronize the site-wide EN/MM selector without reloading the simulator.
+    window.addEventListener('message', event=>{
+      if(event.source!==window.parent || event.origin!==window.location.origin)return;
+      if(event.data?.type==='silent-language'){
+        const next=event.data.language==='my'?'my':'en';
+        if(next!==currentLang)toggleLanguage();
+      }
+    });
     // Initialize Everything on Window Load
     window.onload = function () {
       resizeCanvas();

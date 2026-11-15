@@ -701,7 +701,14 @@ export function mountOuterSpaceEngine(root, { onLand }) {
   on(document, 'visibilitychange', () => {
     previousTime = 0;
     if (document.hidden) stopMovement();
+    else {
+      // RAF stops when an overlay is open; browsers may also suspend the
+      // tab and lose a frame. Resume the orbit renderer on returning.
+      startLoop();
+    }
   });
+  on(window,'focus',()=>{previousTime=0;startLoop()});
+  on(root,'close',()=>{previousTime=0;startLoop()},true);
 
   for (const button of movementButtons) {
     on(button, 'pointerdown', event => {

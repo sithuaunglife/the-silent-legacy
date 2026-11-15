@@ -244,3 +244,15 @@
       padding: 8px 10px !important;
       font-size: 8px !important;
     }
+
+/* Full-screen cinematic pixel spaceflight; HUD stays above the canvas. */
+html,body{width:100%;height:100%;overflow:hidden;background:#030b1b}
+#canvasWrapper,#spaceCanvas{contain:layout style;will-change:auto}
+#canvasWrapper{isolation:isolate;overflow:hidden}
+#spaceCanvas{object-fit:contain;touch-action:none}
+#eventBanner{max-width:min(90vw,660px);white-space:normal}
+#missionActions{isolation:isolate}
+@media(max-width:600px){
+  #dialogueContainer{max-width:calc(100vw - 18px)}
+  #missionActions{bottom:calc(12px + env(safe-area-inset-bottom))}
+}
