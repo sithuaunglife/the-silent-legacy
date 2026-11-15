@@ -21,5 +21,5 @@ assert.match(mars, /paintPreview\(best\)/);
 assert.doesNotMatch(mars, /outer-mars-scan-card/);
 assert.match(marsStyle, /outer-mars-card\[hidden\]/);
 assert.match(dashboard, /!\['eagle', 'opportunity'\]\.includes\(craft\.id\)/);
-assert.match(dashboard, /SCAN THIS ARTIFACT/);
+assert.match(dashboard, /SCAN & COLLECT/);
 console.log('Mars/Moon inspect UI parity, scanning, Eagle/Opportunity heading checks: PASS');

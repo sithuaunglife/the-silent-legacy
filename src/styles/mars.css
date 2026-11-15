@@ -225,3 +225,14 @@
  left:calc(50% + 77px);min-width:72px;font-size:9px;
  }
 }
+
+/* Collected artifacts retain their real 2.5D appearance. */
+#silent-legacy-outer-space .outer-mars-marker.is-collected{
+  border-color:rgba(103,233,182,.72);
+}
+#silent-legacy-outer-space .outer-mars-marker.is-collected .outer-mars-marker-label::after{
+  content:' ✓ COLLECTED';color:#8becbf;text-shadow:0 1px 4px #000;
+}
+#silent-legacy-outer-space .outer-mars-marker:focus-visible{
+  outline:2px solid #a1f9e0;outline-offset:3px;
+}

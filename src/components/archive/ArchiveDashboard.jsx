@@ -10,13 +10,13 @@ const copy = {
     overview: 'MISSION DATA', photo: 'NASA PHOTOS', model: '2.5D PIXEL',
     goal: 'OBJECTIVE', discovery: 'DISCOVERY', challenge: 'CHALLENGE', legacy: 'LEGACY',
     expand: 'MORE MISSION DETAILS', collapse: 'LESS DETAILS', timeline: 'MISSION TIMELINE',
-    visit: 'NASA MISSION SOURCE ↗', return: 'BACK TO EXPLORATION', scan: 'SCAN THIS ARTIFACT',
+    visit: 'NASA MISSION SOURCE ↗', return: 'BACK TO EXPLORATION', scan: 'SCAN & COLLECT',
   },
   my: {
     overview: 'မစ်ရှင်အချက်အလက်', photo: 'NASA ဓာတ်ပုံများ', model: '2.5D PIXEL',
     goal: 'ရည်မှန်းချက်', discovery: 'တွေ့ရှိချက်', challenge: 'စိန်ခေါ်မှု', legacy: 'သမိုင်းဝင်အမွေအနှစ်',
     expand: 'အသေးစိတ်ဖတ်ရန်', collapse: 'အသေးစိတ်ပိတ်ရန်', timeline: 'မစ်ရှင်အချိန်ဇယား',
-    visit: 'NASA မစ်ရှင်မှတ်တမ်း ↗', return: 'ဂြိုလ်ပေါ် ပြန်သွားရန်', scan: 'စက်ကို SCAN လုပ်ရန်',
+    visit: 'NASA မစ်ရှင်မှတ်တမ်း ↗', return: 'ဂြိုလ်ပေါ် ပြန်သွားရန်', scan: 'SCAN ဖတ်ပြီး စုဆောင်းရန်',
   },
 };
 

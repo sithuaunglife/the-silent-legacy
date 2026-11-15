@@ -687,17 +687,18 @@ export function createLunarSurface(surface, terrain, records, openArtifact) {
     const x = (event.clientX - box.left) * terrain.width / box.width;
     const y = (event.clientY - box.top) * terrain.height / box.height;
     const index = sites.findIndex((site, index) => {
-      const image = models[index];
       const point = groundPoint(site);
       const {width, height} = siteDimensions(index, point.scale);
-      // Selection tolerances are larger than tiny archaeological models.
-      return Math.abs(point.x - x) < Math.max(23, width / 2) &&
-        y > site.y - Math.max(36, height) - 8 && y < site.y + 16;
+      // Generous touch targets, especially for small lunar instruments.
+      return Math.abs(point.x - x) < Math.max(29, width / 2 + 7) &&
+        y > site.y - Math.max(42, height) - 9 && y < site.y + 20;
     });
     if (index !== -1) {
       const site = sites[index];
-      // Click-to-walk to equipment. Inspection is a separate near-range action.
-      target = { x: site.x + (player.x > site.x ? 28 : -28), y: clamp(site.y + (player.y > site.y ? 14 : -14), GROUND_MIN_Y, GROUND_MAX_Y) };
+      // Direct Click/Tap opens NASA details; Scan is needed to collect.
+      target = null;
+      keys.clear();
+      openArtifact(records[index], index);
     } else if (y >= HORIZON_Y) {
       const groundY = clamp(y, GROUND_MIN_Y, GROUND_MAX_Y);
       const horizontalScale = (groundPoint({ x: 960, y: groundY }).x - 480) / 480;

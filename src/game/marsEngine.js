@@ -48,6 +48,8 @@ export function mountMarsEngine(surface, onClosed) {
   surface.append(siteLabel);
   const viewer = createArtifactViewer('mars', () => ({markScanned(index) {
     scanned.add(index);
+    markers[index]?.classList.add('is-collected');
+    markers[index]?.setAttribute('aria-label', mars.records[index][1] + ' — collected ✓');
     updateCounter();
     refreshInspectors();
   }}));
@@ -83,8 +85,9 @@ export function mountMarsEngine(surface, onClosed) {
     button.type = 'button';
     button.className = 'outer-mars-marker';
     button.dataset.model = id;
+    button.classList.toggle('is-collected', scanned.has(index));
     button.setAttribute('aria-haspopup', 'dialog');
-    button.setAttribute('aria-label', `Explore ${record[1]} (${heightM} m, size compared to astronaut)`);
+    button.setAttribute('aria-label', scanned.has(index) ? record[1]+' — collected ✓' : 'Collect '+record[1]+' — click to inspect and scan');
     button.title = `${record[1]} • about ${heightM} m tall • inspect NASA archive`;
     button.style.left = `${x}%`;
     button.style.top = `${y}%`;
@@ -109,10 +112,13 @@ export function mountMarsEngine(surface, onClosed) {
     label.className = 'outer-mars-marker-label';
     label.textContent = `${record[1]} · ${heightM}m`;
     button.append(footprint, icon, label);
-    // Machine click guides the astronaut over; information opens only nearby.
+    // Direct Click/Tap on every artifact opens its NASA record.
+    // Collecting still requires a deliberate Scan in the archive.
     on(button, 'click', () => {
       if (!playable()) return;
-      player.target = {x: clamp(x + (player.x > x ? 4 : -4), 6, 94), y: clamp(y + (player.y > y ? 3 : -3), 58, 91)};
+      player.target = null;
+      keys.clear();
+      viewer.show(mars.records[index], index);
     });
     // Keep the preview current without creating one inspection button per item.
     on(icon, 'load', () => {

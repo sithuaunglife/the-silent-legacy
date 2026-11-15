@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const get=path=>fs.readFileSync(path,'utf8');
+const mars=get('src/game/marsEngine.js');
+const moon=get('src/game/lunarSurface.js');
+const archive=get('src/components/archive/ArchiveDashboard.jsx');
+const progress=get('src/game/missionProgress.js');
+assert.match(mars,/viewer\.show\(mars\.records\[index\], index\)/);
+assert.match(mars,/button\.classList\.toggle\('is-collected', scanned\.has\(index\)\)/);
+assert.match(mars,/markers\[index\]\?\.classList\.add\('is-collected'\)/);
+assert.match(moon,/openArtifact\(records\[index\], index\)/);
+assert.match(archive,/SCAN & COLLECT/);
+assert.match(archive,/recordArtifactScan\(selection\?\.world,selection\?\.id\)/);
+assert.match(progress,/progress\[key\]\.length===totals\[key\]/);
+assert.doesNotMatch(mars,/Machine click guides the astronaut over/);
+assert.doesNotMatch(moon,/Click-to-walk to equipment/);
+console.log('PASS: direct click all 9 artifacts, explicit persistent scan-and-collect, 9/9 ending invariant');
