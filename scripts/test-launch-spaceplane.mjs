@@ -9,7 +9,7 @@ for(const name of ['upright','cruise']){
 assert.ok(launcher.includes('drawImage(ship'));
 assert.ok(launcher.includes('orbitHandoffTimer'));
 assert.ok(app.includes('earth-orbit-transition'));
-assert.ok(app.includes('orbitalEntry'));
+assert.ok(app.includes('orbitTransitionVisible'));
 assert.ok(launcher.includes("let autoStage = false"));
 assert.ok(launcher.includes("MISSION.shipAngle = -Math.PI / 2"));
 assert.ok(launcher.includes("MISSION.altitudeKm >= 62"));

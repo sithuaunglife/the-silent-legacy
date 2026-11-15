@@ -25,7 +25,7 @@ export default function App(){
   });
   const [launchKey,setLaunchKey]=useState(0);
   const [launchTransition,setLaunchTransition]=useState(false);
-  const [orbitalEntry,setOrbitalEntry]=useState(false);
+  const [orbitTransitionVisible,setOrbitTransitionVisible]=useState(false);
   const handoffTimer=useRef(null);
   const entryTimer=useRef(null);
   useEffect(()=>()=>{
@@ -35,6 +35,7 @@ export default function App(){
   useEffect(()=>{
     try{window.localStorage.setItem('silent:language',language)}catch{}
     document.documentElement.lang=language==='my'?'my':'en';
+    window.dispatchEvent(new CustomEvent('silent:language-change',{detail:language}));
     return localizeInterface(language);
   },[language]);
   useEffect(()=>{
@@ -77,12 +78,12 @@ export default function App(){
   const completeLaunch=useCallback(()=>{
     if(launchTransition)return;
     setLaunchTransition(true);
+    setOrbitTransitionVisible(true);
     window.clearTimeout(handoffTimer.current);
     handoffTimer.current=window.setTimeout(()=>{
       setLaunchComplete(true);
       try{window.sessionStorage.setItem('silent:stage','orbit')}catch{}
-      setOrbitalEntry(true);
-      entryTimer.current=window.setTimeout(()=>setOrbitalEntry(false),2600);
+      entryTimer.current=window.setTimeout(()=>setOrbitTransitionVisible(false),220);
     },1700);
   },[launchTransition]);
   const backToStart=useCallback(()=>{
@@ -91,7 +92,7 @@ export default function App(){
     closeArchive();
     setWorld(null);
     setLaunchTransition(false);
-    setOrbitalEntry(false);
+    setOrbitTransitionVisible(false);
     setLaunchComplete(false);
     setLaunchKey(key=>key+1);
     try{
@@ -105,7 +106,7 @@ export default function App(){
   const toggleLanguage=useCallback(()=>setLanguage(current=>current==='en'?'my':'en'),[]);
 
   return <>
-    {launchComplete && <main
+    {(launchComplete || launchTransition) && <main
       id="silent-legacy-outer-space"
       className="scene-space scene-space--visible"
     >
@@ -127,16 +128,13 @@ export default function App(){
         {language==='en'?'EN / မြန်မာ':'မြန်မာ / EN'}
       </button>
     </>}
-    {launchTransition && !launchComplete && <div className="earth-orbit-transition" aria-hidden="true">
+    {orbitTransitionVisible && <div className="earth-orbit-transition" aria-hidden="true">
       <div className="earth-orbit-transition__planet" role="img" aria-label="Earth"/>
       <img className="earth-orbit-transition__ship" src="/launch/assets/spacecraft-upright.png" alt="" />
       <div className="earth-orbit-transition__beam"/>
       <div className="earth-orbit-transition__caption">{translate(language,'EARTH DEPARTURE')} <span>→</span> {translate(language,'OUTER SPACE')}</div>
       <div className="earth-orbit-transition__sub">{translate(language,'ORBIT INSERTION COMPLETE • CONTINUING MISSION')}</div>
     </div>}
-    {orbitalEntry && <div className="orbit-entry" aria-hidden="true">
-      <img src="/launch/assets/spacecraft-cruise.png" alt="" />
-      <span>{translate(language,'SPACECRAFT IN ORBIT // NAVIGATION ONLINE')}</span>
-    </div>}
+
   </>;
 }

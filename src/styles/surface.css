@@ -366,3 +366,30 @@
   #silent-legacy-outer-space .outer-surface[data-world='moon'] .outer-lunar-jump {bottom:max(78px,calc(env(safe-area-inset-bottom) + 72px));right:8px;min-width:96px;}
 }
 @media(prefers-reduced-motion:reduce){#silent-legacy-outer-space .outer-mission-dialogue{animation:none}}
+
+/* Shared central touch controller for the Moon and Mars.
+   The orbit screen deliberately keeps its own pad in the lower-right. */
+#silent-legacy-outer-space .outer-surface .outer-direction-pad{
+  left:50%;
+  right:auto;
+  bottom:max(15px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  grid-template:repeat(2,40px)/repeat(3,40px);
+  gap:4px;
+}
+#silent-legacy-outer-space .outer-surface[data-world='moon'] .outer-lunar-jump{
+  left:calc(50% + 96px);
+  right:auto;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  min-width:70px;
+}
+@media(max-width:600px){
+  #silent-legacy-outer-space .outer-surface .outer-direction-pad{
+    left:50%;right:auto;bottom:max(12px,env(safe-area-inset-bottom));
+    grid-template:repeat(2,36px)/repeat(3,36px);gap:3px;
+  }
+  #silent-legacy-outer-space .outer-surface[data-world='moon'] .outer-lunar-jump{
+    left:calc(50% + 78px);right:auto;
+    bottom:max(12px,env(safe-area-inset-bottom));min-width:67px;
+  }
+}

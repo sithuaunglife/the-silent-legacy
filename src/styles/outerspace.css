@@ -295,3 +295,29 @@ html{background:#000}body{margin:0}
 #silent-legacy-outer-space .outer-earth-fallback,
 #silent-legacy-outer-space .outer-probe img,
 #silent-legacy-outer-space .outer-ship img{object-fit:contain}
+
+/* Always show orbit WASD controls at the edge, including mouse/keyboard users.
+   Center positioning is reserved for the Moon/Mars walk controllers. */
+#silent-legacy-outer-space .outer-pad{
+  display:grid!important;
+  position:absolute;right:max(12px,env(safe-area-inset-right));
+  bottom:max(12px,env(safe-area-inset-bottom));left:auto;
+  grid-template-columns:repeat(3,37px);
+  gap:3px;z-index:9;opacity:.82;
+}
+#silent-legacy-outer-space .outer-pad button{
+  width:37px;height:37px;border-radius:5px;
+  background:#061c34d9;
+  border:1px solid #5d8db9aa;
+  color:#d7ebff;font:600 13px/1 Consolas,monospace;
+}
+#silent-legacy-outer-space .outer-pad button:focus-visible{
+  outline:2px solid #a6e9ff;outline-offset:1px
+}
+#silent-legacy-outer-space .outer-pad button[data-active]{
+  background:#296187;color:#fff
+}
+@media(max-width:600px){
+ #silent-legacy-outer-space .outer-pad{bottom:max(10px,env(safe-area-inset-bottom));right:9px;grid-template-columns:repeat(3,32px);gap:3px}
+ #silent-legacy-outer-space .outer-pad button{width:32px;height:32px}
+}

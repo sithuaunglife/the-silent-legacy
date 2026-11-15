@@ -136,3 +136,57 @@
   cursor:pointer
 }
 .launch-global-language:hover{background:#244c6f}
+
+/* One-spacecraft camera continuity: the planet recedes; the ship remains
+   the same object rising out of its atmosphere, not passing across screen. */
+.earth-orbit-transition{
+  background:radial-gradient(ellipse at 50% 80%,rgba(16,92,174,.24),transparent 58%),
+    linear-gradient(0deg,#030b21 0%,rgba(3,8,25,.95) 65%,rgba(1,4,13,.78) 100%);
+  animation:orbit-camera-crossfade 1.95s ease-in-out both;
+}
+.earth-orbit-transition__planet{
+  left:50%;bottom:-13vmin;
+  width:min(79vmin,82vw);
+  border:0;outline:0;
+  image-rendering:pixelated;
+  animation:orbit-earth-recede 1.95s cubic-bezier(.23,.72,.36,1) both;
+}
+.earth-orbit-transition__planet::after{
+  content:"";position:absolute;inset:-2.8%;border-radius:50%;
+  border:2px solid rgba(72,196,255,.52);
+  box-shadow:0 0 30px rgba(46,163,246,.33),0 0 80px rgba(34,123,225,.16);
+}
+.earth-orbit-transition__ship{
+  left:50%;
+  bottom:26%;
+  width:clamp(92px,14vw,162px);
+  max-height:26vh;
+  object-fit:contain;
+  filter:none;
+  animation:orbit-ship-departure 1.95s cubic-bezier(.3,.54,.37,.96) both;
+}
+.earth-orbit-transition__beam{
+  left:50%;
+  bottom:20%;
+  height:16vh;width:4px;
+  opacity:.42;
+  filter:blur(6px)
+}
+.earth-orbit-transition__caption{top:14%}
+.earth-orbit-transition__sub{top:22%}
+@keyframes orbit-camera-crossfade{
+  0%{opacity:0}17%,66%{opacity:1}100%{opacity:0}
+}
+@keyframes orbit-earth-recede{
+  0%{transform:translateX(-50%) scale(1.06);opacity:1}
+  100%{transform:translate(-50%,38vh) scale(.63);opacity:.1}
+}
+@keyframes orbit-ship-departure{
+  0%{transform:translate(-50%,15vh) scale(.89);opacity:.92}
+  48%{transform:translate(-50%,2vh) scale(1);opacity:1}
+  100%{transform:translate(-50%,-12vh) scale(.80);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .earth-orbit-transition,.earth-orbit-transition__planet,
+  .earth-orbit-transition__ship{animation-duration:1ms}
+}

@@ -16,4 +16,18 @@ for (const key of ['Moon','Mars','Earth','Mercury','Jupiter','Saturn','Go to Moo
   assert.ok(language.includes("'" + key + "':"), key);
 }
 assert.ok(engine.includes("on(window,'focus'"));
-console.log('PASS: restored orbit/surface, EN-MM toggle, home navigation, browser resume');
+const mission=fs.readFileSync('src/game/landingSequence.js','utf8');
+const surface=fs.readFileSync('src/styles/surface.css','utf8');
+const orbitCss=fs.readFileSync('src/styles/outerspace.css','utf8');
+const transition=fs.readFileSync('src/styles/sceneTransition.css','utf8');
+assert.ok(mission.includes('MYANMAR_MISSION'));
+assert.ok(mission.includes('silent:language-change'));
+assert.ok(mission.includes('Astronaut deployed'));
+assert.ok(surface.includes('.outer-surface .outer-direction-pad'));
+assert.ok(surface.includes('left:50%'));
+assert.ok(orbitCss.includes('.outer-pad{'));
+assert.ok(orbitCss.includes('display:grid!important'));
+assert.ok(transition.includes('orbit-camera-crossfade'));
+assert.ok(transition.includes('orbit-ship-departure'));
+assert.ok(!app.includes('orbit-entry'));
+console.log('PASS: EN-MM Mars mission, centered surface WASD, corner orbit pad and continuous Earth launch');
