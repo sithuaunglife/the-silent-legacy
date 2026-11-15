@@ -210,3 +210,26 @@
     @media(prefers-reduced-motion:reduce) {
       .nasa-start .planet img{ animation: none !important; }
     }
+
+/* Original uploaded 'The Silent Legacy' pixel-art title, with its white background
+   removed so the artwork can sit directly on the existing deep-space starfield. */
+.nasa-start .title-block {
+  left: 510px;
+  top: 70px;
+  width: 420px;
+}
+.nasa-start .title-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 14px rgba(70, 127, 200, .15));
+}
+@media (max-width: 650px) {
+  .nasa-start .title-block {
+    left: 535px;
+    top: 100px;
+    width: 400px;
+  }
+}

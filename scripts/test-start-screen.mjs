@@ -11,6 +11,12 @@ assert.ok(app.includes('!launchComplete && !startDismissed'));
 assert.ok(app.includes('setStartDismissed(false)'));
 assert.ok(start.includes('onClick={onBegin}'));
 assert.ok(start.includes('BEGIN THE JOURNEY'));
+assert.ok(start.includes("src={asset('title.png')}"), 'Must render the supplied pixel-art logo');
+assert.ok(start.includes("alt='The Silent Legacy'"), 'Logo must have accessible alt text');
+assert.ok(!start.includes("className='title-line'"), 'Remove replaced text-based title');
+assert.ok(css.includes('.nasa-start .title-art'), 'New title must be responsive');
+assert.ok(fs.existsSync('public/assets/start/title.png'), 'Uploaded transparent title image must be committed');
+
 assert.ok(start.includes("data-i18n-ignore='true'"), 'Keep Start Screen text in English even when Myanmar UI is selected');
 assert.ok(start.includes("lang='en'"), 'Brand/title screen language is English');
 const i18n = fs.readFileSync('src/i18n.js', 'utf8');

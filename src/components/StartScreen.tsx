@@ -57,10 +57,14 @@ export default function StartScreen({ onBegin }: StartScreenProps) {
 
       <div ref={sceneRef} id='scene' className='scene'>
         <div className='title-block'>
-          <div className='title-line'>
-            <small>THE SILENT</small>
-            <strong>LEGACY</strong>
-          </div>
+          <img
+            className='title-art'
+            src={asset('title.png')}
+            alt='The Silent Legacy'
+            draggable={false}
+            width={500}
+            height={209}
+          />
         </div>
 
         <div aria-hidden='true' className='light-ring ring-one' />
